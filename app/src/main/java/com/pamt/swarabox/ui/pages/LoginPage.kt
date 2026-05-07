@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,9 +30,6 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
@@ -47,10 +43,10 @@ import com.pamt.swarabox.ui.components.AuthBackground
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 
 @Composable
-fun RegisterEmailPasswordPage(modifier: Modifier = Modifier) {
+fun LoginPage(modifier: Modifier = Modifier) {
     var name by remember { mutableStateOf("") }
 
-    val policyAgreementText = buildAnnotatedString {
+    val navigationToRegister = buildAnnotatedString {
         withStyle(
             style = SpanStyle(
                 fontSize = 14.sp,
@@ -58,7 +54,7 @@ fun RegisterEmailPasswordPage(modifier: Modifier = Modifier) {
                 color = Color(0xFFCCCCCC),
             )
         ) {
-            append("By continuing, you agree to SwaraBox’s ")
+            append("Don’t have an account? ")
         }
         withLink(
             LinkAnnotation.Clickable(
@@ -74,33 +70,7 @@ fun RegisterEmailPasswordPage(modifier: Modifier = Modifier) {
                     textDecoration = TextDecoration.Underline,
                 )
             ) {
-                append("Condition of Use")
-            }
-        }
-        withStyle(
-            style = SpanStyle(
-                fontSize = 14.sp,
-                fontWeight = FontWeight(400),
-                color = Color(0xFFCCCCCC),
-            )
-        ) {
-            append(" and ")
-        }
-        withLink(
-            LinkAnnotation.Clickable(
-                tag = "LOGIN",
-                linkInteractionListener = { }
-            )
-        ) {
-            withStyle(
-                style = SpanStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight(400),
-                    color = Color.White,
-                    textDecoration = TextDecoration.Underline,
-                )
-            ) {
-                append("Privacy Notice")
+                append("Register")
             }
         }
     }
@@ -131,8 +101,9 @@ fun RegisterEmailPasswordPage(modifier: Modifier = Modifier) {
                         modifier = Modifier.size(24.dp)
                     )
                 }
+                Spacer(Modifier.height(30.dp))
                 Text(
-                    "Enter your email & password",
+                    "Welcome Back :)",
                     fontSize = 53.sp,
                     lineHeight = 64.sp,
                     fontWeight = FontWeight(500),
@@ -144,7 +115,7 @@ fun RegisterEmailPasswordPage(modifier: Modifier = Modifier) {
                 color = Color(0xff262626),
                 shape = RoundedCornerShape(
                     topEnd = 27.dp,
-                    topStart = 27.dp,
+                    topStart = 27.dp
                 )
             ) {
                 Column(
@@ -164,32 +135,23 @@ fun RegisterEmailPasswordPage(modifier: Modifier = Modifier) {
                             label = "Email",
                             onValueChange = { name = it },
                             placeholder = "jeren@example.com",
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                         )
                         AppTextField(
                             value = name,
-                            label = "Passowrd",
+                            label = "Password",
                             onValueChange = { name = it },
                             placeholder = "..........",
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-                        )
-                        AppTextField(
-                            value = name,
-                            label = "Confirm Password",
-                            onValueChange = { name = it },
-                            placeholder = "..........",
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
                         )
                     }
 
-                    Spacer(Modifier.height(30.dp))
+                    Spacer(Modifier.height(50.dp))
 
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
+
                         AppButton(
                             text = "Submit",
                             modifier = Modifier.fillMaxWidth(),
@@ -200,29 +162,20 @@ fun RegisterEmailPasswordPage(modifier: Modifier = Modifier) {
 
                         Spacer(Modifier.height(19.dp))
 
-                        Text(
-                            text = policyAgreementText,
-                            textAlign = TextAlign.Center,
-                            lineHeight = 18.sp
-                        )
+                        Text(text = navigationToRegister)
                     }
                 }
             }
-
         }
     }
 }
 
-
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun RegisterEmailPasswordPreview() {
+private fun LoginPagePreview() {
     SwaraBoxTheme {
         Scaffold(Modifier.fillMaxSize()) {
-            RegisterEmailPasswordPage(
-                Modifier.padding(it),
-            )
+            LoginPage(Modifier.padding(it))
         }
     }
 }

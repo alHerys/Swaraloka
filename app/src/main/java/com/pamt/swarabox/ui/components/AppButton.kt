@@ -13,10 +13,10 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun AppButton(
-    label: String,
+    text: String,
     modifier: Modifier = Modifier,
     containerColor: Color,
-    contentColor: Color,
+    textColor: Color,
     disabledContainerColor: Color = Color.Transparent,
     disabledContentColor:Color = Color.Transparent,
     onClick: () -> Unit,
@@ -26,14 +26,14 @@ fun AppButton(
         modifier = modifier,
         colors = ButtonColors(
             containerColor = containerColor,
-            contentColor = contentColor,
+            contentColor = textColor,
             disabledContainerColor = disabledContainerColor,
             disabledContentColor = disabledContentColor,
         ),
         contentPadding = PaddingValues(vertical = 16.dp),
     ) {
         Text(
-            text = label,
+            text = text,
             fontSize = 16.sp,
             fontWeight = FontWeight(500),
         )
