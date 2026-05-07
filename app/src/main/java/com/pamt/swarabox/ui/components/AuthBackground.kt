@@ -1,4 +1,4 @@
-package com.pamt.swarabox.ui.widget
+package com.pamt.swarabox.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
