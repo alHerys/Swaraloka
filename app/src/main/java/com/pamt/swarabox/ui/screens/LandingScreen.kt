@@ -1,15 +1,14 @@
-package com.pamt.swarabox.ui.pages
+package com.pamt.swarabox.ui.screens
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,9 +32,8 @@ import com.pamt.swarabox.ui.components.LogoWidget
 
 @Composable
 fun LandingPage(
-    modifier: Modifier = Modifier,
     onGetStartedClick: () -> Unit = {},
-    onLoginClick: () -> Unit = {}
+    onLoginClick: () -> Unit = {},
 ) {
     val navigationToLoginText = buildAnnotatedString {
         withStyle(
@@ -66,49 +64,50 @@ fun LandingPage(
         }
     }
 
-    AuthBackground {
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                LogoWidget()
-                Spacer(Modifier.height(15.dp))
-                Text(
-                    text = "Millions of songs Free for You",
-                    color = Color.White,
-                    fontWeight = FontWeight(500),
-                    fontSize = 53.sp,
-                    lineHeight = 64.sp,
-                )
-            }
-
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        AuthBackground {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                AppButton(
-                    text = "Get Started",
-                    textColor = Color.White,
-                    containerColor = Color.White.copy(alpha = 0.15f),
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {  }
-                )
-                Spacer(Modifier.height(24.dp))
-                Text(navigationToLoginText)
-            }
+                Column {
+                    LogoWidget()
+                    Spacer(Modifier.height(15.dp))
+                    Text(
+                        text = "Millions of songs Free for You",
+                        color = Color.White,
+                        fontWeight = FontWeight(500),
+                        fontSize = 53.sp,
+                        lineHeight = 64.sp,
+                    )
+                }
 
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    AppButton(
+                        text = "Get Started",
+                        textColor = Color.White,
+                        containerColor = Color.White.copy(alpha = 0.15f),
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = onGetStartedClick
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    Text(navigationToLoginText)
+                }
+
+            }
         }
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true, showSystemUi = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 private fun LandingPagePreview() {
     SwaraBoxTheme {
-        Scaffold(Modifier.fillMaxSize()) {
-            LandingPage(Modifier.padding(it))
-        }
+        LandingPage()
     }
 }

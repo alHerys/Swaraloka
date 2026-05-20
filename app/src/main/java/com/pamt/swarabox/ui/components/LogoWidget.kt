@@ -37,7 +37,7 @@ fun LogoWidget(modifier: Modifier = Modifier) {
                 color = Color(0xFFEBB77B)
             )
         ) {
-            append("Box")
+            append("loka")
         }
     }
 

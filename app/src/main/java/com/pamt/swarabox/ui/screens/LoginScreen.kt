@@ -1,8 +1,7 @@
-package com.pamt.swarabox.ui.pages
+package com.pamt.swarabox.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,8 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -40,19 +37,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pamt.swarabox.R
+import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.AuthBackground
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 
 @Composable
-fun RegisterNamePage(
-    modifier: Modifier = Modifier,
-    onNextClick: (String) -> Unit,
-    onLoginClick: () -> Unit
-) {
+fun LoginPage(modifier: Modifier = Modifier) {
     var name by remember { mutableStateOf("") }
 
-    val navigationToLogin = buildAnnotatedString {
+    val navigationToRegister = buildAnnotatedString {
         withStyle(
             style = SpanStyle(
                 fontSize = 14.sp,
@@ -60,12 +54,12 @@ fun RegisterNamePage(
                 color = Color(0xFFCCCCCC),
             )
         ) {
-            append("Already have an account? ")
+            append("Don’t have an account? ")
         }
         withLink(
             LinkAnnotation.Clickable(
                 tag = "LOGIN",
-                linkInteractionListener = { onLoginClick() }
+                linkInteractionListener = { }
             )
         ) {
             withStyle(
@@ -76,7 +70,7 @@ fun RegisterNamePage(
                     textDecoration = TextDecoration.Underline,
                 )
             ) {
-                append("Login")
+                append("Register")
             }
         }
     }
@@ -97,7 +91,7 @@ fun RegisterNamePage(
                 verticalArrangement = Arrangement.spacedBy(26.dp)
             ) {
                 IconButton(
-                    onClick = onLoginClick,
+                    onClick = { },
                     modifier = Modifier.size(15.dp)
                 ) {
                     Icon(
@@ -107,8 +101,9 @@ fun RegisterNamePage(
                         modifier = Modifier.size(24.dp)
                     )
                 }
+                Spacer(Modifier.height(30.dp))
                 Text(
-                    "What's your name?",
+                    "Welcome Back :)",
                     fontSize = 53.sp,
                     lineHeight = 64.sp,
                     fontWeight = FontWeight(500),
@@ -134,12 +129,20 @@ fun RegisterNamePage(
                         ),
                 ) {
 
-                    AppTextField(
-                        value = name,
-                        label = "Name",
-                        onValueChange = { name = it },
-                        placeholder = "Your Name",
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        AppTextField(
+                            value = name,
+                            label = "Email",
+                            onValueChange = { name = it },
+                            placeholder = "jeren@example.com",
+                        )
+                        AppTextField(
+                            value = name,
+                            label = "Password",
+                            onValueChange = { name = it },
+                            placeholder = "..........",
+                        )
+                    }
 
                     Spacer(Modifier.height(50.dp))
 
@@ -148,45 +151,31 @@ fun RegisterNamePage(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Button(
-                            onClick = { onNextClick(name) },
+
+                        AppButton(
+                            text = "Submit",
                             modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonColors(
-                                containerColor = Color(0xFFF0B505),
-                                contentColor = Color(0xFF212121),
-                                disabledContainerColor = Color.Transparent,
-                                disabledContentColor = Color.Transparent
-                            ),
-                            contentPadding = PaddingValues(vertical = 16.dp),
-                        ) {
-                            Text(
-                                "Next",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight(500),
-                            )
-                        }
+                            containerColor = Color(0xFFF0B505),
+                            textColor = Color(0xFF212121),
+                            onClick = {}
+                        )
 
                         Spacer(Modifier.height(19.dp))
 
-                        Text(text = navigationToLogin)
+                        Text(text = navigationToRegister)
                     }
                 }
             }
-
         }
     }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun RegisterNamePreview() {
+private fun LoginPagePreview() {
     SwaraBoxTheme {
         Scaffold(Modifier.fillMaxSize()) {
-            RegisterNamePage(
-                Modifier.padding(it),
-                onNextClick = { },
-                onLoginClick = { }
-            )
+            LoginPage(Modifier.padding(it))
         }
     }
 }
