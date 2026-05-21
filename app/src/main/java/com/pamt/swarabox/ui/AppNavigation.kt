@@ -14,8 +14,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.projectpamt.viewmodel.auth.AuthCheckState
-import com.example.projectpamt.viewmodel.auth.AuthUiState
-import com.example.projectpamt.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.viewmodel.auth.AuthUiState
+import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 import com.pamt.swarabox.ui.screens.LandingScreen
 import com.pamt.swarabox.ui.screens.LoginScreen
 import com.pamt.swarabox.ui.screens.RegisterEmailPasswordScreen
@@ -47,7 +47,7 @@ fun AppNavigation(
         is AuthCheckState.NotAuthenticated -> {
             MainNavHost(
                 authViewModel = authViewModel,
-                startDestination = Login
+                startDestination = Landing
             )
         }
     }
@@ -68,11 +68,11 @@ fun MainNavHost(
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.Success) {
             navController.navigate(Home) {
-                popUpTo<Login> {
+                popUpTo(startDestination) {
                     inclusive = true
                 }
             }
-            authViewModel.resetState()
+            authViewModel.clearUiState()
         }
     }
 
@@ -81,44 +81,69 @@ fun MainNavHost(
         startDestination = startDestination,
     ) {
         composable<Landing> {
+            authViewModel.clearUiState()
             LandingScreen(
                 onNavigateToLogin = {
-                    navController.navigate(Login)
+                    navController.navigate(Login) {
+                        popUpTo(Landing) {
+                            inclusive = true
+                        }
+                    }
                 },
-                onGetStartedClick = {
+                onGetStartedClicked = {
                     navController.navigate(RegisterName)
                 },
             )
         }
 
         composable<Login> {
+            authViewModel.clearUiState()
             LoginScreen(
                 email = email,
                 onEmailChange = { authViewModel.onEmailChange(it) },
                 password = password,
                 onPasswordChange = { authViewModel.onPasswordChange(it) },
                 onNavigateToRegister = {
-                    navController.navigate(RegisterName)
+                    navController.navigate(RegisterName) {
+                        popUpTo(Login) {
+                            inclusive = true
+                        }
+                    }
                 },
-                onLoginClick = {
+                onLogin = {
                     authViewModel.login()
                 },
-                onBackClicked = { navController.navigate(Landing) },
+                onBack = {
+                    navController.navigate(Landing) {
+                        popUpTo(Landing) {
+                            inclusive = true
+                        }
+                    }
+                },
             )
         }
 
         composable<RegisterName> {
+            authViewModel.clearUiState()
             RegisterNameScreen(
                 name = name,
                 onNameChange = { authViewModel.onNameChange(it) },
-                onBackClicked = {
-                    navController.popBackStack()
+                onBack = {
+                    navController.navigate(Landing) {
+                        popUpTo(RegisterName) {
+                            inclusive = true
+                        }
+                    }
                 },
                 onNextClicked = {
                     navController.navigate(RegisterEmailPassword)
                 },
                 onNavigateToLogin = {
-                    navController.navigate(Login)
+                    navController.navigate(Login) {
+                        popUpTo(RegisterName) {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
@@ -127,14 +152,14 @@ fun MainNavHost(
             RegisterEmailPasswordScreen(
                 email = email,
                 password = password,
-                confirmPassword = password,
-                onEmailChange = {authViewModel.onEmailChange(it)},
-                onPasswordChange = {authViewModel.onPasswordChange(it)},
-                onConfirmPasswordChange = {authViewModel.onPasswordChange(it)}, // TODO: Implement Confirm Passowrd
-                onBackClicked = {
+                confirmPassword = confirmPassword,
+                onEmailChange = { authViewModel.onEmailChange(it) },
+                onPasswordChange = { authViewModel.onPasswordChange(it) },
+                onConfirmPasswordChange = { authViewModel.onConfirmPasswordChange(it) },
+                onBack = {
                     navController.popBackStack()
                 },
-                onRegisterClicked = {
+                onRegister = {
                     authViewModel.register()
                 }
             )

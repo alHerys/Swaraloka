@@ -31,7 +31,7 @@ import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 
 @Composable
 fun LandingScreen(
-    onGetStartedClick: () -> Unit = {},
+    onGetStartedClicked: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
 ) {
     val navigationToLoginText = buildAnnotatedString {
@@ -92,7 +92,7 @@ fun LandingScreen(
                         textColor = Color.White,
                         containerColor = Color.White.copy(alpha = 0.15f),
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = onGetStartedClick
+                        onClick = onGetStartedClicked
                     )
                     Spacer(Modifier.height(24.dp))
                     Text(navigationToLoginText)

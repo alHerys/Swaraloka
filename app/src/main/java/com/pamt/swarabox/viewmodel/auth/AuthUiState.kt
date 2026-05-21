@@ -1,4 +1,4 @@
-package com.example.projectpamt.viewmodel.auth
+package com.pamt.swarabox.viewmodel.auth
 
 sealed class AuthUiState {
     object Idle : AuthUiState()

@@ -45,8 +45,8 @@ fun LoginScreen(
     password: String,
     onPasswordChange: (String) -> Unit,
     onNavigateToRegister: () -> Unit,
-    onLoginClick: () -> Unit,
-    onBackClicked: () -> Unit
+    onLogin: () -> Unit,
+    onBack: () -> Unit
 ) {
     val navigationToRegister = buildAnnotatedString {
         withStyle(
@@ -96,7 +96,7 @@ fun LoginScreen(
                     verticalArrangement = Arrangement.spacedBy(26.dp)
                 ) {
                     IconButton(
-                        onClick = onBackClicked,
+                        onClick = onBack,
                         modifier = Modifier.size(15.dp)
                     ) {
                         Icon(
@@ -163,7 +163,7 @@ fun LoginScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 containerColor = Color(0xFFF0B505),
                                 textColor = Color(0xFF212121),
-                                onClick = onLoginClick
+                                onClick = onLogin
                             )
 
                             Spacer(Modifier.height(19.dp))
@@ -187,8 +187,8 @@ private fun LoginScreenPreview() {
             password = "",
             onPasswordChange = {},
             onNavigateToRegister = {},
-            onLoginClick = {},
-            onBackClicked = {}
+            onLogin = {},
+            onBack = {}
         )
     }
 }

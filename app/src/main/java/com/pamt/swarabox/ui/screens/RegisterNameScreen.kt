@@ -44,9 +44,9 @@ import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 fun RegisterNameScreen(
     name: String,
     onNameChange: (String) -> Unit,
-    onNextClicked: (String) -> Unit,
+    onNextClicked: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    onBackClicked: () -> Unit,
+    onBack: () -> Unit,
 ) {
     val navigationToLogin = buildAnnotatedString {
         withStyle(
@@ -96,7 +96,7 @@ fun RegisterNameScreen(
                     verticalArrangement = Arrangement.spacedBy(26.dp)
                 ) {
                     IconButton(
-                        onClick = onBackClicked,
+                        onClick = onBack,
                         modifier = Modifier.size(15.dp)
                     ) {
                         Icon(
@@ -149,7 +149,7 @@ fun RegisterNameScreen(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Button(
-                                onClick = { onNextClicked(name) },
+                                onClick = onNextClicked,
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonColors(
                                     containerColor = Color(0xFFF0B505),
@@ -187,7 +187,7 @@ private fun RegisterNamePreview() {
             onNavigateToLogin = { },
             name = "",
             onNameChange = {},
-            onBackClicked = { }
+            onBack = { }
         )
 
     }

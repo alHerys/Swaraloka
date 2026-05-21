@@ -50,8 +50,8 @@ fun RegisterEmailPasswordScreen(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
-    onRegisterClicked: () -> Unit,
-    onBackClicked: () -> Unit,
+    onRegister: () -> Unit,
+    onBack: () -> Unit,
 ) {
     val policyAgreementText = buildAnnotatedString {
         withStyle(
@@ -127,7 +127,7 @@ fun RegisterEmailPasswordScreen(
                     verticalArrangement = Arrangement.spacedBy(26.dp)
                 ) {
                     IconButton(
-                        onClick = onBackClicked,
+                        onClick = onBack,
                         modifier = Modifier.size(15.dp)
                     ) {
                         Icon(
@@ -201,7 +201,7 @@ fun RegisterEmailPasswordScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 containerColor = Color(0xFFF0B505),
                                 textColor = Color(0xFF212121),
-                                onClick = onRegisterClicked
+                                onClick = onRegister
                             )
 
                             Spacer(Modifier.height(19.dp))
@@ -232,8 +232,8 @@ private fun RegisterEmailPasswordPreview() {
             onEmailChange = { },
             onPasswordChange = { },
             onConfirmPasswordChange = { },
-            onBackClicked = {},
-            onRegisterClicked = {  }
+            onBack = {},
+            onRegister = {  }
         )
     }
 }
