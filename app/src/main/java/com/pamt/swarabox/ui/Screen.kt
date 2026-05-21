@@ -1,8 +1,14 @@
 package com.pamt.swarabox.ui
 
-sealed class Screen(val route: String) {
-    object Landing: Screen("landing")
-    object Login : Screen("login")
-    object Register : Screen("register")
-    object Home : Screen("home")
-}
+import kotlinx.serialization.Serializable
+
+@Serializable
+object Landing
+@Serializable
+object Login
+@Serializable
+object RegisterName
+@Serializable
+object RegisterEmailPassword
+@Serializable
+object Home

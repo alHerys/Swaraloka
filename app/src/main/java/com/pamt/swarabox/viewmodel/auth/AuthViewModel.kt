@@ -24,11 +24,11 @@ class AuthViewModel : ViewModel() {
     private val _password = MutableStateFlow("")
     val password: StateFlow<String> = _password
 
-    private val _name = MutableStateFlow("")
-    val fullname: StateFlow<String> = _name
+    private val _confirmPassword = MutableStateFlow("")
+    val confirmPassword: StateFlow<String> = _confirmPassword
 
-    private val _phone = MutableStateFlow("")
-    val phone: StateFlow<String> = _phone
+    private val _name = MutableStateFlow("")
+    val name: StateFlow<String> = _name
 
     init {
         observeAuthStatus()
@@ -62,10 +62,6 @@ class AuthViewModel : ViewModel() {
 
     fun onNameChange(value: String) {
         _name.value = value
-    }
-
-    fun onPhoneChange(value: String) {
-        _phone.value = value
     }
 
     fun login() {

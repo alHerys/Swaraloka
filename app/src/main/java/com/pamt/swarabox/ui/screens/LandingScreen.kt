@@ -2,7 +2,6 @@ package com.pamt.swarabox.ui.screens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,14 +25,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pamt.swarabox.ui.components.AppButton
-import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 import com.pamt.swarabox.ui.components.AuthBackground
 import com.pamt.swarabox.ui.components.LogoWidget
+import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 
 @Composable
-fun LandingPage(
+fun LandingScreen(
     onGetStartedClick: () -> Unit = {},
-    onLoginClick: () -> Unit = {},
+    onNavigateToLogin: () -> Unit = {},
 ) {
     val navigationToLoginText = buildAnnotatedString {
         withStyle(
@@ -48,7 +47,7 @@ fun LandingPage(
         withLink(
             LinkAnnotation.Clickable(
                 tag = "LOGIN",
-                linkInteractionListener = { onLoginClick() }
+                linkInteractionListener = { onNavigateToLogin() }
             )
         ) {
             withStyle(
@@ -106,8 +105,8 @@ fun LandingPage(
 
 @Preview(showBackground = true, showSystemUi = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
-private fun LandingPagePreview() {
+private fun LandingScreenPreview() {
     SwaraBoxTheme {
-        LandingPage()
+        LandingScreen()
     }
 }

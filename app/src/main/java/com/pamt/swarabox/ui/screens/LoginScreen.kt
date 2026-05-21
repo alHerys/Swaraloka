@@ -18,10 +18,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,9 +39,15 @@ import com.pamt.swarabox.ui.components.AuthBackground
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 
 @Composable
-fun LoginPage(modifier: Modifier = Modifier) {
-    var name by remember { mutableStateOf("") }
-
+fun LoginScreen(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onLoginClick: () -> Unit,
+    onBackClicked: () -> Unit
+) {
     val navigationToRegister = buildAnnotatedString {
         withStyle(
             style = SpanStyle(
@@ -59,7 +61,7 @@ fun LoginPage(modifier: Modifier = Modifier) {
         withLink(
             LinkAnnotation.Clickable(
                 tag = "LOGIN",
-                linkInteractionListener = { }
+                linkInteractionListener = { onNavigateToRegister() }
             )
         ) {
             withStyle(
@@ -75,94 +77,99 @@ fun LoginPage(modifier: Modifier = Modifier) {
         }
     }
 
-    AuthBackground {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .imePadding()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
+    Scaffold(Modifier.fillMaxSize()) { innerpadding ->
+        AuthBackground {
             Column(
-                modifier = modifier.padding(
-                    horizontal = 24.dp,
-                    vertical = 15.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(26.dp)
-            ) {
-                IconButton(
-                    onClick = { },
-                    modifier = Modifier.size(15.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.back_icon),
-                        contentDescription = "Back Icon",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                Spacer(Modifier.height(30.dp))
-                Text(
-                    "Welcome Back :)",
-                    fontSize = 53.sp,
-                    lineHeight = 64.sp,
-                    fontWeight = FontWeight(500),
-                    color = Color.White,
-                )
-            }
-
-            Surface(
-                color = Color(0xff262626),
-                shape = RoundedCornerShape(
-                    topEnd = 27.dp,
-                    topStart = 27.dp
-                )
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(
-                    modifier = modifier
-                        .fillMaxWidth()
+                    modifier = Modifier
+                        .padding(innerpadding)
                         .padding(
-                            top = 15.dp,
-                            bottom = 24.dp,
-                            start = 18.dp,
-                            end = 18.dp,
+                            horizontal = 24.dp,
+                            vertical = 15.dp
                         ),
+                    verticalArrangement = Arrangement.spacedBy(26.dp)
                 ) {
-
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        AppTextField(
-                            value = name,
-                            label = "Email",
-                            onValueChange = { name = it },
-                            placeholder = "jeren@example.com",
-                        )
-                        AppTextField(
-                            value = name,
-                            label = "Password",
-                            onValueChange = { name = it },
-                            placeholder = "..........",
+                    IconButton(
+                        onClick = onBackClicked,
+                        modifier = Modifier.size(15.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.back_icon),
+                            contentDescription = "Back Icon",
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
+                    Spacer(Modifier.height(30.dp))
+                    Text(
+                        "Welcome Back :)",
+                        fontSize = 53.sp,
+                        lineHeight = 64.sp,
+                        fontWeight = FontWeight(500),
+                        color = Color.White,
+                    )
+                }
 
-                    Spacer(Modifier.height(50.dp))
-
+                Surface(
+                    color = Color(0xff262626),
+                    shape = RoundedCornerShape(
+                        topEnd = 27.dp,
+                        topStart = 27.dp
+                    )
+                ) {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        modifier = Modifier
+                            .padding(innerpadding)
+                            .fillMaxWidth()
+                            .padding(
+                                top = 15.dp,
+                                bottom = 24.dp,
+                                start = 18.dp,
+                                end = 18.dp,
+                            ),
                     ) {
 
-                        AppButton(
-                            text = "Submit",
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            AppTextField(
+                                value = email,
+                                label = "Email",
+                                onValueChange = onEmailChange,
+                                placeholder = "jeren@example.com",
+                            )
+                            AppTextField(
+                                value = password,
+                                label = "Password",
+                                onValueChange = onPasswordChange,
+                                placeholder = "..........",
+                            )
+                        }
+
+                        Spacer(Modifier.height(50.dp))
+
+                        Column(
                             modifier = Modifier.fillMaxWidth(),
-                            containerColor = Color(0xFFF0B505),
-                            textColor = Color(0xFF212121),
-                            onClick = {}
-                        )
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
 
-                        Spacer(Modifier.height(19.dp))
+                            AppButton(
+                                text = "Submit",
+                                modifier = Modifier.fillMaxWidth(),
+                                containerColor = Color(0xFFF0B505),
+                                textColor = Color(0xFF212121),
+                                onClick = onLoginClick
+                            )
 
-                        Text(text = navigationToRegister)
+                            Spacer(Modifier.height(19.dp))
+
+                            Text(text = navigationToRegister)
+                        }
                     }
                 }
             }
@@ -172,10 +179,16 @@ fun LoginPage(modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun LoginPagePreview() {
+private fun LoginScreenPreview() {
     SwaraBoxTheme {
-        Scaffold(Modifier.fillMaxSize()) {
-            LoginPage(Modifier.padding(it))
-        }
+        LoginScreen(
+            email = "",
+            onEmailChange = {},
+            password = "",
+            onPasswordChange = {},
+            onNavigateToRegister = {},
+            onLoginClick = {},
+            onBackClicked = {}
+        )
     }
 }
