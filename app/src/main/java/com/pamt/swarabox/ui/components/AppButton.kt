@@ -13,13 +13,13 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun AppButton(
+    onClick: () -> Unit,
     text: String,
     modifier: Modifier = Modifier,
     containerColor: Color,
     textColor: Color,
     disabledContainerColor: Color = Color.Transparent,
     disabledContentColor:Color = Color.Transparent,
-    onClick: () -> Unit,
 ) {
     Button(
         onClick = onClick,

@@ -52,6 +52,7 @@ fun RegisterEmailPasswordScreen(
     onConfirmPasswordChange: (String) -> Unit,
     onRegister: () -> Unit,
     onBack: () -> Unit,
+    errorMessage: String? = null
 ) {
     val policyAgreementText = buildAnnotatedString {
         withStyle(
@@ -196,6 +197,15 @@ fun RegisterEmailPasswordScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
+                            if (errorMessage != null) {
+                                Text(
+                                    text = errorMessage,
+                                    color = Color.Red,
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
                             AppButton(
                                 text = "Register",
                                 modifier = Modifier.fillMaxWidth(),
@@ -233,7 +243,7 @@ private fun RegisterEmailPasswordPreview() {
             onPasswordChange = { },
             onConfirmPasswordChange = { },
             onBack = {},
-            onRegister = {  }
+            onRegister = {  },
         )
     }
 }

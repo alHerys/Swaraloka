@@ -7,7 +7,6 @@ import io.github.jan.supabase.postgrest.from
 class ProfileRepository {
     private val supabase = SupabaseClientProvider.client
 
-    // get profile from user table postgre supabase
     suspend fun getCurrentProfile(userId: String): UserModel {
         return supabase.from("user")
             .select {
@@ -15,10 +14,8 @@ class ProfileRepository {
                     eq("user_id", userId)
                 }
             }.decodeSingle<UserModel>()
-
     }
 
-    // Edit profile in user table postgre supabase
     suspend fun editUserProfile(
         userId: String,
         name: String,

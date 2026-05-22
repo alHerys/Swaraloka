@@ -3,7 +3,6 @@ package com.pamt.swarabox.viewmodel.auth
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.projectpamt.viewmodel.auth.AuthCheckState
 import com.pamt.swarabox.data.repository.AuthRepository
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -112,7 +111,7 @@ class AuthViewModel : ViewModel() {
     fun logout() {
         viewModelScope.launch {
             repository.logout()
-            resetAllState()
+            resetFormState()
         }
     }
 
@@ -120,7 +119,7 @@ class AuthViewModel : ViewModel() {
         _uiState.value = AuthUiState.Idle
     }
 
-    fun resetAllState() {
+    fun resetFormState() {
         _name.value = ""
         _email.value = ""
         _password.value = ""

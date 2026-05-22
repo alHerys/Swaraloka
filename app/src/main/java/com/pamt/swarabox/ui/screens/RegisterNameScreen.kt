@@ -36,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pamt.swarabox.R
+import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.AuthBackground
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
@@ -148,23 +149,13 @@ fun RegisterNameScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            Button(
+                            AppButton(
+                                text = "Next",
+                                containerColor = Color(0xFFF0B505),
+                                textColor = Color(0xFF212121),
                                 onClick = onNextClicked,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonColors(
-                                    containerColor = Color(0xFFF0B505),
-                                    contentColor = Color(0xFF212121),
-                                    disabledContainerColor = Color.Transparent,
-                                    disabledContentColor = Color.Transparent
-                                ),
-                                contentPadding = PaddingValues(vertical = 16.dp),
-                            ) {
-                                Text(
-                                    "Next",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight(500),
-                                )
-                            }
+                                modifier = Modifier.fillMaxWidth()
+                            )
 
                             Spacer(Modifier.height(19.dp))
 
@@ -172,7 +163,6 @@ fun RegisterNameScreen(
                         }
                     }
                 }
-
             }
         }
     }

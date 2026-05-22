@@ -1,5 +1,7 @@
 package com.pamt.swarabox.ui
 
+import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -8,50 +10,88 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.pamt.swarabox.viewmodel.auth.AuthCheckState
 import com.pamt.swarabox.data.model.SongModel
-import com.pamt.swarabox.data.model.UserModel
-import com.pamt.swarabox.viewmodel.auth.AuthUiState
-import com.pamt.swarabox.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.ui.screens.LandingScreen
 import com.pamt.swarabox.ui.screens.LoginScreen
 import com.pamt.swarabox.ui.screens.ProfileScreen
 import com.pamt.swarabox.ui.screens.RegisterEmailPasswordScreen
 import com.pamt.swarabox.ui.screens.RegisterNameScreen
+import com.pamt.swarabox.viewmodel.auth.AuthCheckState
+import com.pamt.swarabox.viewmodel.auth.AuthUiState
+import com.pamt.swarabox.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.viewmodel.profile.ProfileUiState
+import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
 
 @Composable
 fun AppNavigation(
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel()
 ) {
-    val authCheckState = authViewModel.authCheckState.collectAsStateWithLifecycle()
+    val authCheckState by authViewModel.authCheckState.collectAsStateWithLifecycle()
+    val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
+    val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
 
-    when (authCheckState.value) {
-        is AuthCheckState.Authenticated -> {
-            MainNavHost(
-                authViewModel = authViewModel,
-                startDestination = Home
-            )
+    // Trigger fetch profile saat user terdeteksi sudah Authenticated
+    LaunchedEffect(authCheckState) {
+        if (authCheckState is AuthCheckState.Authenticated) {
+            authViewModel.clearUiState()
+            profileViewModel.fetchProfile()
         }
+    }
 
-        is AuthCheckState.Checking -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+    when (authCheckState) {
+        is AuthCheckState.Authenticated -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                MainNavHost(
+                    authViewModel = authViewModel,
+                    profileViewModel = profileViewModel,
+                    startDestination = Profile
+                )
+
+                val isLoading =
+                    authUiState is AuthUiState.Loading ||
+                            profileUiState is ProfileUiState.Loading ||
+                            profileUiState is ProfileUiState.Idle
+
+                if (isLoading) {
+                    LoadingOverlay()
+                }
             }
         }
 
         is AuthCheckState.NotAuthenticated -> {
-            MainNavHost(
-                authViewModel = authViewModel,
-                startDestination = Landing
-            )
+            Box(modifier = Modifier.fillMaxSize()) {
+                MainNavHost(
+                    authViewModel = authViewModel,
+                    profileViewModel = profileViewModel,
+                    startDestination = Landing
+                )
+
+                val isLoading = authUiState is AuthUiState.Loading || authUiState is AuthUiState.Success
+
+                if (isLoading) {
+                    LoadingOverlay()
+                }
+            }
+        }
+
+        else -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF262626)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+
         }
     }
 }
@@ -59,24 +99,25 @@ fun AppNavigation(
 @Composable
 fun MainNavHost(
     authViewModel: AuthViewModel,
+    profileViewModel: ProfileViewModel,
     startDestination: Any
 ) {
     val navController = rememberNavController()
-    val email by authViewModel.email.collectAsStateWithLifecycle()
-    val password by authViewModel.password.collectAsStateWithLifecycle()
-    val name by authViewModel.name.collectAsStateWithLifecycle()
-    val confirmPassword by authViewModel.confirmPassword.collectAsStateWithLifecycle()
-    val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
+    val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
+    val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(uiState) {
-        if (uiState is AuthUiState.Success) {
-            navController.navigate(Home) {
-                popUpTo(startDestination) {
-                    inclusive = true
-                }
-            }
-            authViewModel.clearUiState()
+    val errorMessage = when {
+        authUiState is AuthUiState.Error -> {
+            Log.d("AUTH ERROR", (authUiState as AuthUiState.Error).message)
+            (authUiState as AuthUiState.Error).message
         }
+
+        profileUiState is ProfileUiState.Error -> {
+            Log.d("AUTH ERROR", (profileUiState as ProfileUiState.Error).message)
+            (profileUiState as ProfileUiState.Error).message
+        }
+
+        else -> null
     }
 
     NavHost(
@@ -84,14 +125,9 @@ fun MainNavHost(
         startDestination = startDestination,
     ) {
         composable<Landing> {
-            authViewModel.clearUiState()
             LandingScreen(
                 onNavigateToLogin = {
-                    navController.navigate(Login) {
-                        popUpTo(Landing) {
-                            inclusive = true
-                        }
-                    }
+                    navController.navigate(Login)
                 },
                 onGetStartedClicked = {
                     navController.navigate(RegisterName)
@@ -100,13 +136,15 @@ fun MainNavHost(
         }
 
         composable<Login> {
-            authViewModel.clearUiState()
+            val email by authViewModel.email.collectAsStateWithLifecycle()
+            val password by authViewModel.password.collectAsStateWithLifecycle()
             LoginScreen(
                 email = email,
                 onEmailChange = { authViewModel.onEmailChange(it) },
                 password = password,
                 onPasswordChange = { authViewModel.onPasswordChange(it) },
                 onNavigateToRegister = {
+                    authViewModel.resetFormState()
                     navController.navigate(RegisterName) {
                         popUpTo(Login) {
                             inclusive = true
@@ -117,17 +155,19 @@ fun MainNavHost(
                     authViewModel.login()
                 },
                 onBack = {
+                    authViewModel.resetFormState()
                     navController.navigate(Landing) {
                         popUpTo(Landing) {
                             inclusive = true
                         }
                     }
                 },
+                errorMessage = errorMessage
             )
         }
 
         composable<RegisterName> {
-            authViewModel.clearUiState()
+            val name by authViewModel.name.collectAsStateWithLifecycle()
             RegisterNameScreen(
                 name = name,
                 onNameChange = { authViewModel.onNameChange(it) },
@@ -142,6 +182,7 @@ fun MainNavHost(
                     navController.navigate(RegisterEmailPassword)
                 },
                 onNavigateToLogin = {
+                    authViewModel.resetFormState()
                     navController.navigate(Login) {
                         popUpTo(RegisterName) {
                             inclusive = true
@@ -152,6 +193,9 @@ fun MainNavHost(
         }
 
         composable<RegisterEmailPassword> {
+            val email by authViewModel.email.collectAsStateWithLifecycle()
+            val password by authViewModel.password.collectAsStateWithLifecycle()
+            val confirmPassword by authViewModel.confirmPassword.collectAsStateWithLifecycle()
             RegisterEmailPasswordScreen(
                 email = email,
                 password = password,
@@ -164,17 +208,25 @@ fun MainNavHost(
                 },
                 onRegister = {
                     authViewModel.register()
-                }
+                },
+                errorMessage = errorMessage
             )
         }
 
-        composable<Home> {
-            ProfileScreen(
-                user = UserModel.dummy,
-                listMySong = SongModel.dummyList,
-                onLogout = {},
-                onNavigateToAbout = {},
-            )
+        composable<Profile> {
+            val state = profileUiState
+            if (state is ProfileUiState.Success) {
+                ProfileScreen(
+                    user = state.user,
+                    listMySong = SongModel.dummyList,
+                    onLogout = {
+                        profileViewModel.resetUiState()
+                        authViewModel.resetFormState()
+                        authViewModel.logout()
+                    },
+                    onNavigateToAbout = {}
+                )
+            }
         }
     }
 }

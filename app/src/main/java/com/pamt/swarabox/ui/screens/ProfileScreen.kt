@@ -33,6 +33,7 @@ import coil.compose.AsyncImage
 import com.pamt.swarabox.R
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.model.UserModel
+import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.CircleContainer
 import com.pamt.swarabox.ui.components.SongTile
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
@@ -43,6 +44,7 @@ fun ProfileScreen(
     listMySong: List<SongModel>,
     onLogout: () -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
+    onNavigateToEdit: () -> Unit = {}
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(), containerColor = Color(0xFF212121)
@@ -61,7 +63,8 @@ fun ProfileScreen(
             ) {
                 CircleContainer(
                     size = 38.dp,
-                    backgroundColor = Color(0xFF343434)
+                    backgroundColor = Color(0xFF343434),
+                    onClick = onNavigateToEdit
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.frame),
@@ -155,6 +158,7 @@ fun ProfileScreen(
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.about),
+                        tint = Color.White,
                         contentDescription = null
                     )
                     Spacer(Modifier.width(16.dp))
@@ -170,20 +174,13 @@ fun ProfileScreen(
 
             Spacer(Modifier.height(32.dp))
 
-            Button(
+            AppButton(
                 onClick = onLogout,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFF04444),
-                ),
-                contentPadding = PaddingValues(vertical = 16.dp),
-            ) {
-                Text(
-                    text = "Logout",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight(500),
-                )
-            }
+                text = "Logout",
+                containerColor = Color(0xFFF04444),
+                textColor = Color.White,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }

@@ -2,7 +2,7 @@ package com.pamt.swarabox.data
 
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.auth.Auth
-import io.ktor.websocket.WebSocketDeflateExtension.Companion.install
+import io.github.jan.supabase.postgrest.Postgrest
 
 object SupabaseClientProvider {
     val client = createSupabaseClient(
@@ -10,5 +10,6 @@ object SupabaseClientProvider {
         supabaseKey = "sb_publishable_XS5CYJXmBpA4JW_0lambiw_-jSMhuwi"
     ) {
         install(Auth)
+        install(Postgrest)
     }
 }

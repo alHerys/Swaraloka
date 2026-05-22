@@ -46,7 +46,8 @@ fun LoginScreen(
     onPasswordChange: (String) -> Unit,
     onNavigateToRegister: () -> Unit,
     onLogin: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    errorMessage: String? = null
 ) {
     val navigationToRegister = buildAnnotatedString {
         withStyle(
@@ -157,7 +158,14 @@ fun LoginScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-
+                            if (errorMessage != null) {
+                                Text(
+                                    text = errorMessage,
+                                    color = Color.Red,
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
                             AppButton(
                                 text = "Submit",
                                 modifier = Modifier.fillMaxWidth(),
