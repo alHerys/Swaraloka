@@ -1,9 +1,6 @@
 package com.pamt.swarabox.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,12 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -27,20 +21,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.pamt.swarabox.R
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.model.UserModel
+import com.pamt.swarabox.ui.components.CircleContainer
+import com.pamt.swarabox.ui.components.SongTile
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 import kotlin.time.Clock
 
@@ -126,7 +120,7 @@ fun ProfileScreen(
                         ),
                         contentDescription = null,
                         tint = Color.White,
-                        )
+                    )
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = "My Collections",
@@ -141,7 +135,7 @@ fun ProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(listMySong) { song ->
-                        SongItem(song = song)
+                        SongTile(song = song)
                     }
                 }
             }
@@ -149,7 +143,7 @@ fun ProfileScreen(
             Spacer(Modifier.height(32.dp))
 
             Button(
-                onClick = {},
+                onClick = onNavigateToAbout,
                 modifier = Modifier
                     .fillMaxWidth(),
                 contentPadding = PaddingValues(16.dp),
@@ -196,63 +190,6 @@ fun ProfileScreen(
     }
 }
 
-@Composable
-fun SongItem(song: SongModel) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = Color(0xFF262626), shape = RoundedCornerShape(size = 12.dp)
-            )
-            .padding(16.dp)
-
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            AsyncImage(
-                model = song.thumbnailUrl,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(5.dp)),
-                contentScale = ContentScale.Crop,
-            )
-            Spacer(Modifier.width(16.dp))
-            Column {
-                Text(
-                    text = song.title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight(500),
-                    color = Color.White,
-                )
-                Text(
-                    text = song.artist,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight(700),
-                    color = Color(0xFF747474),
-                    lineHeight = 3.sp
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CircleContainer(
-    size: Dp, backgroundColor: Color, content: @Composable BoxScope.() -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(color = backgroundColor),
-        contentAlignment = Alignment.Center,
-        content = content
-    )
-}
-
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun ProfileScreenPreview() {
@@ -264,7 +201,8 @@ private fun ProfileScreenPreview() {
                 id = "1",
                 avatarUrl = null,
                 createdAt = Clock.System.now()
-            ), listMySong = SongModel.dummySongs
+            ),
+            listMySong = SongModel.dummySongs
         )
     }
 }
