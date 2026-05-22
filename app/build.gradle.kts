@@ -57,6 +57,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
+    // Viewmodel
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
 
@@ -74,4 +75,7 @@ dependencies {
 
     // Ktor
     implementation(libs.ktor.client.android)
+
+    // Coil
+    implementation(libs.coil.compose)
 }
