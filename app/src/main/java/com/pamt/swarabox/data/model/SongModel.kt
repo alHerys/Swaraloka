@@ -14,7 +14,7 @@ data class SongModel(
     val createdAt: Instant, // TIMESTAMPTZ in SUPABASE
 ) {
     companion object {
-        val dummySongs = listOf(
+        val dummyList = listOf(
             SongModel(
                 id = "1",
                 artistId = "artist_1",

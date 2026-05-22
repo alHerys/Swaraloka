@@ -13,11 +13,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.projectpamt.viewmodel.auth.AuthCheckState
+import com.pamt.swarabox.viewmodel.auth.AuthCheckState
+import com.pamt.swarabox.data.model.SongModel
+import com.pamt.swarabox.data.model.UserModel
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 import com.pamt.swarabox.ui.screens.LandingScreen
 import com.pamt.swarabox.ui.screens.LoginScreen
+import com.pamt.swarabox.ui.screens.ProfileScreen
 import com.pamt.swarabox.ui.screens.RegisterEmailPasswordScreen
 import com.pamt.swarabox.ui.screens.RegisterNameScreen
 
@@ -166,7 +169,12 @@ fun MainNavHost(
         }
 
         composable<Home> {
-
+            ProfileScreen(
+                user = UserModel.dummy,
+                listMySong = SongModel.dummyList,
+                onLogout = {},
+                onNavigateToAbout = {},
+            )
         }
     }
 }

@@ -36,18 +36,16 @@ import com.pamt.swarabox.data.model.UserModel
 import com.pamt.swarabox.ui.components.CircleContainer
 import com.pamt.swarabox.ui.components.SongTile
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
-import kotlin.time.Clock
 
 @Composable
 fun ProfileScreen(
-    modifier: Modifier = Modifier,
     user: UserModel,
     listMySong: List<SongModel>,
     onLogout: () -> Unit = {},
     onNavigateToAbout: () -> Unit = {},
 ) {
     Scaffold(
-        modifier = modifier.fillMaxSize(), containerColor = Color(0xFF212121)
+        modifier = Modifier.fillMaxSize(), containerColor = Color(0xFF212121)
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -195,14 +193,8 @@ fun ProfileScreen(
 private fun ProfileScreenPreview() {
     SwaraBoxTheme {
         ProfileScreen(
-            user = UserModel(
-                name = "Alvianto Hery Sarborn",
-                email = "john.doe@example.com",
-                id = "1",
-                avatarUrl = null,
-                createdAt = Clock.System.now()
-            ),
-            listMySong = SongModel.dummySongs
+            user = UserModel.dummy,
+            listMySong = SongModel.dummyList
         )
     }
 }
