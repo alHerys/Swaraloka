@@ -1,6 +1,5 @@
 package com.pamt.swarabox.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,16 +15,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.pamt.swarabox.R
-import com.pamt.swarabox.data.model.UserModel
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.CircleContainer
@@ -33,16 +33,15 @@ import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 
 @Composable
 fun EditProfileScreen(
-    modifier: Modifier = Modifier,
     name: String,
-    avatar: String? = null,
     onNameChange: (String) -> Unit,
     onAvatarChange: () -> Unit,
     onEdit: () -> Unit,
     onCancel: () -> Unit,
+    avatar: String,
 ) {
     Scaffold(
-        Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFF262626)
     ) { innerPadding ->
         Column(
@@ -57,38 +56,41 @@ fun EditProfileScreen(
                 size = 120.dp,
                 onClick = onAvatarChange,
             ) {
-//                if (avatar != null) {
-//                    Image(
-//                        painter = painterResource(
-//                            id = TODO()
-//                        ),
-//                        contentDescription = null
-//                    )
-//                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .border(
-                            width = 4.dp,
-                            color = Color(0xFFE4E0D8),
-                            shape = CircleShape
-                        ),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.image_upload),
+                if (avatar.isNotEmpty()) {
+                    AsyncImage(
+                        model = avatar,
                         contentDescription = null,
-                        tint = Color.White
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
                     )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = "Select Image",
-                        fontSize = 12.sp,
-                        lineHeight = 16.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFFFFFFFF),
-                    )
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .border(
+                                width = 4.dp,
+                                color = Color(0xFFE4E0D8),
+                                shape = CircleShape
+                            ),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.image_upload),
+                            contentDescription = null,
+                            tint = Color.White
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "Select Image",
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp,
+                            fontWeight = FontWeight(500),
+                            color = Color(0xFFFFFFFF),
+                        )
+                    }
                 }
             }
 
@@ -124,12 +126,12 @@ fun EditProfileScreen(
     }
 }
 
-@Preview(showSystemUi = true)
+@Preview(showSystemUi = true, name = "Empty Avatar")
 @Composable
-private fun EditProfileScreenPreview() {
+private fun EditProfileScreenEmptyPreview() {
     SwaraBoxTheme {
         EditProfileScreen(
-            name = "",
+            name = "John Doe",
             avatar = "",
             onNameChange = {},
             onAvatarChange = {},

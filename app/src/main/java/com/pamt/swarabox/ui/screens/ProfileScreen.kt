@@ -42,9 +42,9 @@ import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 fun ProfileScreen(
     user: UserModel,
     listMySong: List<SongModel>,
-    onLogout: () -> Unit = {},
-    onNavigateToAbout: () -> Unit = {},
-    onNavigateToEdit: () -> Unit = {}
+    onLogout: () -> Unit,
+    onNavigateToAbout: () -> Unit,
+    onNavigateToEdit: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(), containerColor = Color(0xFF212121)
@@ -191,7 +191,10 @@ private fun ProfileScreenPreview() {
     SwaraBoxTheme {
         ProfileScreen(
             user = UserModel.dummy,
-            listMySong = SongModel.dummyList
+            listMySong = SongModel.dummyList,
+            onLogout = {},
+            onNavigateToAbout = { },
+            onNavigateToEdit = { }
         )
     }
 }

@@ -1,13 +1,19 @@
 package com.pamt.swarabox.ui
 
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.ui.components.LoadingOverlay
+import com.pamt.swarabox.ui.screens.EditProfileScreen
 import com.pamt.swarabox.ui.screens.LandingScreen
 import com.pamt.swarabox.ui.screens.LoginScreen
 import com.pamt.swarabox.ui.screens.ProfileScreen
@@ -74,7 +81,8 @@ fun AppNavigation(
                     startDestination = Landing
                 )
 
-                val isLoading = authUiState is AuthUiState.Loading || authUiState is AuthUiState.Success
+                val isLoading =
+                    authUiState is AuthUiState.Loading || authUiState is AuthUiState.Success
 
                 if (isLoading) {
                     LoadingOverlay()
@@ -215,6 +223,7 @@ fun MainNavHost(
 
         composable<Profile> {
             val state = profileUiState
+
             if (state is ProfileUiState.Success) {
                 ProfileScreen(
                     user = state.user,
@@ -224,7 +233,66 @@ fun MainNavHost(
                         authViewModel.resetFormState()
                         authViewModel.logout()
                     },
-                    onNavigateToAbout = {}
+                    onNavigateToAbout = {},
+                    onNavigateToEdit = {
+                        navController.navigate(EditProfile)
+                    }
+                )
+            }
+        }
+
+        composable<EditProfile> {
+            val name by profileViewModel.name.collectAsStateWithLifecycle()
+            val avatarUrl by profileViewModel.avatarUrl.collectAsStateWithLifecycle()
+            val snackbarHostState = remember { SnackbarHostState() }
+
+            val launcher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.GetContent()
+            ) { uri ->
+                uri?.let { profileViewModel.onAvatarChange(it.toString()) }
+            }
+
+            LaunchedEffect(profileUiState) {
+                if (profileUiState is ProfileUiState.Error) {
+                    snackbarHostState.showSnackbar(
+                        message = (profileUiState as ProfileUiState.Error).message
+                    )
+                    profileViewModel.resetUiState()
+                }
+            }
+
+            LaunchedEffect(Unit) {
+                profileViewModel.onAvatarChange("")
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    profileViewModel.cancelEdit()
+                }
+            }
+
+            Box(modifier = Modifier.fillMaxSize()) {
+                EditProfileScreen(
+                    name = name,
+                    avatar = avatarUrl,
+                    onNameChange = { profileViewModel.onNameChange(it) },
+                    onAvatarChange = { launcher.launch("image/*") },
+                    onEdit = {
+                        profileViewModel.updateProfile(name, avatarUrl.ifEmpty { null })
+                        navController.popBackStack()
+                    },
+                    onCancel = {
+                        navController.popBackStack()
+                    }
+                )
+
+                if (profileUiState is ProfileUiState.Loading) {
+                    LoadingOverlay()
+                }
+
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier.align(Alignment.BottomCenter)
                 )
             }
         }

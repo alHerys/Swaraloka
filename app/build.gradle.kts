@@ -73,6 +73,9 @@ dependencies {
     // Supabase Auth
     implementation(libs.auth.kt)
 
+    // Supabase Storage
+    implementation(libs.storage.kt)
+
     // Ktor
     implementation(libs.ktor.client.android)
 

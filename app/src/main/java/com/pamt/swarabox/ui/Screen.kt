@@ -16,3 +16,6 @@ object RegisterEmailPassword
 
 @Serializable
 object Profile
+
+@Serializable
+object EditProfile

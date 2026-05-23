@@ -31,4 +31,7 @@ class ProfileRepository {
                 }
             }
     }
+
+    // Function to upload profile picture to supabase storage bucker "gambar"
+
 }
