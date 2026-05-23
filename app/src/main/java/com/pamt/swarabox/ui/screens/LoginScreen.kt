@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,14 +20,20 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
@@ -49,6 +57,8 @@ fun LoginScreen(
     onBack: () -> Unit,
     errorMessage: String? = null
 ) {
+    val passwordFocusRequester = remember { FocusRequester() }
+
     val navigationToRegister = buildAnnotatedString {
         withStyle(
             style = SpanStyle(
@@ -142,12 +152,24 @@ fun LoginScreen(
                                 label = "Email",
                                 onValueChange = onEmailChange,
                                 placeholder = "jeren@example.com",
+                                keyboardActions = KeyboardActions(onNext = { passwordFocusRequester.requestFocus() }),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Email,
+                                    imeAction = ImeAction.Next
+                                )
                             )
                             AppTextField(
                                 value = password,
                                 label = "Password",
                                 onValueChange = onPasswordChange,
                                 placeholder = "..........",
+                                modifier = Modifier.focusRequester(passwordFocusRequester),
+                                visualTransformation = PasswordVisualTransformation(),
+                                keyboardActions = KeyboardActions(onDone = { onLogin() }),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Password,
+                                    imeAction = ImeAction.Done
+                                )
                             )
                         }
 

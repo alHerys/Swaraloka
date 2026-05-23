@@ -66,6 +66,7 @@ fun AppTextField(
             textStyle = textStyle,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
+            singleLine = true,
             visualTransformation = visualTransformation,
             decorationBox = { innerTextField ->
                 Box(

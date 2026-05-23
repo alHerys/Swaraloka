@@ -1,5 +1,6 @@
 package com.pamt.swarabox.viewmodel.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamt.swarabox.data.SupabaseClientProvider
@@ -51,13 +52,20 @@ class ProfileViewModel(
         }
     }
 
-    fun updateProfile(name: String, avatarUrl: String?) {
+    fun updateProfile(name: String, avatarUrl: String?, newImageBytes: ByteArray? = null) {
         viewModelScope.launch {
             _uiState.value = ProfileUiState.Loading
             try {
                 val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
+
                 if (userId != null) {
-                    repository.editUserProfile(userId, name, avatarUrl)
+                    var finalAvatarUrl = avatarUrl
+
+                    if (newImageBytes != null) {
+                        finalAvatarUrl = repository.uploadAvatar(userId, newImageBytes)
+                    }
+
+                    repository.editUserProfile(userId, name, finalAvatarUrl)
 
                     val user = repository.getCurrentProfile(userId)
 
@@ -69,12 +77,13 @@ class ProfileViewModel(
                     _uiState.value = ProfileUiState.Error("Session end, please relogged to app")
                 }
             } catch (e: Exception) {
+                Log.d("UPDATE PROFILE", e.message.toString())
                 _uiState.value = ProfileUiState.Error(e.message ?: "Error while updating profile")
             }
         }
     }
 
-    fun cancelEdit() {
+    fun resetChanges() {
         val currentState = _uiState.value
         if (currentState is ProfileUiState.Success) {
             _name.value = currentState.user.name

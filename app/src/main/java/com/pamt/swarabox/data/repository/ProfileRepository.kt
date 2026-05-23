@@ -3,6 +3,7 @@ package com.pamt.swarabox.data.repository
 import com.pamt.swarabox.data.SupabaseClientProvider
 import com.pamt.swarabox.data.model.UserModel
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.storage.storage
 
 class ProfileRepository {
     private val supabase = SupabaseClientProvider.client
@@ -11,7 +12,10 @@ class ProfileRepository {
         return supabase.from("user")
             .select {
                 filter {
-                    eq("user_id", userId)
+                    eq(
+                        column = "user_id",
+                        value = userId
+                    )
                 }
             }.decodeSingle<UserModel>()
     }
@@ -27,11 +31,21 @@ class ProfileRepository {
                 set("avatar_url", avatarUrl)
             }) {
                 filter {
-                    eq("user_id", userId)
+                    eq(
+                        column = "user_id",
+                        value = userId
+                    )
                 }
             }
     }
 
-    // Function to upload profile picture to supabase storage bucker "gambar"
+    suspend fun uploadAvatar(userId: String, byteArray: ByteArray): String {
+        val fileName = "avatar_$userId.png"
+        val bucket = supabase.storage.from("gambar")
+        bucket.upload(fileName, byteArray) {
+            upsert = true
+        }
+        return bucket.publicUrl(fileName)
+    }
 
 }

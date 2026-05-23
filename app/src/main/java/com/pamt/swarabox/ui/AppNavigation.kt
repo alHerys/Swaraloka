@@ -13,10 +13,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -244,20 +247,15 @@ fun MainNavHost(
         composable<EditProfile> {
             val name by profileViewModel.name.collectAsStateWithLifecycle()
             val avatarUrl by profileViewModel.avatarUrl.collectAsStateWithLifecycle()
-            val snackbarHostState = remember { SnackbarHostState() }
+            val context = LocalContext.current
+            var selectedImageUri by remember { mutableStateOf<android.net.Uri?>(null) }
 
             val launcher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.GetContent()
             ) { uri ->
-                uri?.let { profileViewModel.onAvatarChange(it.toString()) }
-            }
-
-            LaunchedEffect(profileUiState) {
-                if (profileUiState is ProfileUiState.Error) {
-                    snackbarHostState.showSnackbar(
-                        message = (profileUiState as ProfileUiState.Error).message
-                    )
-                    profileViewModel.resetUiState()
+                uri?.let {
+                    selectedImageUri = it
+                    profileViewModel.onAvatarChange(it.toString())
                 }
             }
 
@@ -267,7 +265,7 @@ fun MainNavHost(
 
             DisposableEffect(Unit) {
                 onDispose {
-                    profileViewModel.cancelEdit()
+                    profileViewModel.resetChanges()
                 }
             }
 
@@ -278,7 +276,10 @@ fun MainNavHost(
                     onNameChange = { profileViewModel.onNameChange(it) },
                     onAvatarChange = { launcher.launch("image/*") },
                     onEdit = {
-                        profileViewModel.updateProfile(name, avatarUrl.ifEmpty { null })
+                        val imageBytes = selectedImageUri?.let { uri ->
+                            context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                        }
+                        profileViewModel.updateProfile(name, avatarUrl.ifEmpty { null }, imageBytes)
                         navController.popBackStack()
                     },
                     onCancel = {
@@ -289,11 +290,6 @@ fun MainNavHost(
                 if (profileUiState is ProfileUiState.Loading) {
                     LoadingOverlay()
                 }
-
-                SnackbarHost(
-                    hostState = snackbarHostState,
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                )
             }
         }
     }
