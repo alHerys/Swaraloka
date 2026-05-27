@@ -18,12 +18,14 @@ fun AppButton(
     modifier: Modifier = Modifier,
     containerColor: Color,
     textColor: Color,
+    enabled: Boolean = true,
     disabledContainerColor: Color = Color.Transparent,
     disabledContentColor:Color = Color.Transparent,
 ) {
     Button(
         onClick = onClick,
         modifier = modifier,
+        enabled = enabled,
         colors = ButtonColors(
             containerColor = containerColor,
             contentColor = textColor,

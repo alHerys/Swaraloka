@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -33,9 +34,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -52,6 +56,7 @@ import com.pamt.swarabox.ui.screens.ProfileScreen
 import com.pamt.swarabox.ui.screens.RegisterEmailPasswordScreen
 import com.pamt.swarabox.ui.screens.RegisterNameScreen
 import com.pamt.swarabox.ui.screens.UploadScreen
+import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 import com.pamt.swarabox.viewmodel.auth.AuthCheckState
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
@@ -136,91 +141,20 @@ fun AuthenticatedLayout(
 
     Scaffold(
         bottomBar = {
-            // Only show bottom bar on main screens (Home, Profile, etc.)
             val showBottomBar = currentDestination?.route?.contains("Home") == true ||
                     currentDestination?.route?.contains("Profile") == true ||
                     currentDestination?.route?.contains("Upload") == true
 
             if (showBottomBar) {
-                NavigationBar(
+                AppNavigationBar(
+                    navController = navController,
+                    currentDestination = currentDestination,
                     containerColor = Color(0xFF212121),
-                    contentColor = Color.White
-                ) {
-                    NavigationBarItem(
-                        selected = currentDestination.route?.contains("Home") == true,
-                        onClick = {
-                            navController.navigate(Home) {
-                                popUpTo(Home) { inclusive = false }
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.home),
-                                contentDescription = "Home"
-                            )
-                        },
-                        label = { Text("Home", color = Color.White) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White,
-                            unselectedIconColor = Color.Gray,
-                            indicatorColor = Color(0xFF3D3D3D)
-                        )
-                    )
-                    NavigationBarItem(
-                        selected = currentDestination.route?.contains("Upload") == true,
-                        onClick = {
-                            navController.navigate(Upload) {
-                                popUpTo(Home) { inclusive = false }
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.upload),
-                                contentDescription = "Upload"
-                            )
-                        },
-                        label = { Text("Upload", color = Color.White) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White,
-                            unselectedIconColor = Color.Gray,
-                            indicatorColor = Color(0xFF3D3D3D)
-                        )
-                    )
-                    NavigationBarItem(
-                        selected = currentDestination.route?.contains("Profile") == true,
-                        onClick = {
-                            navController.navigate(Profile) {
-                                popUpTo(Home) { inclusive = false }
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.profile),
-                                contentDescription = "Profile"
-                            )
-                        },
-                        label = { Text("Profile", color = Color.White) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White,
-                            unselectedIconColor = Color.Gray,
-                            indicatorColor = Color(0xFF3D3D3D)
-                        )
-                    )
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = { /* TODO */ },
-                        icon = {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.history),
-                                contentDescription = "History"
-                            )
-                        },
-                        label = { Text("History", color = Color.White) },
-                        colors = NavigationBarItemDefaults.colors(
-                            unselectedIconColor = Color.Gray
-                        )
-                    )
-                }
+                    contentColor = Color.White,
+                    selectedIconColor = Color.White,
+                    unselectedIconColor = Color.White,
+                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                )
             }
         }
     ) { innerPadding ->
@@ -241,6 +175,99 @@ fun AuthenticatedLayout(
                 LoadingOverlay()
             }
         }
+    }
+}
+
+@Composable
+fun AppNavigationBar(
+    navController: NavController,
+    currentDestination: NavDestination?,
+    containerColor: Color,
+    contentColor: Color,
+    selectedIconColor: Color,
+    unselectedIconColor: Color,
+    indicatorColor: Color,
+) {
+    NavigationBar(
+        containerColor = containerColor,
+        contentColor = contentColor,
+    ) {
+        NavigationBarItem(
+            selected = currentDestination?.route?.contains("Home") == true,
+            onClick = {
+                navController.navigate(Home) {
+                    popUpTo(Home) { inclusive = false }
+                }
+            },
+            icon = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.home),
+                    contentDescription = "Home"
+                )
+            },
+            label = { Text("Home", color = Color.White) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = selectedIconColor,
+                unselectedIconColor = unselectedIconColor,
+                indicatorColor = indicatorColor
+            )
+        )
+        NavigationBarItem(
+            selected = currentDestination?.route?.contains("Upload") == true,
+            onClick = {
+                navController.navigate(Upload) {
+                    popUpTo(Home) { inclusive = false }
+                }
+            },
+            icon = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.upload),
+                    contentDescription = "Upload"
+                )
+            },
+            label = { Text("Upload", color = Color.White) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = selectedIconColor,
+                unselectedIconColor = unselectedIconColor,
+                indicatorColor = indicatorColor
+            )
+        )
+        NavigationBarItem(
+            selected = currentDestination?.route?.contains("Profile") == true,
+            onClick = {
+                navController.navigate(Profile) {
+                    popUpTo(Home) { inclusive = false }
+                }
+            },
+            icon = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.profile),
+                    contentDescription = "Profile"
+                )
+            },
+            label = { Text("Profile", color = Color.White) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = selectedIconColor,
+                unselectedIconColor = unselectedIconColor,
+                indicatorColor = indicatorColor
+            )
+        )
+        NavigationBarItem(
+            selected = false,
+            onClick = { /* TODO */ },
+            icon = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.history),
+                    contentDescription = "History"
+                )
+            },
+            label = { Text("History", color = Color.White) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = selectedIconColor,
+                unselectedIconColor = unselectedIconColor,
+                indicatorColor = indicatorColor
+            )
+        )
     }
 }
 
@@ -277,7 +304,9 @@ fun MainNavHost(
         }
 
         composable<Upload> {
-            UploadScreen()
+            UploadScreen(
+                profileUiState = profileUiState
+            )
         }
 
         composable<Landing> {
