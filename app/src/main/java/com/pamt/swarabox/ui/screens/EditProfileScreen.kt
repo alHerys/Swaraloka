@@ -1,15 +1,20 @@
 package com.pamt.swarabox.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -41,104 +46,109 @@ fun EditProfileScreen(
     onEdit: () -> Unit,
     onCancel: () -> Unit,
     avatar: String,
+    modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = Color(0xFF262626),
-    ) { innerPadding ->
-        Column(
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Edit Profile",
+            fontSize = 18.sp,
+            fontWeight = FontWeight(700),
+            color = Color(0xFFFFFFFF),
+        )
+
+        Spacer(Modifier.height(28.dp))
+
+        Box(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .background(Color.Transparent)
+                .clickable { onAvatarChange() }
         ) {
             CircleContainer(
                 backgroundColor = Color(0xFF262626),
                 size = 120.dp,
-                onClick = onAvatarChange,
+                onClick = onAvatarChange
             ) {
-                if (avatar.isNotEmpty()) {
-                    AsyncImage(
-                        model = avatar,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .border(
-                                width = 4.dp,
-                                color = Color(0xFFE4E0D8),
-                                shape = CircleShape
-                            ),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.image_upload),
-                            contentDescription = null,
-                            tint = Color.White
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            text = "Select Image",
-                            fontSize = 12.sp,
-                            lineHeight = 16.sp,
-                            fontWeight = FontWeight(500),
-                            color = Color(0xFFFFFFFF),
-                        )
-                    }
-                }
+                AsyncImage(
+                    model = avatar,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
             }
 
-            Spacer(Modifier.height(24.dp))
-
-            AppTextField(
-                value = name,
-                onValueChange = onNameChange,
-                placeholder = "Enter new name",
-                label = "Name",
-            )
-
-            Spacer(Modifier.height(32.dp))
-
-            AppButton(
-                onClick = onEdit,
-                text = "Edit",
-                containerColor = Color(0xFF007AFF),
-                textColor = Color.White,
-                modifier = Modifier.width(175.dp)
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            AppButton(
-                onClick = onCancel,
-                text = "Cancel",
-                containerColor = Color(0xFFF04444),
-                textColor = Color.White,
-                modifier = Modifier.width(175.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .align(Alignment.BottomEnd)
+                    .clickable { onAvatarChange() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.edit),
+                    contentDescription = "Edit Profile Picture",
+                    tint = Color.Black,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
+
+        Spacer(Modifier.height(24.dp))
+
+        AppTextField(
+            value = name,
+            onValueChange = onNameChange,
+            placeholder = "Enter new name",
+            label = "Name",
+        )
+
+        Spacer(Modifier.height(32.dp))
+
+        AppButton(
+            onClick = onEdit,
+            text = "Edit",
+            containerColor = Color(0xFF007AFF),
+            textColor = Color.White,
+            modifier = Modifier.width(175.dp)
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        AppButton(
+            onClick = onCancel,
+            text = "Cancel",
+            containerColor = Color(0xFFF04444),
+            textColor = Color.White,
+            modifier = Modifier.width(175.dp)
+        )
     }
 }
 
-@Preview(showSystemUi = true, name = "Empty Avatar")
+@Preview(showSystemUi = true, name = "Empty Avatar", showBackground = true)
 @Composable
 private fun EditProfileScreenEmptyPreview() {
     SwaraBoxTheme {
-        EditProfileScreen(
-            name = "John Doe",
-            avatar = "",
-            onNameChange = {},
-            onAvatarChange = {},
-            onEdit = {},
-            onCancel = {},
-        )
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color(0xFF262626),
+        ) {
+            EditProfileScreen(
+                name = "John Doe",
+                avatar = "",
+                onNameChange = {},
+                onAvatarChange = {},
+                onEdit = {},
+                onCancel = {},
+                modifier = Modifier.padding(it)
+            )
+        }
     }
 }

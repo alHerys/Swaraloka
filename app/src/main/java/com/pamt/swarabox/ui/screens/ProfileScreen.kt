@@ -67,7 +67,7 @@ fun ProfileScreen(
                     onClick = onNavigateToEdit
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.frame),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.edit),
                         tint = Color.White,
                         contentDescription = null
                     )

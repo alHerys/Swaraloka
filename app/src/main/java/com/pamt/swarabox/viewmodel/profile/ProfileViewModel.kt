@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamt.swarabox.data.SupabaseClientProvider
+import com.pamt.swarabox.data.model.UserModel
 import com.pamt.swarabox.data.repository.ProfileRepository
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +24,8 @@ class ProfileViewModel(
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Idle)
     val uiState: StateFlow<ProfileUiState> = _uiState
 
+    private var lastSuccessUser: UserModel? = null
+
     fun onNameChange(value: String) {
         _name.value = value
     }
@@ -38,11 +41,18 @@ class ProfileViewModel(
                 val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                 if (userId != null) {
                     val user = repository.getCurrentProfile(userId)
+                    
+                    // Menambahkan timestamp untuk mem-bypass cache Coil
+                    val timestamp = System.currentTimeMillis()
+                    val userWithCacheBuster = user.copy(
+                        avatarUrl = user.avatarUrl?.let { "$it?t=$timestamp" }
+                    )
 
-                    _name.value = user.name
-                    _avatarUrl.value = user.avatarUrl ?: ""
+                    _name.value = userWithCacheBuster.name
+                    _avatarUrl.value = userWithCacheBuster.avatarUrl ?: ""
 
-                    _uiState.value = ProfileUiState.Success(user)
+                    _uiState.value = ProfileUiState.Success(userWithCacheBuster)
+                    lastSuccessUser = userWithCacheBuster
                 } else {
                     _uiState.value = ProfileUiState.Error("Session end, please relogged to app")
                 }
@@ -69,10 +79,16 @@ class ProfileViewModel(
 
                     val user = repository.getCurrentProfile(userId)
 
-                    _name.value = user.name
-                    _avatarUrl.value = user.avatarUrl ?: ""
+                    val timestamp = System.currentTimeMillis()
+                    val userWithCacheBuster = user.copy(
+                        avatarUrl = user.avatarUrl?.let { "$it?t=$timestamp" }
+                    )
 
-                    _uiState.value = ProfileUiState.Success(user)
+                    _name.value = userWithCacheBuster.name
+                    _avatarUrl.value = userWithCacheBuster.avatarUrl ?: ""
+
+                    _uiState.value = ProfileUiState.Success(userWithCacheBuster)
+                    lastSuccessUser = userWithCacheBuster
                 } else {
                     _uiState.value = ProfileUiState.Error("Session end, please relogged to app")
                 }
@@ -84,10 +100,10 @@ class ProfileViewModel(
     }
 
     fun resetChanges() {
-        val currentState = _uiState.value
-        if (currentState is ProfileUiState.Success) {
-            _name.value = currentState.user.name
-            _avatarUrl.value = currentState.user.avatarUrl ?: ""
+        lastSuccessUser?.let { user ->
+            _name.value = user.name
+            _avatarUrl.value = user.avatarUrl ?: ""
+            _uiState.value = ProfileUiState.Success(user)
         }
     }
 

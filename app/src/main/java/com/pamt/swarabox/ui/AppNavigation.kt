@@ -1,12 +1,18 @@
 package com.pamt.swarabox.ui
 
+import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -15,11 +21,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -38,6 +46,7 @@ import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun AppNavigation(
@@ -48,7 +57,6 @@ fun AppNavigation(
     val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
     val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
 
-    // Trigger fetch profile saat user terdeteksi sudah Authenticated
     LaunchedEffect(authCheckState) {
         if (authCheckState is AuthCheckState.Authenticated) {
             authViewModel.clearUiState()
@@ -124,7 +132,7 @@ fun MainNavHost(
         }
 
         profileUiState is ProfileUiState.Error -> {
-            Log.d("AUTH ERROR", (profileUiState as ProfileUiState.Error).message)
+            Log.d("PROFILE ERROR", (profileUiState as ProfileUiState.Error).message)
             (profileUiState as ProfileUiState.Error).message
         }
 
@@ -247,8 +255,13 @@ fun MainNavHost(
         composable<EditProfile> {
             val name by profileViewModel.name.collectAsStateWithLifecycle()
             val avatarUrl by profileViewModel.avatarUrl.collectAsStateWithLifecycle()
+
             val context = LocalContext.current
-            var selectedImageUri by remember { mutableStateOf<android.net.Uri?>(null) }
+            var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
+            var isUpdating by remember { mutableStateOf(false) }
+
+            val snackbarHostState = remember { SnackbarHostState() }
 
             val launcher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.GetContent()
@@ -259,8 +272,28 @@ fun MainNavHost(
                 }
             }
 
-            LaunchedEffect(Unit) {
-                profileViewModel.onAvatarChange("")
+            LaunchedEffect(profileUiState) {
+                if (isUpdating) {
+                    when (profileUiState) {
+                        is ProfileUiState.Success -> {
+                            navController.popBackStack()
+                            isUpdating = false
+                        }
+
+                        is ProfileUiState.Error -> {
+                            val message = (profileUiState as ProfileUiState.Error).message
+                            launch {
+                                snackbarHostState.showSnackbar(
+                                    message = message,
+                                    duration = SnackbarDuration.Short
+                                )
+                                profileViewModel.resetChanges()
+                                isUpdating = false
+                            }
+                        }
+                        else -> {}
+                    }
+                }
             }
 
             DisposableEffect(Unit) {
@@ -269,18 +302,32 @@ fun MainNavHost(
                 }
             }
 
-            Box(modifier = Modifier.fillMaxSize()) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = Color(0xFF262626),
+                snackbarHost = {
+                    SnackbarHost(hostState = snackbarHostState) { data ->
+                        Snackbar(
+                            snackbarData = data,
+                            containerColor = Color(0xFFF04444),
+                            contentColor = Color.White,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    }
+                }
+            ) { innerPadding ->
                 EditProfileScreen(
                     name = name,
                     avatar = avatarUrl,
+                    modifier = Modifier.padding(innerPadding),
                     onNameChange = { profileViewModel.onNameChange(it) },
                     onAvatarChange = { launcher.launch("image/*") },
                     onEdit = {
                         val imageBytes = selectedImageUri?.let { uri ->
                             context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
                         }
+                        isUpdating = true
                         profileViewModel.updateProfile(name, avatarUrl.ifEmpty { null }, imageBytes)
-                        navController.popBackStack()
                     },
                     onCancel = {
                         navController.popBackStack()
