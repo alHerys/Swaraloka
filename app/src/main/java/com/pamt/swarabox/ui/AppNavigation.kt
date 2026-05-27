@@ -216,7 +216,7 @@ fun AuthenticatedLayout(
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
+        Box(Modifier.padding(innerPadding)) {
             MainNavHost(
                 navController = navController,
                 authViewModel = authViewModel,

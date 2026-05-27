@@ -49,38 +49,37 @@ fun HomeScreen(
     featuredSong: SongModel = SongModel.dummyList[0],
     otherSongs: List<SongModel> = SongModel.dummyList
 ) {
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF212121))
-            .padding(horizontal = 20.dp)
+            .background(Color(0x33000000))
+            .padding(horizontal = 20.dp),
+        contentPadding = PaddingValues(bottom = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Spacer(modifier = Modifier.height(42.dp))
-        LogoWidget()
+        item {
+            Column {
+                Spacer(modifier = Modifier.height(12.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
+                LogoWidget()
 
-        // Featured Playlist Card
-        FeaturedCard(featuredSong)
+                Spacer(modifier = Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(34.dp))
+                FeaturedCard(featuredSong)
 
-        Text(
-            text = "Other Songs",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color.White
-        )
+                Spacer(modifier = Modifier.height(34.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 20.dp)
-        ) {
-            items(otherSongs) { song ->
-                SongTile(song = song)
+                Text(
+                    text = "Other Songs",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White
+                )
             }
+        }
+
+        items(otherSongs) { song ->
+            SongTile(song = song)
         }
     }
 }

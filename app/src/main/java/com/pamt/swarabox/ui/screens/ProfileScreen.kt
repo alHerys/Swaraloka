@@ -1,5 +1,6 @@
 package com.pamt.swarabox.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,142 +47,138 @@ fun ProfileScreen(
     onNavigateToAbout: () -> Unit,
     onNavigateToEdit: () -> Unit
 ) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(), containerColor = Color(0xFF212121)
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0x33000000))
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            CircleContainer(
+                size = 38.dp,
+                backgroundColor = Color(0xFF343434),
+                onClick = onNavigateToEdit
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.edit),
+                    tint = Color.White,
+                    contentDescription = null
+                )
+            }
+        }
+
+
+        CircleContainer(
+            size = 120.dp,
+            backgroundColor = Color.Gray
+        ) {
+            if (user.avatarUrl != null) {
+                AsyncImage(
+                    model = user.avatarUrl,
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                val initials = user.name.split(" ").filter { it.isNotBlank() }.take(2)
+                    .joinToString("") { it.take(1).uppercase() }
+                Text(
+                    text = initials,
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = Color.White
+                )
+            }
+        }
+
+        Text(
+            text = user.name,
+            fontSize = 22.sp,
+            fontWeight = FontWeight(500),
+            color = Color(0xFFFFFFFF),
+            modifier = Modifier.padding(top = 16.dp)
+        )
+        Text(
+            text = user.email,
+            fontSize = 14.sp,
+            fontWeight = FontWeight(500),
+            color = Color(0xFF747474),
+        )
+
+        Spacer(Modifier.height(40.dp))
+
+        Column(Modifier.fillMaxWidth()) {
+            Row {
+                Icon(
+                    imageVector = ImageVector.vectorResource(
+                        id = R.drawable.library_music
+                    ),
+                    contentDescription = null,
+                    tint = Color.White,
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "My Collections",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight(500),
+                    color = Color(0xFFFFFFFF),
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(listMySong) { song ->
+                    SongTile(song = song)
+                }
+            }
+        }
+
+        Spacer(Modifier.height(32.dp))
+
+        Button(
+            onClick = onNavigateToAbout,
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentPadding = PaddingValues(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0x33FEFEFE)
+            )
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                CircleContainer(
-                    size = 38.dp,
-                    backgroundColor = Color(0xFF343434),
-                    onClick = onNavigateToEdit
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.edit),
-                        tint = Color.White,
-                        contentDescription = null
-                    )
-                }
-            }
-
-
-            CircleContainer(
-                size = 120.dp,
-                backgroundColor = Color.Gray
-            ) {
-                if (user.avatarUrl != null) {
-                    AsyncImage(
-                        model = user.avatarUrl,
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    val initials = user.name.split(" ").filter { it.isNotBlank() }.take(2)
-                        .joinToString("") { it.take(1).uppercase() }
-                    Text(
-                        text = initials,
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = Color.White
-                    )
-                }
-            }
-
-            Text(
-                text = user.name,
-                fontSize = 22.sp,
-                fontWeight = FontWeight(500),
-                color = Color(0xFFFFFFFF),
-                modifier = Modifier.padding(top = 16.dp)
-            )
-            Text(
-                text = user.email,
-                fontSize = 14.sp,
-                fontWeight = FontWeight(500),
-                color = Color(0xFF747474),
-            )
-
-            Spacer(Modifier.height(40.dp))
-
-            Column(Modifier.fillMaxWidth()) {
-                Row {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(
-                            id = R.drawable.library_music
-                        ),
-                        contentDescription = null,
-                        tint = Color.White,
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = "My Collections",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFFFFFFFF),
-                    )
-                }
-                Spacer(Modifier.height(16.dp))
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(listMySong) { song ->
-                        SongTile(song = song)
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(32.dp))
-
-            Button(
-                onClick = onNavigateToAbout,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                contentPadding = PaddingValues(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0x33FEFEFE)
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.about),
+                    tint = Color.White,
+                    contentDescription = null
                 )
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.about),
-                        tint = Color.White,
-                        contentDescription = null
-                    )
-                    Spacer(Modifier.width(16.dp))
-                    Text(
-                        text = "About SwaraBox",
-                        fontSize = 16.sp,
-                        lineHeight = 24.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color.White,
-                    )
-                }
+                Spacer(Modifier.width(16.dp))
+                Text(
+                    text = "About SwaraBox",
+                    fontSize = 16.sp,
+                    lineHeight = 24.sp,
+                    fontWeight = FontWeight(500),
+                    color = Color.White,
+                )
             }
-
-            Spacer(Modifier.height(32.dp))
-
-            AppButton(
-                onClick = onLogout,
-                text = "Logout",
-                containerColor = Color(0xFFF04444),
-                textColor = Color.White,
-                modifier = Modifier.fillMaxWidth()
-            )
         }
+
+        Spacer(Modifier.height(32.dp))
+
+        AppButton(
+            onClick = onLogout,
+            text = "Logout",
+            containerColor = Color(0xFFF04444),
+            textColor = Color.White,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
