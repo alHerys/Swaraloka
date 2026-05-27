@@ -6,6 +6,9 @@ import kotlinx.serialization.Serializable
 object Home
 
 @Serializable
+object Upload
+
+@Serializable
 object Landing
 
 @Serializable

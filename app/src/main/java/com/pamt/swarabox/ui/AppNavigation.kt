@@ -51,6 +51,7 @@ import com.pamt.swarabox.ui.screens.LoginScreen
 import com.pamt.swarabox.ui.screens.ProfileScreen
 import com.pamt.swarabox.ui.screens.RegisterEmailPasswordScreen
 import com.pamt.swarabox.ui.screens.RegisterNameScreen
+import com.pamt.swarabox.ui.screens.UploadScreen
 import com.pamt.swarabox.viewmodel.auth.AuthCheckState
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
@@ -137,7 +138,8 @@ fun AuthenticatedLayout(
         bottomBar = {
             // Only show bottom bar on main screens (Home, Profile, etc.)
             val showBottomBar = currentDestination?.route?.contains("Home") == true ||
-                    currentDestination?.route?.contains("Profile") == true
+                    currentDestination?.route?.contains("Profile") == true ||
+                    currentDestination?.route?.contains("Upload") == true
 
             if (showBottomBar) {
                 NavigationBar(
@@ -165,8 +167,12 @@ fun AuthenticatedLayout(
                         )
                     )
                     NavigationBarItem(
-                        selected = false,
-                        onClick = { /* TODO */ },
+                        selected = currentDestination.route?.contains("Upload") == true,
+                        onClick = {
+                            navController.navigate(Upload) {
+                                popUpTo(Home) { inclusive = false }
+                            }
+                        },
                         icon = {
                             Icon(
                                 imageVector = ImageVector.vectorResource(R.drawable.upload),
@@ -175,7 +181,9 @@ fun AuthenticatedLayout(
                         },
                         label = { Text("Upload", color = Color.White) },
                         colors = NavigationBarItemDefaults.colors(
-                            unselectedIconColor = Color.Gray
+                            selectedIconColor = Color.White,
+                            unselectedIconColor = Color.Gray,
+                            indicatorColor = Color(0xFF3D3D3D)
                         )
                     )
                     NavigationBarItem(
@@ -266,6 +274,10 @@ fun MainNavHost(
     ) {
         composable<Home> {
             HomeScreen()
+        }
+
+        composable<Upload> {
+            UploadScreen()
         }
 
         composable<Landing> {
