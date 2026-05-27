@@ -10,32 +10,42 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.pamt.swarabox.R
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.ui.screens.EditProfileScreen
+import com.pamt.swarabox.ui.screens.HomeScreen
 import com.pamt.swarabox.ui.screens.LandingScreen
 import com.pamt.swarabox.ui.screens.LoginScreen
 import com.pamt.swarabox.ui.screens.ProfileScreen
@@ -56,6 +66,7 @@ fun AppNavigation(
     val authCheckState by authViewModel.authCheckState.collectAsStateWithLifecycle()
     val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
     val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
+    val navController = rememberNavController()
 
     LaunchedEffect(authCheckState) {
         if (authCheckState is AuthCheckState.Authenticated) {
@@ -66,27 +77,19 @@ fun AppNavigation(
 
     when (authCheckState) {
         is AuthCheckState.Authenticated -> {
-            Box(modifier = Modifier.fillMaxSize()) {
-                MainNavHost(
-                    authViewModel = authViewModel,
-                    profileViewModel = profileViewModel,
-                    startDestination = Profile
-                )
-
-                val isLoading =
-                    authUiState is AuthUiState.Loading ||
-                            profileUiState is ProfileUiState.Loading ||
-                            profileUiState is ProfileUiState.Idle
-
-                if (isLoading) {
-                    LoadingOverlay()
-                }
-            }
+            AuthenticatedLayout(
+                navController = navController,
+                authViewModel = authViewModel,
+                profileViewModel = profileViewModel,
+                authUiState = authUiState,
+                profileUiState = profileUiState
+            )
         }
 
         is AuthCheckState.NotAuthenticated -> {
             Box(modifier = Modifier.fillMaxSize()) {
                 MainNavHost(
+                    navController = navController,
                     authViewModel = authViewModel,
                     profileViewModel = profileViewModel,
                     startDestination = Landing
@@ -102,26 +105,144 @@ fun AppNavigation(
         }
 
         else -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF262626)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = Color(0xFF262626),
+            ) { innerPadding ->
+                Box(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
+        }
+    }
+}
 
+@Composable
+fun AuthenticatedLayout(
+    navController: NavHostController,
+    authViewModel: AuthViewModel,
+    profileViewModel: ProfileViewModel,
+    authUiState: AuthUiState,
+    profileUiState: ProfileUiState
+) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
+    Scaffold(
+        bottomBar = {
+            // Only show bottom bar on main screens (Home, Profile, etc.)
+            val showBottomBar = currentDestination?.route?.contains("Home") == true ||
+                    currentDestination?.route?.contains("Profile") == true
+
+            if (showBottomBar) {
+                NavigationBar(
+                    containerColor = Color(0xFF212121),
+                    contentColor = Color.White
+                ) {
+                    NavigationBarItem(
+                        selected = currentDestination.route?.contains("Home") == true,
+                        onClick = {
+                            navController.navigate(Home) {
+                                popUpTo(Home) { inclusive = false }
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.home),
+                                contentDescription = "Home"
+                            )
+                        },
+                        label = { Text("Home", color = Color.White) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color.White,
+                            unselectedIconColor = Color.Gray,
+                            indicatorColor = Color(0xFF3D3D3D)
+                        )
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = { /* TODO */ },
+                        icon = {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.upload),
+                                contentDescription = "Upload"
+                            )
+                        },
+                        label = { Text("Upload", color = Color.White) },
+                        colors = NavigationBarItemDefaults.colors(
+                            unselectedIconColor = Color.Gray
+                        )
+                    )
+                    NavigationBarItem(
+                        selected = currentDestination.route?.contains("Profile") == true,
+                        onClick = {
+                            navController.navigate(Profile) {
+                                popUpTo(Home) { inclusive = false }
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.profile),
+                                contentDescription = "Profile"
+                            )
+                        },
+                        label = { Text("Profile", color = Color.White) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color.White,
+                            unselectedIconColor = Color.Gray,
+                            indicatorColor = Color(0xFF3D3D3D)
+                        )
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = { /* TODO */ },
+                        icon = {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.history),
+                                contentDescription = "History"
+                            )
+                        },
+                        label = { Text("History", color = Color.White) },
+                        colors = NavigationBarItemDefaults.colors(
+                            unselectedIconColor = Color.Gray
+                        )
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            MainNavHost(
+                navController = navController,
+                authViewModel = authViewModel,
+                profileViewModel = profileViewModel,
+                startDestination = Home
+            )
+
+            val isLoading =
+                authUiState is AuthUiState.Loading ||
+                        profileUiState is ProfileUiState.Loading ||
+                        profileUiState is ProfileUiState.Idle
+
+            if (isLoading) {
+                LoadingOverlay()
+            }
         }
     }
 }
 
 @Composable
 fun MainNavHost(
+    navController: NavHostController,
     authViewModel: AuthViewModel,
     profileViewModel: ProfileViewModel,
     startDestination: Any
 ) {
-    val navController = rememberNavController()
     val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
     val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -143,6 +264,10 @@ fun MainNavHost(
         navController = navController,
         startDestination = startDestination,
     ) {
+        composable<Home> {
+            HomeScreen()
+        }
+
         composable<Landing> {
             LandingScreen(
                 onNavigateToLogin = {
@@ -291,6 +416,7 @@ fun MainNavHost(
                                 isUpdating = false
                             }
                         }
+
                         else -> {}
                     }
                 }

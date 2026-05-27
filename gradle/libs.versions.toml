@@ -12,12 +12,10 @@ activityCompose = "1.13.0"
 kotlin = "2.3.21"
 composeBom = "2026.05.01"
 lifecycleViewmodelCompose = "2.10.0"
-materialIconsCore = "1.7.8"
 navigationCompose = "2.9.8"
 storageKt = "3.6.0"
 
 [libraries]
-androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "materialIconsCore" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }

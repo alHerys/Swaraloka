@@ -3,6 +3,9 @@ package com.pamt.swarabox.ui
 import kotlinx.serialization.Serializable
 
 @Serializable
+object Home
+
+@Serializable
 object Landing
 
 @Serializable
