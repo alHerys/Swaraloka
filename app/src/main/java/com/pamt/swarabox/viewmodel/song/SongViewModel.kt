@@ -78,6 +78,12 @@ class SongViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun pause() {
+        if (_exoPlayer.isPlaying) {
+            _exoPlayer.pause()
+        }
+    }
+
     fun seekTo(position: Long) {
         _exoPlayer.seekTo(position)
         _currentPosition.value = position

@@ -268,7 +268,10 @@ fun MainNavHost(
         }
 
         composable<Upload> {
-            UploadScreen(profileUiState = profileUiState)
+            UploadScreen(
+                profileUiState = profileUiState,
+                songViewModel = songViewModel
+            )
         }
 
         composable<Landing> {

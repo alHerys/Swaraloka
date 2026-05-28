@@ -3,20 +3,28 @@ package com.pamt.swarabox.data.model
 import android.net.Uri
 import android.os.Bundle
 import androidx.navigation.NavType
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.time.Instant
 
 @Serializable
 data class SongModel(
+    @SerialName("song_id")
     val id: String,
+    @SerialName("artist_id")
     val artistId: String,
     val title: String,
+    @SerialName("thumbnail_url")
     val thumbnailUrl: String,
+    @SerialName("song_url")
     val songUrl: String,
     val artist: String,
-    val duration: Long,
+    @SerialName("song_duration")
+    val songDuration: Long,
+    @SerialName("is_active")
     val isActive: Boolean,
+    @SerialName("created_at")
     val createdAt: Instant, // TIMESTAMPTZ in SUPABASE
 ) {
     companion object {
@@ -28,7 +36,7 @@ data class SongModel(
                 thumbnailUrl = "https://picsum.photos/300",
                 songUrl = "https://samplelib.com/mp3/sample-speech-5m.mp3",
                 artist = "Example Artist",
-                duration = 210000L,
+                songDuration = 210000L,
                 isActive = true,
                 createdAt = Instant.fromEpochMilliseconds(System.currentTimeMillis())
             ),
@@ -39,7 +47,7 @@ data class SongModel(
                 thumbnailUrl = "https://picsum.photos/100",
                 songUrl = "https://samplelib.com/mp3/sample-55s.mp3",
                 artist = "Another Artist",
-                duration = 180000L,
+                songDuration = 180000L,
                 isActive = true,
                 createdAt = Instant.fromEpochMilliseconds(System.currentTimeMillis())
             ),
@@ -50,7 +58,7 @@ data class SongModel(
                 thumbnailUrl = "https://picsum.photos/200",
                 songUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
                 artist = "Melody Maker",
-                duration = 240000L,
+                songDuration = 240000L,
                 isActive = true,
                 createdAt = Instant.fromEpochMilliseconds(System.currentTimeMillis())
             )
