@@ -1,5 +1,6 @@
 package com.pamt.swarabox.ui
 
+import com.pamt.swarabox.data.model.SongModel
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -9,7 +10,9 @@ object Home
 object Upload
 
 @Serializable
-object PlayMusic
+data class PlayMusic(
+    val song: SongModel
+)
 
 @Serializable
 object Landing

@@ -1,6 +1,7 @@
 package com.pamt.swarabox.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import com.pamt.swarabox.data.model.SongModel
 @Composable
 fun SongTile(
     song: SongModel,
+    onClick: (SongModel) -> Unit,
     containerColor: Color = Color(0xFF262626)
 ) {
     Box(
@@ -35,6 +37,7 @@ fun SongTile(
                 color = containerColor, shape = RoundedCornerShape(size = 12.dp)
             )
             .padding(16.dp)
+            .clickable { onClick(song) }
 
     ) {
         Row(
@@ -59,10 +62,9 @@ fun SongTile(
                 )
                 Text(
                     text = song.artist,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight(700),
-                    color = Color(0xFF747474),
-                    lineHeight = 3.sp
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF838383)
                 )
             }
         }

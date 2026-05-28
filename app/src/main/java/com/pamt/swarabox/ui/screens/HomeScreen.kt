@@ -49,7 +49,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     featuredSong: SongModel = SongModel.dummyList[0],
     otherSongs: List<SongModel> = SongModel.dummyList,
-    onNavigateToPlay: () -> Unit = {}
+    onNavigateToPlay: (SongModel) -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier
@@ -67,7 +67,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                FeaturedCard(featuredSong, onClick = onNavigateToPlay)
+                FeaturedCard(featuredSong, onClick = { onNavigateToPlay(featuredSong) })
 
                 Spacer(modifier = Modifier.height(34.dp))
 
@@ -81,8 +81,11 @@ fun HomeScreen(
         }
 
         items(otherSongs) { song ->
-            Box(modifier = Modifier.clickable { onNavigateToPlay() }) {
-                SongTile(song = song)
+            Box {
+                SongTile(
+                    song = song,
+                    onClick = { onNavigateToPlay(song) },
+                )
             }
         }
     }

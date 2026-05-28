@@ -1,7 +1,13 @@
 package com.pamt.swarabox.data.model
 
+import android.net.Uri
+import android.os.Bundle
+import androidx.navigation.NavType
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import kotlin.time.Instant
 
+@Serializable
 data class SongModel(
     val id: String,
     val artistId: String,
@@ -38,5 +44,23 @@ data class SongModel(
                 createdAt = Instant.fromEpochMilliseconds(System.currentTimeMillis())
             )
         )
+    }
+}
+
+val SongModelNavType = object : NavType<SongModel>(isNullableAllowed = false) {
+    override fun get(bundle: Bundle, key: String): SongModel? {
+        return bundle.getString(key)?.let { Json.decodeFromString(it) }
+    }
+
+    override fun parseValue(value: String): SongModel {
+        return Json.decodeFromString(Uri.decode(value))
+    }
+
+    override fun put(bundle: Bundle, key: String, value: SongModel) {
+        bundle.putString(key, Json.encodeToString(value))
+    }
+
+    override fun serializeAsValue(value: SongModel): String {
+        return Uri.encode(Json.encodeToString(value))
     }
 }
