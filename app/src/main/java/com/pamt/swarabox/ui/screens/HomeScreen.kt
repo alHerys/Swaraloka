@@ -47,9 +47,9 @@ import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    featuredSong: SongModel = SongModel.dummyList[0],
-    otherSongs: List<SongModel> = SongModel.dummyList,
-    onNavigateToPlay: (SongModel) -> Unit = {}
+    featuredSong: SongModel,
+    otherSongs: List<SongModel>,
+    onNavigateToPlay: (SongModel) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier
@@ -195,7 +195,12 @@ fun FeaturedCard(song: SongModel, onClick: () -> Unit = {}) {
 private fun HomeScreenPreview() {
     SwaraBoxTheme {
         Scaffold(Modifier.fillMaxSize()) { innerPadding ->
-            HomeScreen(modifier = Modifier.padding(innerPadding))
+            HomeScreen(
+                modifier = Modifier.padding(innerPadding),
+                featuredSong = SongModel.dummyList[0],
+                otherSongs = SongModel.dummyList,
+                onNavigateToPlay = {}
+            )
         }
     }
 }

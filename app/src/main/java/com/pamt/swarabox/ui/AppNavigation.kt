@@ -203,7 +203,9 @@ fun MainNavHost(
             HomeScreen(
                 onNavigateToPlay = { song ->
                     navController.navigate(PlayMusic(song))
-                }
+                },
+                featuredSong = SongModel.dummyList[0],
+                otherSongs = SongModel.dummyList
             )
         }
 

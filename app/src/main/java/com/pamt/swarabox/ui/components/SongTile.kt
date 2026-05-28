@@ -64,7 +64,8 @@ fun SongTile(
                     text = song.artist,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color(0xFF838383)
+                    color = Color(0xFF838383),
+                    lineHeight = 3.sp
                 )
             }
         }

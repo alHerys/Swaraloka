@@ -2,24 +2,49 @@ package com.pamt.swarabox.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import com.pamt.swarabox.R
 import com.pamt.swarabox.data.model.SongModel
@@ -27,19 +52,61 @@ import com.pamt.swarabox.ui.components.CircleContainer
 import com.pamt.swarabox.ui.components.SongTile
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 import com.pamt.swarabox.ui.theme.yellow
+import kotlinx.coroutines.delay
 
 @Composable
 fun PlayMusicScreen(
     song: SongModel,
-    onBack: () -> Unit,
-    onNavigateToPlay: (SongModel) -> Unit,
     similarSongs: List<SongModel>,
+    onNavigateToPlay: (SongModel) -> Unit,
+    onBack: () -> Unit
 ) {
-    // TODO: Implement dynamic background based on thumbnail
+    // TODO: make audio state global
+    val context = LocalContext.current
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            val mediaItem = MediaItem.fromUri(song.songUrl)
+            setMediaItem(mediaItem)
+            prepare()
+            playWhenReady = true
+        }
+    }
+
+    var isPlaying by remember { mutableStateOf(true) }
+    var currentPosition by remember { mutableLongStateOf(0L) }
+    var duration by remember { mutableLongStateOf(0L) }
+
+    DisposableEffect(Unit) {
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(isPlayingChanged: Boolean) {
+                isPlaying = isPlayingChanged
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    duration = exoPlayer.duration.coerceAtLeast(0L)
+                }
+            }
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+        }
+    }
+
+    LaunchedEffect(isPlaying) {
+        while (isPlaying) {
+            currentPosition = exoPlayer.currentPosition
+            delay(1000)
+        }
+    }
+
+    // TODO: Implement dynamic background based on thumbnail music that are currently playing
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF212121))
+            .background(Color(0x33000000))
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(24.dp))
@@ -65,10 +132,11 @@ fun PlayMusicScreen(
                 )
             }
 
+            // TODO: Only Show edit functionality if this artist id of song equal to current user id (that mean current user is the song owner)
             CircleContainer(
                 size = 40.dp,
                 backgroundColor = Color(0x33FFFFFF),
-                onClick = { /* TODO */ }
+                onClick = { /* TODO: EDIT SONG FUNCTIONALITY */ }
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.edit),
@@ -116,98 +184,41 @@ fun PlayMusicScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         // Progress Bar
-        // TODO: Implement audio wave progress bar
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
         ) {
             Slider(
-                value = 0.45f,
-                onValueChange = {},
+                value = if (duration > 0) currentPosition.toFloat() / duration else 0f,
+                onValueChange = {
+                    val newPos = (it * duration).toLong()
+                    exoPlayer.seekTo(newPos)
+                    currentPosition = newPos
+                },
                 colors = SliderDefaults.colors(
-                    thumbColor = Color.Transparent,
-                    activeTrackColor = Color(0xFFC1FF93),
-                    inactiveTrackColor = Color(0xFF333333)
+                    thumbColor = Color.White,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = Color.White.copy(alpha = 0.3f)
                 ),
                 modifier = Modifier.height(4.dp)
             )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "01:30", fontSize = 12.sp, color = Color.White)
-                Text(text = "03:30", fontSize = 12.sp, color = Color.White)
+                Text(text = formatTime(currentPosition), fontSize = 12.sp, color = Color.White)
+                Text(text = formatTime(duration), fontSize = 12.sp, color = Color.White)
             }
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
-
-        // Playback Controls
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            // Previous Button (dummy using rotated play)
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.play_skip_back),
-                contentDescription = "Previous",
-                tint = Color.White,
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable { /* TODO */ }
-                    // Rotate 180 would be better but if it's skip back it usually has a bar.
-                    // For now let's just use it as is for dummy.
-            )
-            
-            Spacer(modifier = Modifier.width(45.dp))
-            
-            CircleContainer(
-                size = 50.dp,
-                backgroundColor = yellow,
-                onClick = { /* TODO */ }
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.play),
-                    contentDescription = "Play",
-                    tint = Color.Black,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(45.dp))
-
-            // Next Button (dummy using play)
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.play_skip_forward),
-                contentDescription = "Next",
-                tint = Color.White,
-                modifier = Modifier
-                    .size(30.dp)
-                    .clickable { /* TODO */ }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        // Swipe up indicator / similar music header
-        Text(
-            text = "swipe up to find similar music",
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            color = Color(0xFF747474),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
         // Similar Songs List (Bottom sheet style container)
         Column(
@@ -215,20 +226,87 @@ fun PlayMusicScreen(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
                 .background(Color(0xFF262626))
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 16.dp, vertical = 21.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            similarSongs.forEach { song ->
-                SongTile(
-                    song = song,
-                    containerColor = Color(0xFF1A1A1A),
-                    onClick = { onNavigateToPlay(song) }
+            // Playback Controls
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                // Previous Button
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.play_skip_back),
+                    contentDescription = "Previous",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clickable { exoPlayer.seekTo(0L) }
+                )
+
+                Spacer(modifier = Modifier.width(45.dp))
+
+                CircleContainer(
+                    size = 50.dp,
+                    backgroundColor = yellow,
+                    onClick = {
+                        if (isPlaying) exoPlayer.pause() else exoPlayer.play()
+                    }
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(
+                            if (isPlaying) R.drawable.pause else R.drawable.play
+                        ),
+                        contentDescription = if (isPlaying) "Pause" else "Play",
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(45.dp))
+
+                // Next Button
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.play_skip_forward),
+                    contentDescription = "Next",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clickable { /* TODO: MOVE TO THE NEXT SIMILIAR SONG */ }
                 )
             }
-            
-            Spacer(modifier = Modifier.height(20.dp))
+
+            // Swipe up indicator / similar music header
+            Text(
+                text = "swipe up to find similar music",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                color = Color(0xFF747474),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                similarSongs.forEach { songItem ->
+                    SongTile(
+                        song = songItem,
+                        containerColor = Color(0xFF1A1A1A),
+                        onClick = { onNavigateToPlay(songItem) }
+                    )
+                }
+            }
         }
     }
+}
+
+private fun formatTime(ms: Long): String {
+    val totalSeconds = ms / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return String.format("%02d:%02d", minutes, seconds)
 }
 
 @Preview(showSystemUi = true)
@@ -236,10 +314,10 @@ fun PlayMusicScreen(
 fun PlayMusicScreenPreview() {
     SwaraBoxTheme {
         PlayMusicScreen(
-            onNavigateToPlay = { },
             song = SongModel.dummyList[0],
-            onBack = {  },
-            similarSongs = SongModel.dummyList
+            similarSongs = SongModel.dummyList,
+            onNavigateToPlay = {},
+            onBack = {}
         )
     }
 }

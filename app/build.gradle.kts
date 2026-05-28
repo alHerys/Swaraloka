@@ -84,4 +84,7 @@ dependencies {
 
     // Serialization JSON
     implementation(libs.kotlinx.serialization.json)
+
+    // ExoPlayer
+    implementation(libs.androidx.media3.exoplayer)
 }
