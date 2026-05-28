@@ -4,7 +4,12 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +44,7 @@ import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.model.SongModelNavType
 import com.pamt.swarabox.ui.components.AppNavigationBar
 import com.pamt.swarabox.ui.components.LoadingOverlay
+import com.pamt.swarabox.ui.components.MiniPlayer
 import com.pamt.swarabox.ui.screens.EditProfileScreen
 import com.pamt.swarabox.ui.screens.HomeScreen
 import com.pamt.swarabox.ui.screens.LandingScreen
@@ -53,13 +59,15 @@ import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
+import com.pamt.swarabox.viewmodel.song.SongViewModel
 import kotlinx.coroutines.launch
 import kotlin.reflect.typeOf
 
 @Composable
 fun AppNavigation(
     authViewModel: AuthViewModel = viewModel(),
-    profileViewModel: ProfileViewModel = viewModel()
+    profileViewModel: ProfileViewModel = viewModel(),
+    songViewModel: SongViewModel = viewModel()
 ) {
     val authCheckState by authViewModel.authCheckState.collectAsStateWithLifecycle()
     val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
@@ -70,6 +78,8 @@ fun AppNavigation(
         if (authCheckState is AuthCheckState.Authenticated) {
             authViewModel.clearUiState()
             profileViewModel.fetchProfile()
+        } else if (authCheckState is AuthCheckState.NotAuthenticated) {
+            songViewModel.release()
         }
     }
 
@@ -79,6 +89,7 @@ fun AppNavigation(
                 navController = navController,
                 authViewModel = authViewModel,
                 profileViewModel = profileViewModel,
+                songViewModel = songViewModel,
                 authUiState = authUiState,
                 profileUiState = profileUiState
             )
@@ -90,6 +101,7 @@ fun AppNavigation(
                     navController = navController,
                     authViewModel = authViewModel,
                     profileViewModel = profileViewModel,
+                    songViewModel = songViewModel,
                     startDestination = Landing
                 )
 
@@ -125,10 +137,13 @@ fun AuthenticatedLayout(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     profileViewModel: ProfileViewModel,
+    songViewModel: SongViewModel,
     authUiState: AuthUiState,
     profileUiState: ProfileUiState
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentSong by songViewModel.currentSong.collectAsStateWithLifecycle()
+    val isPlaying by songViewModel.isPlaying.collectAsStateWithLifecycle()
     val currentDestination = navBackStackEntry?.destination
 
     Scaffold(
@@ -139,15 +154,33 @@ fun AuthenticatedLayout(
                     currentDestination?.route?.contains("Upload") == true
 
             if (showBottomBar) {
-                AppNavigationBar(
-                    navController = navController,
-                    currentDestination = currentDestination,
-                    containerColor = Color(0xFF212121),
-                    contentColor = Color.White,
-                    selectedIconColor = Color.White,
-                    unselectedIconColor = Color.Gray,
-                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                )
+                Column {
+                    AnimatedVisibility(
+                        visible = currentSong != null,
+                        enter = slideInVertically(initialOffsetY = { it }),
+                        exit = slideOutVertically(targetOffsetY = { it }),
+                        modifier = Modifier.background(Color.Transparent)
+                    ) {
+                        currentSong?.let { song ->
+                            MiniPlayer(
+                                song = song,
+                                isPlaying = isPlaying,
+                                onTogglePlay = { songViewModel.togglePlayPause() },
+                                onClick = { navController.navigate(PlayMusic(song)) }
+                            )
+                        }
+                    }
+
+                    AppNavigationBar(
+                        navController = navController,
+                        currentDestination = currentDestination,
+                        containerColor = Color(0xFF212121),
+                        contentColor = Color.White,
+                        selectedIconColor = Color.White,
+                        unselectedIconColor = Color.Gray,
+                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                    )
+                }
             }
         }
     ) { innerPadding ->
@@ -156,6 +189,7 @@ fun AuthenticatedLayout(
                 navController = navController,
                 authViewModel = authViewModel,
                 profileViewModel = profileViewModel,
+                songViewModel = songViewModel,
                 startDestination = Home
             )
 
@@ -176,6 +210,7 @@ fun MainNavHost(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     profileViewModel: ProfileViewModel,
+    songViewModel: SongViewModel,
     startDestination: Any
 ) {
     val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
@@ -202,6 +237,7 @@ fun MainNavHost(
         composable<Home> {
             HomeScreen(
                 onNavigateToPlay = { song ->
+                    songViewModel.playSong(song)
                     navController.navigate(PlayMusic(song))
                 },
                 featuredSong = SongModel.dummyList[0],
@@ -214,12 +250,14 @@ fun MainNavHost(
         ) { backStackEntry ->
             val args = backStackEntry.toRoute<PlayMusic>()
             PlayMusicScreen(
+                songViewModel = songViewModel,
                 song = args.song,
                 similarSongs = SongModel.dummyList,
                 onBack = {
                     navController.popBackStack()
                 },
                 onNavigateToPlay = { song ->
+                    songViewModel.playSong(song)
                     navController.navigate(PlayMusic(song)) {
                         popUpTo<PlayMusic> {
                             inclusive = true
@@ -339,6 +377,7 @@ fun MainNavHost(
                         navController.navigate(EditProfile)
                     },
                     onNavigateToPlay = { song ->
+                        songViewModel.playSong(song)
                         navController.navigate(PlayMusic(song))
                     }
                 )

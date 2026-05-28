@@ -22,29 +22,20 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.pamt.swarabox.R
 import com.pamt.swarabox.data.model.SongModel
@@ -52,55 +43,19 @@ import com.pamt.swarabox.ui.components.CircleContainer
 import com.pamt.swarabox.ui.components.SongTile
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 import com.pamt.swarabox.ui.theme.yellow
-import kotlinx.coroutines.delay
+import com.pamt.swarabox.viewmodel.song.SongViewModel
 
 @Composable
 fun PlayMusicScreen(
+    songViewModel: SongViewModel,
     song: SongModel,
     similarSongs: List<SongModel>,
     onNavigateToPlay: (SongModel) -> Unit,
     onBack: () -> Unit
 ) {
-    // TODO: make audio state global
-    val context = LocalContext.current
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            val mediaItem = MediaItem.fromUri(song.songUrl)
-            setMediaItem(mediaItem)
-            prepare()
-            playWhenReady = true
-        }
-    }
-
-    var isPlaying by remember { mutableStateOf(true) }
-    var currentPosition by remember { mutableLongStateOf(0L) }
-    var duration by remember { mutableLongStateOf(0L) }
-
-    DisposableEffect(Unit) {
-        val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(isPlayingChanged: Boolean) {
-                isPlaying = isPlayingChanged
-            }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == Player.STATE_READY) {
-                    duration = exoPlayer.duration.coerceAtLeast(0L)
-                }
-            }
-        }
-        exoPlayer.addListener(listener)
-        onDispose {
-            exoPlayer.removeListener(listener)
-            exoPlayer.release()
-        }
-    }
-
-    LaunchedEffect(isPlaying) {
-        while (isPlaying) {
-            currentPosition = exoPlayer.currentPosition
-            delay(1000)
-        }
-    }
+    val isPlaying by songViewModel.isPlaying.collectAsStateWithLifecycle()
+    val currentPosition by songViewModel.currentPosition.collectAsStateWithLifecycle()
+    val duration by songViewModel.duration.collectAsStateWithLifecycle()
 
     // TODO: Implement dynamic background based on thumbnail music that are currently playing
     Column(
@@ -196,8 +151,7 @@ fun PlayMusicScreen(
                 value = if (duration > 0) currentPosition.toFloat() / duration else 0f,
                 onValueChange = {
                     val newPos = (it * duration).toLong()
-                    exoPlayer.seekTo(newPos)
-                    currentPosition = newPos
+                    songViewModel.seekTo(newPos)
                 },
                 colors = SliderDefaults.colors(
                     thumbColor = Color.White,
@@ -213,8 +167,16 @@ fun PlayMusicScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = formatTime(currentPosition), fontSize = 12.sp, color = Color.White)
-                Text(text = formatTime(duration), fontSize = 12.sp, color = Color.White)
+                Text(
+                    text = formatTime(currentPosition),
+                    fontSize = 12.sp,
+                    color = Color.White
+                )
+                Text(
+                    text = formatTime(duration),
+                    fontSize = 12.sp,
+                    color = Color.White
+                )
             }
         }
 
@@ -242,7 +204,7 @@ fun PlayMusicScreen(
                     tint = Color.White,
                     modifier = Modifier
                         .size(30.dp)
-                        .clickable { exoPlayer.seekTo(0L) }
+                        .clickable { songViewModel.seekTo(0L) }
                 )
 
                 Spacer(modifier = Modifier.width(45.dp))
@@ -251,7 +213,7 @@ fun PlayMusicScreen(
                     size = 50.dp,
                     backgroundColor = yellow,
                     onClick = {
-                        if (isPlaying) exoPlayer.pause() else exoPlayer.play()
+                        songViewModel.togglePlayPause()
                     }
                 ) {
                     Icon(
@@ -273,7 +235,10 @@ fun PlayMusicScreen(
                     tint = Color.White,
                     modifier = Modifier
                         .size(30.dp)
-                        .clickable { /* TODO: MOVE TO THE NEXT SIMILIAR SONG */ }
+                        .clickable {
+                            val nextSong = similarSongs.random()
+                            onNavigateToPlay(nextSong)
+                        }
                 )
             }
 
@@ -312,12 +277,14 @@ private fun formatTime(ms: Long): String {
 @Preview(showSystemUi = true)
 @Composable
 fun PlayMusicScreenPreview() {
-    SwaraBoxTheme {
-        PlayMusicScreen(
-            song = SongModel.dummyList[0],
-            similarSongs = SongModel.dummyList,
-            onNavigateToPlay = {},
-            onBack = {}
-        )
-    }
+    // SwaraBoxTheme {
+    //     PlayMusicScreen(
+    //         songViewModel = ..., // Need a mock or dummy
+    //         song = SongModel.dummyList[0],
+    //         similarSongs = SongModel.dummyList,
+    //         onNavigateToPlay = {},
+    //         onBack = {}
+    //     )
+    // }
 }
+

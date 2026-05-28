@@ -1,14 +1,17 @@
 package com.pamt.swarabox.ui.components
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import com.pamt.swarabox.R
@@ -40,7 +43,7 @@ fun AppNavigationBar(
             icon = {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.home),
-                    contentDescription = "Home"
+                    contentDescription = "Home",
                 )
             },
             label = { Text("Home", color = Color.White) },
@@ -48,7 +51,8 @@ fun AppNavigationBar(
                 selectedIconColor = selectedIconColor,
                 unselectedIconColor = unselectedIconColor,
                 indicatorColor = indicatorColor
-            )
+            ),
+            modifier = Modifier.size(24.dp),
         )
         NavigationBarItem(
             selected = currentDestination?.route?.contains("Upload") == true,
@@ -60,7 +64,8 @@ fun AppNavigationBar(
             icon = {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.upload),
-                    contentDescription = "Upload"
+                    contentDescription = "Upload",
+                    modifier = Modifier.size(20.dp),
                 )
             },
             label = { Text("Upload", color = Color.White) },
@@ -68,8 +73,28 @@ fun AppNavigationBar(
                 selectedIconColor = selectedIconColor,
                 unselectedIconColor = unselectedIconColor,
                 indicatorColor = indicatorColor
-            )
+            ),
+            modifier = Modifier.size(24.dp),
         )
+
+        NavigationBarItem(
+            selected = false,
+            onClick = { /* TODO */ },
+            icon = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.history),
+                    contentDescription = "History",
+                )
+            },
+            label = { Text("History", color = Color.White) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = selectedIconColor,
+                unselectedIconColor = unselectedIconColor,
+                indicatorColor = indicatorColor
+            ),
+            modifier = Modifier.size(24.dp),
+        )
+
         NavigationBarItem(
             selected = currentDestination?.route?.contains("Profile") == true,
             onClick = {
@@ -80,7 +105,8 @@ fun AppNavigationBar(
             icon = {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.profile),
-                    contentDescription = "Profile"
+                    contentDescription = "Profile",
+                    modifier = Modifier.size(20.dp),
                 )
             },
             label = { Text("Profile", color = Color.White) },
@@ -88,23 +114,9 @@ fun AppNavigationBar(
                 selectedIconColor = selectedIconColor,
                 unselectedIconColor = unselectedIconColor,
                 indicatorColor = indicatorColor
-            )
+            ),
+            modifier = Modifier.size(24.dp),
         )
-        NavigationBarItem(
-            selected = false,
-            onClick = { /* TODO */ },
-            icon = {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.history),
-                    contentDescription = "History"
-                )
-            },
-            label = { Text("History", color = Color.White) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = selectedIconColor,
-                unselectedIconColor = unselectedIconColor,
-                indicatorColor = indicatorColor
-            )
-        )
+
     }
 }

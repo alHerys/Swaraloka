@@ -13,12 +13,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="28dp"
-    android:height="28dp"
-    android:viewportWidth="28"
-    android:viewportHeight="28">
-  <path
-      android:pathData="M12.833,18.667V9.158L9.8,12.191L8.167,10.5L14,4.667L19.833,10.5L18.2,12.191L15.167,9.158V18.667H12.833ZM7,23.333C6.358,23.333 5.809,23.105 5.352,22.648C4.895,22.191 4.667,21.642 4.667,21V17.5H7V21H21V17.5H23.333V21C23.333,21.642 23.105,22.191 22.648,22.648C22.191,23.105 21.642,23.333 21,23.333H7Z"
-      android:fillColor="#E3E3E3"/>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp" android:viewportHeight="19" android:viewportWidth="19" android:width="24dp">
+      
+    <path android:fillColor="#E3E3E3" android:pathData="M8.167,14V4.492L5.133,7.525L3.5,5.833L9.333,0L15.167,5.833L13.533,7.525L10.5,4.492V14H8.167ZM2.333,18.667C1.692,18.667 1.142,18.438 0.685,17.981C0.228,17.524 0,16.975 0,16.333V12.833H2.333V16.333H16.333V12.833H18.667V16.333C18.667,16.975 18.438,17.524 17.981,17.981C17.524,18.438 16.975,18.667 16.333,18.667H2.333Z"/>
+    
 </vector>
