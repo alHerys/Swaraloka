@@ -9,6 +9,9 @@ object Home
 object Upload
 
 @Serializable
+object PlayMusic
+
+@Serializable
 object Landing
 
 @Serializable

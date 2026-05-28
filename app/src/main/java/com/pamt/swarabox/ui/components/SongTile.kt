@@ -24,12 +24,15 @@ import coil.compose.AsyncImage
 import com.pamt.swarabox.data.model.SongModel
 
 @Composable
-fun SongTile(song: SongModel) {
+fun SongTile(
+    song: SongModel,
+    containerColor: Color = Color(0xFF262626)
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = Color(0xFF262626), shape = RoundedCornerShape(size = 12.dp)
+                color = containerColor, shape = RoundedCornerShape(size = 12.dp)
             )
             .padding(16.dp)
 

@@ -4,14 +4,12 @@ import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -34,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,7 +53,6 @@ import com.pamt.swarabox.ui.screens.ProfileScreen
 import com.pamt.swarabox.ui.screens.RegisterEmailPasswordScreen
 import com.pamt.swarabox.ui.screens.RegisterNameScreen
 import com.pamt.swarabox.ui.screens.UploadScreen
-import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 import com.pamt.swarabox.viewmodel.auth.AuthCheckState
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
@@ -141,6 +137,7 @@ fun AuthenticatedLayout(
 
     Scaffold(
         bottomBar = {
+            // Only show bottom bar on main screens (Home, Profile, etc.)
             val showBottomBar = currentDestination?.route?.contains("Home") == true ||
                     currentDestination?.route?.contains("Profile") == true ||
                     currentDestination?.route?.contains("Upload") == true
@@ -152,8 +149,8 @@ fun AuthenticatedLayout(
                     containerColor = Color(0xFF212121),
                     contentColor = Color.White,
                     selectedIconColor = Color.White,
-                    unselectedIconColor = Color.White,
-                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                    unselectedIconColor = Color.Gray,
+                    indicatorColor = Color(0xFF3D3D3D)
                 )
             }
         }
@@ -300,13 +297,13 @@ fun MainNavHost(
         startDestination = startDestination,
     ) {
         composable<Home> {
-            HomeScreen()
+            HomeScreen(
+                onNavigateToPlay = {}
+            )
         }
 
         composable<Upload> {
-            UploadScreen(
-                profileUiState = profileUiState
-            )
+            UploadScreen(profileUiState = profileUiState)
         }
 
         composable<Landing> {

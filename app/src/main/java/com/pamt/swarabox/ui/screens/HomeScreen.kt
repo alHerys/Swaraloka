@@ -1,6 +1,7 @@
 package com.pamt.swarabox.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,7 +48,8 @@ import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 fun HomeScreen(
     modifier: Modifier = Modifier,
     featuredSong: SongModel = SongModel.dummyList[0],
-    otherSongs: List<SongModel> = SongModel.dummyList
+    otherSongs: List<SongModel> = SongModel.dummyList,
+    onNavigateToPlay: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier
@@ -65,7 +67,7 @@ fun HomeScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                FeaturedCard(featuredSong)
+                FeaturedCard(featuredSong, onClick = onNavigateToPlay)
 
                 Spacer(modifier = Modifier.height(34.dp))
 
@@ -79,20 +81,24 @@ fun HomeScreen(
         }
 
         items(otherSongs) { song ->
-            SongTile(song = song)
+            Box(modifier = Modifier.clickable { onNavigateToPlay() }) {
+                SongTile(song = song)
+            }
         }
     }
 }
 
 @Composable
-fun FeaturedCard(song: SongModel) {
+fun FeaturedCard(song: SongModel, onClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(476.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(Color(0xFF262626))
+            .clickable { onClick() }
     ) {
+        // ... (rest of FeaturedCard remains the same, but use onClick for the button too)
         // Image at the top, square-ish as per Figma (353x353)
         AsyncImage(
             model = song.thumbnailUrl,
@@ -141,7 +147,7 @@ fun FeaturedCard(song: SongModel) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
-                    onClick = { /* TODO */ },
+                    onClick = onClick,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.White,
                         contentColor = Color.Black
@@ -159,7 +165,7 @@ fun FeaturedCard(song: SongModel) {
                         CircleContainer(
                             size = 28.dp,
                             backgroundColor = MaterialTheme.colorScheme.primary,
-                            onClick = {}
+                            onClick = onClick
                         ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(R.drawable.play),

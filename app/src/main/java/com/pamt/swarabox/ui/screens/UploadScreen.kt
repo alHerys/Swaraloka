@@ -18,11 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
@@ -35,6 +31,7 @@ import com.pamt.swarabox.R
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.CircleContainer
+import com.pamt.swarabox.ui.components.DashedSelector
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 
 @Composable
@@ -242,46 +239,3 @@ fun DummyWaveform() {
     }
 }
 
-@Composable
-fun DashedSelector(
-    label: String,
-    icon: ImageVector,
-    onClick: () -> Unit
-) {
-    val stroke = Stroke(
-        width = 2f,
-        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(150.dp)
-            .drawBehind {
-                drawRoundRect(
-                    color = Color(0xFFC4C8BC),
-                    style = stroke,
-                    cornerRadius = CornerRadius(24.dp.toPx())
-                )
-            }
-            .clip(RoundedCornerShape(24.dp))
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = label,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color.White
-            )
-        }
-    }
-}
