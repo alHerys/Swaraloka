@@ -43,6 +43,7 @@ import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 
 @Composable
 fun RegisterNameScreen(
+    modifier: Modifier = Modifier,
     name: String,
     onNameChange: (String) -> Unit,
     onNextClicked: () -> Unit,
@@ -78,95 +79,93 @@ fun RegisterNameScreen(
         }
     }
 
-    Scaffold(Modifier.fillMaxSize()) { innerPadding ->
-        AuthBackground {
+    AuthBackground {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .imePadding()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.SpaceBetween
+                modifier = modifier
+                    .padding(
+                        horizontal = 24.dp,
+                        vertical = 15.dp
+                    ),
+                verticalArrangement = Arrangement.spacedBy(26.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .padding(
-                            horizontal = 24.dp,
-                            vertical = 15.dp
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(26.dp)
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier.size(15.dp)
                 ) {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier.size(15.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.back_icon),
-                            contentDescription = "Back Icon",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Text(
-                        "What's your name?",
-                        fontSize = 53.sp,
-                        lineHeight = 64.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color.White,
+                    Icon(
+                        painter = painterResource(R.drawable.back_icon),
+                        contentDescription = "Back Icon",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
+                Text(
+                    "What's your name?",
+                    fontSize = 53.sp,
+                    lineHeight = 64.sp,
+                    fontWeight = FontWeight(500),
+                    color = Color.White,
+                )
+            }
 
-                Surface(
-                    color = Color(0xff262626),
-                    shape = RoundedCornerShape(
-                        topEnd = 27.dp,
-                        topStart = 27.dp
-                    )
+            Surface(
+                color = Color(0xff262626),
+                shape = RoundedCornerShape(
+                    topEnd = 27.dp,
+                    topStart = 27.dp
+                )
+            ) {
+                Column(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(
+                            top = 15.dp,
+                            bottom = 24.dp,
+                            start = 18.dp,
+                            end = 18.dp,
+                        ),
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .fillMaxWidth()
-                            .padding(
-                                top = 15.dp,
-                                bottom = 24.dp,
-                                start = 18.dp,
-                                end = 18.dp,
-                            ),
-                    ) {
 
-                        AppTextField(
-                            value = name,
-                            label = "Name",
-                            onValueChange = onNameChange,
-                            placeholder = "Your Name",
+                    AppTextField(
+                        value = name,
+                        label = "Name",
+                        onValueChange = onNameChange,
+                        placeholder = "Your Name",
+                    )
+
+                    Spacer(Modifier.height(50.dp))
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        AppButton(
+                            text = "Next",
+                            containerColor = Color(0xFFF0B505),
+                            textColor = Color(0xFF212121),
+                            onClick = onNextClicked,
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = name.isNotBlank()
                         )
 
-                        Spacer(Modifier.height(50.dp))
+                        Spacer(Modifier.height(19.dp))
 
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            AppButton(
-                                text = "Next",
-                                containerColor = Color(0xFFF0B505),
-                                textColor = Color(0xFF212121),
-                                onClick = onNextClicked,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            Spacer(Modifier.height(19.dp))
-
-                            Text(text = navigationToLogin)
-                        }
+                        Text(text = navigationToLogin)
                     }
                 }
             }
         }
     }
 }
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

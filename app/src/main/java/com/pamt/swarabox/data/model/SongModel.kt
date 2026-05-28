@@ -11,7 +11,7 @@ import kotlin.time.Instant
 @Serializable
 data class SongModel(
     @SerialName("song_id")
-    val id: String,
+    val id: String? = null,
     @SerialName("artist_id")
     val artistId: String,
     val title: String,
@@ -19,13 +19,13 @@ data class SongModel(
     val thumbnailUrl: String,
     @SerialName("song_url")
     val songUrl: String,
-    val artist: String,
+    val artist: String? = null,
     @SerialName("song_duration")
-    val songDuration: Long,
+    val songDuration: Int,
     @SerialName("is_active")
-    val isActive: Boolean,
+    val isActive: Boolean = true,
     @SerialName("created_at")
-    val createdAt: Instant, // TIMESTAMPTZ in SUPABASE
+    val createdAt: Instant? = null, // TIMESTAMPTZ in SUPABASE
 ) {
     companion object {
         val dummyList = listOf(
@@ -36,7 +36,7 @@ data class SongModel(
                 thumbnailUrl = "https://picsum.photos/300",
                 songUrl = "https://samplelib.com/mp3/sample-speech-5m.mp3",
                 artist = "Example Artist",
-                songDuration = 210000L,
+                songDuration = 210,
                 isActive = true,
                 createdAt = Instant.fromEpochMilliseconds(System.currentTimeMillis())
             ),
@@ -47,7 +47,7 @@ data class SongModel(
                 thumbnailUrl = "https://picsum.photos/100",
                 songUrl = "https://samplelib.com/mp3/sample-55s.mp3",
                 artist = "Another Artist",
-                songDuration = 180000L,
+                songDuration = 180,
                 isActive = true,
                 createdAt = Instant.fromEpochMilliseconds(System.currentTimeMillis())
             ),
@@ -58,7 +58,7 @@ data class SongModel(
                 thumbnailUrl = "https://picsum.photos/200",
                 songUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
                 artist = "Melody Maker",
-                songDuration = 240000L,
+                songDuration = 240,
                 isActive = true,
                 createdAt = Instant.fromEpochMilliseconds(System.currentTimeMillis())
             )

@@ -1,24 +1,11 @@
-package com.pamt.swarabox.ui
+package com.pamt.swarabox.ui.navigation
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -27,24 +14,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.model.SongModelNavType
-import com.pamt.swarabox.ui.components.AppNavigationBar
 import com.pamt.swarabox.ui.components.LoadingOverlay
-import com.pamt.swarabox.ui.components.MiniPlayer
 import com.pamt.swarabox.ui.screens.EditProfileScreen
 import com.pamt.swarabox.ui.screens.HomeScreen
 import com.pamt.swarabox.ui.screens.LandingScreen
@@ -54,182 +34,29 @@ import com.pamt.swarabox.ui.screens.ProfileScreen
 import com.pamt.swarabox.ui.screens.RegisterEmailPasswordScreen
 import com.pamt.swarabox.ui.screens.RegisterNameScreen
 import com.pamt.swarabox.ui.screens.UploadScreen
-import com.pamt.swarabox.viewmodel.auth.AuthCheckState
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
+import com.pamt.swarabox.viewmodel.song.SongUploadUiState
+import com.pamt.swarabox.viewmodel.song.SongUploadViewModel
 import com.pamt.swarabox.viewmodel.song.SongViewModel
-import kotlinx.coroutines.launch
 import kotlin.reflect.typeOf
 
 @Composable
-fun AppNavigation(
-    authViewModel: AuthViewModel = viewModel(),
-    profileViewModel: ProfileViewModel = viewModel(),
-    songViewModel: SongViewModel = viewModel()
-) {
-    val authCheckState by authViewModel.authCheckState.collectAsStateWithLifecycle()
-    val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
-    val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
-    val navController = rememberNavController()
-
-    LaunchedEffect(authCheckState) {
-        if (authCheckState is AuthCheckState.Authenticated) {
-            authViewModel.clearUiState()
-            profileViewModel.fetchProfile()
-        } else if (authCheckState is AuthCheckState.NotAuthenticated) {
-            songViewModel.release()
-        }
-    }
-
-    when (authCheckState) {
-        is AuthCheckState.Authenticated -> {
-            AuthenticatedLayout(
-                navController = navController,
-                authViewModel = authViewModel,
-                profileViewModel = profileViewModel,
-                songViewModel = songViewModel,
-                authUiState = authUiState,
-                profileUiState = profileUiState
-            )
-        }
-
-        is AuthCheckState.NotAuthenticated -> {
-            Box(modifier = Modifier.fillMaxSize()) {
-                MainNavHost(
-                    navController = navController,
-                    authViewModel = authViewModel,
-                    profileViewModel = profileViewModel,
-                    songViewModel = songViewModel,
-                    startDestination = Landing
-                )
-
-                val isLoading =
-                    authUiState is AuthUiState.Loading || authUiState is AuthUiState.Success
-
-                if (isLoading) {
-                    LoadingOverlay()
-                }
-            }
-        }
-
-        else -> {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                containerColor = Color(0xFF262626),
-            ) { innerPadding ->
-                Box(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun AuthenticatedLayout(
+fun AppNavHost(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     profileViewModel: ProfileViewModel,
     songViewModel: SongViewModel,
+    songUploadViewModel: SongUploadViewModel,
     authUiState: AuthUiState,
-    profileUiState: ProfileUiState
+    profileUiState: ProfileUiState,
+    songUploadUiState: SongUploadUiState,
+    snackbarHostState: SnackbarHostState,
+    startDestination: Any,
+    modifier: Modifier = Modifier
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentSong by songViewModel.currentSong.collectAsStateWithLifecycle()
-    val isPlaying by songViewModel.isPlaying.collectAsStateWithLifecycle()
-    val currentDestination = navBackStackEntry?.destination
-
-    Scaffold(
-        bottomBar = {
-            // Only show bottom bar on main screens (Home, Profile, etc.)
-            val showBottomBar = currentDestination?.route?.contains("Home") == true ||
-                    currentDestination?.route?.contains("Profile") == true ||
-                    currentDestination?.route?.contains("Upload") == true
-
-            if (showBottomBar) {
-                Column {
-                    AnimatedVisibility(
-                        visible = currentSong != null,
-                        enter = slideInVertically(initialOffsetY = { it }),
-                        exit = slideOutVertically(targetOffsetY = { it }),
-                        modifier = Modifier.background(Color.Transparent)
-                    ) {
-                        currentSong?.let { song ->
-                            MiniPlayer(
-                                song = song,
-                                isPlaying = isPlaying,
-                                onTogglePlay = { songViewModel.togglePlayPause() },
-                                onClick = { navController.navigate(PlayMusic(song)) }
-                            )
-                        }
-                    }
-
-                    AppNavigationBar(
-                        navController = navController,
-                        currentDestination = currentDestination,
-                        containerColor = Color(0xFF212121),
-                        contentColor = Color.White,
-                        selectedIconColor = Color.White,
-                        unselectedIconColor = Color.Gray,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                }
-            }
-        }
-    ) { innerPadding ->
-        Box(Modifier.padding(innerPadding)) {
-            MainNavHost(
-                navController = navController,
-                authViewModel = authViewModel,
-                profileViewModel = profileViewModel,
-                songViewModel = songViewModel,
-                startDestination = Home
-            )
-
-            val isLoading =
-                authUiState is AuthUiState.Loading ||
-                        profileUiState is ProfileUiState.Loading ||
-                        profileUiState is ProfileUiState.Idle
-
-            if (isLoading) {
-                LoadingOverlay()
-            }
-        }
-    }
-}
-
-@Composable
-fun MainNavHost(
-    navController: NavHostController,
-    authViewModel: AuthViewModel,
-    profileViewModel: ProfileViewModel,
-    songViewModel: SongViewModel,
-    startDestination: Any
-) {
-    val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
-    val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
-
-    val errorMessage = when {
-        authUiState is AuthUiState.Error -> {
-            Log.d("AUTH ERROR", (authUiState as AuthUiState.Error).message)
-            (authUiState as AuthUiState.Error).message
-        }
-
-        profileUiState is ProfileUiState.Error -> {
-            Log.d("PROFILE ERROR", (profileUiState as ProfileUiState.Error).message)
-            (profileUiState as ProfileUiState.Error).message
-        }
-
-        else -> null
-    }
-
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -270,7 +97,10 @@ fun MainNavHost(
         composable<Upload> {
             UploadScreen(
                 profileUiState = profileUiState,
-                songViewModel = songViewModel
+                songViewModel = songViewModel,
+                songUploadViewModel = songUploadViewModel,
+                snackbarHostState = snackbarHostState,
+                navController = navController,
             )
         }
 
@@ -282,6 +112,7 @@ fun MainNavHost(
                 onGetStartedClicked = {
                     navController.navigate(RegisterName)
                 },
+                modifier = modifier
             )
         }
 
@@ -312,7 +143,7 @@ fun MainNavHost(
                         }
                     }
                 },
-                errorMessage = errorMessage
+                modifier = modifier
             )
         }
 
@@ -338,7 +169,8 @@ fun MainNavHost(
                             inclusive = true
                         }
                     }
-                }
+                },
+                modifier = modifier
             )
         }
 
@@ -359,16 +191,13 @@ fun MainNavHost(
                 onRegister = {
                     authViewModel.register()
                 },
-                errorMessage = errorMessage
             )
         }
 
         composable<Profile> {
-            val state = profileUiState
-
-            if (state is ProfileUiState.Success) {
+            if (profileUiState is ProfileUiState.Success) {
                 ProfileScreen(
-                    user = state.user,
+                    user = profileUiState.user,
                     listMySong = SongModel.dummyList,
                     onLogout = {
                         profileViewModel.resetUiState()
@@ -396,8 +225,6 @@ fun MainNavHost(
 
             var isUpdating by remember { mutableStateOf(false) }
 
-            val snackbarHostState = remember { SnackbarHostState() }
-
             val launcher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.GetContent()
             ) { uri ->
@@ -416,15 +243,8 @@ fun MainNavHost(
                         }
 
                         is ProfileUiState.Error -> {
-                            val message = (profileUiState as ProfileUiState.Error).message
-                            launch {
-                                snackbarHostState.showSnackbar(
-                                    message = message,
-                                    duration = SnackbarDuration.Short
-                                )
-                                profileViewModel.resetChanges()
-                                isUpdating = false
-                            }
+                            profileViewModel.resetChanges()
+                            isUpdating = false
                         }
 
                         else -> {}
@@ -441,16 +261,6 @@ fun MainNavHost(
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 containerColor = Color(0xFF262626),
-                snackbarHost = {
-                    SnackbarHost(hostState = snackbarHostState) { data ->
-                        Snackbar(
-                            snackbarData = data,
-                            containerColor = Color(0xFFF04444),
-                            contentColor = Color.White,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                    }
-                }
             ) { innerPadding ->
                 EditProfileScreen(
                     name = name,

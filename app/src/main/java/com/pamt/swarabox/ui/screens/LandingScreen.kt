@@ -31,6 +31,7 @@ import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 
 @Composable
 fun LandingScreen(
+    modifier: Modifier = Modifier,
     onGetStartedClicked: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
 ) {
@@ -63,42 +64,40 @@ fun LandingScreen(
         }
     }
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        AuthBackground {
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    LogoWidget()
-                    Spacer(Modifier.height(15.dp))
-                    Text(
-                        text = "Millions of songs Free for You",
-                        color = Color.White,
-                        fontWeight = FontWeight(500),
-                        fontSize = 53.sp,
-                        lineHeight = 64.sp,
-                    )
-                }
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    AppButton(
-                        text = "Get Started",
-                        textColor = Color.White,
-                        containerColor = Color.White.copy(alpha = 0.15f),
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = onGetStartedClicked
-                    )
-                    Spacer(Modifier.height(24.dp))
-                    Text(navigationToLoginText)
-                }
-
+    AuthBackground {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                LogoWidget()
+                Spacer(Modifier.height(15.dp))
+                Text(
+                    text = "Millions of songs Free for You",
+                    color = Color.White,
+                    fontWeight = FontWeight(500),
+                    fontSize = 53.sp,
+                    lineHeight = 64.sp,
+                )
             }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                AppButton(
+                    text = "Get Started",
+                    textColor = Color.White,
+                    containerColor = Color.White.copy(alpha = 0.15f),
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onGetStartedClicked
+                )
+                Spacer(Modifier.height(24.dp))
+                Text(navigationToLoginText)
+            }
+
         }
     }
 }

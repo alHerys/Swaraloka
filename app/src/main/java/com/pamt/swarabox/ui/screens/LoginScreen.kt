@@ -48,6 +48,7 @@ import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 
 @Composable
 fun LoginScreen(
+    modifier: Modifier = Modifier,
     email: String,
     onEmailChange: (String) -> Unit,
     password: String,
@@ -55,7 +56,6 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onLogin: () -> Unit,
     onBack: () -> Unit,
-    errorMessage: String? = null
 ) {
     val passwordFocusRequester = remember { FocusRequester() }
 
@@ -88,124 +88,115 @@ fun LoginScreen(
         }
     }
 
-    Scaffold(Modifier.fillMaxSize()) { innerpadding ->
-        AuthBackground {
+
+    AuthBackground {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .imePadding()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.SpaceBetween
+                modifier = modifier
+                    .padding(
+                        horizontal = 24.dp,
+                        vertical = 15.dp
+                    ),
+                verticalArrangement = Arrangement.spacedBy(26.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(innerpadding)
-                        .padding(
-                            horizontal = 24.dp,
-                            vertical = 15.dp
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(26.dp)
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier.size(15.dp)
                 ) {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier.size(15.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.back_icon),
-                            contentDescription = "Back Icon",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Spacer(Modifier.height(30.dp))
-                    Text(
-                        "Welcome Back :)",
-                        fontSize = 53.sp,
-                        lineHeight = 64.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color.White,
+                    Icon(
+                        painter = painterResource(R.drawable.back_icon),
+                        contentDescription = "Back Icon",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
+                Spacer(Modifier.height(30.dp))
+                Text(
+                    "Welcome Back :)",
+                    fontSize = 53.sp,
+                    lineHeight = 64.sp,
+                    fontWeight = FontWeight(500),
+                    color = Color.White,
+                )
+            }
 
-                Surface(
-                    color = Color(0xff262626),
-                    shape = RoundedCornerShape(
-                        topEnd = 27.dp,
-                        topStart = 27.dp
-                    )
+            Surface(
+                color = Color(0xff262626),
+                shape = RoundedCornerShape(
+                    topEnd = 27.dp,
+                    topStart = 27.dp
+                )
+            ) {
+                Column(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(
+                            top = 15.dp,
+                            bottom = 24.dp,
+                            start = 18.dp,
+                            end = 18.dp,
+                        ),
                 ) {
+
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        AppTextField(
+                            value = email,
+                            label = "Email",
+                            onValueChange = onEmailChange,
+                            placeholder = "jeren@example.com",
+                            keyboardActions = KeyboardActions(onNext = { passwordFocusRequester.requestFocus() }),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Email,
+                                imeAction = ImeAction.Next
+                            )
+                        )
+                        AppTextField(
+                            value = password,
+                            label = "Password",
+                            onValueChange = onPasswordChange,
+                            placeholder = "..........",
+                            modifier = Modifier.focusRequester(passwordFocusRequester),
+                            visualTransformation = PasswordVisualTransformation(),
+                            keyboardActions = KeyboardActions(onDone = { onLogin() }),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                                imeAction = ImeAction.Done
+                            )
+                        )
+                    }
+
+                    Spacer(Modifier.height(50.dp))
+
                     Column(
-                        modifier = Modifier
-                            .padding(innerpadding)
-                            .fillMaxWidth()
-                            .padding(
-                                top = 15.dp,
-                                bottom = 24.dp,
-                                start = 18.dp,
-                                end = 18.dp,
-                            ),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
-
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            AppTextField(
-                                value = email,
-                                label = "Email",
-                                onValueChange = onEmailChange,
-                                placeholder = "jeren@example.com",
-                                keyboardActions = KeyboardActions(onNext = { passwordFocusRequester.requestFocus() }),
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Email,
-                                    imeAction = ImeAction.Next
-                                )
-                            )
-                            AppTextField(
-                                value = password,
-                                label = "Password",
-                                onValueChange = onPasswordChange,
-                                placeholder = "..........",
-                                modifier = Modifier.focusRequester(passwordFocusRequester),
-                                visualTransformation = PasswordVisualTransformation(),
-                                keyboardActions = KeyboardActions(onDone = { onLogin() }),
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Password,
-                                    imeAction = ImeAction.Done
-                                )
-                            )
-                        }
-
-                        Spacer(Modifier.height(50.dp))
-
-                        Column(
+                        AppButton(
+                            text = "Submit",
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            if (errorMessage != null) {
-                                Text(
-                                    text = errorMessage,
-                                    color = Color.Red,
-                                    fontSize = 14.sp,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
-                            }
-                            AppButton(
-                                text = "Submit",
-                                modifier = Modifier.fillMaxWidth(),
-                                containerColor = Color(0xFFF0B505),
-                                textColor = Color(0xFF212121),
-                                onClick = onLogin
-                            )
+                            containerColor = Color(0xFFF0B505),
+                            textColor = Color(0xFF212121),
+                            onClick = onLogin,
+                            enabled = email.isNotBlank() && password.isNotBlank()
+                        )
 
-                            Spacer(Modifier.height(19.dp))
+                        Spacer(Modifier.height(19.dp))
 
-                            Text(text = navigationToRegister)
-                        }
+                        Text(text = navigationToRegister)
                     }
                 }
             }
         }
     }
 }
+
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

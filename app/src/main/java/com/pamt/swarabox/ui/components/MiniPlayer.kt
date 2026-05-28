@@ -68,7 +68,7 @@ fun MiniPlayer(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = song.artist,
+                    text = song.artist ?: "Famous Artist",
                     fontSize = 12.sp,
                     color = Color(0xFF747474),
                     maxLines = 1,

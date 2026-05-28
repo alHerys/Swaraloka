@@ -19,8 +19,8 @@ fun AppButton(
     containerColor: Color,
     textColor: Color,
     enabled: Boolean = true,
-    disabledContainerColor: Color = Color.Transparent,
-    disabledContentColor:Color = Color.Transparent,
+    disabledContentColor: Color = Color.White.copy(alpha = 0.5f),
+    disabledContainerColor: Color = Color(0x33FFFFFF),
 ) {
     Button(
         onClick = onClick,

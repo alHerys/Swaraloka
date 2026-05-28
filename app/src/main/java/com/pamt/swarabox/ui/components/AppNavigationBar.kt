@@ -15,9 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import com.pamt.swarabox.R
-import com.pamt.swarabox.ui.Home
-import com.pamt.swarabox.ui.Profile
-import com.pamt.swarabox.ui.Upload
+import com.pamt.swarabox.ui.navigation.Home
+import com.pamt.swarabox.ui.navigation.Profile
+import com.pamt.swarabox.ui.navigation.Upload
 
 @Composable
 fun AppNavigationBar(

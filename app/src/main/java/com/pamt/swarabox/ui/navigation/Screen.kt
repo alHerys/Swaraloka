@@ -1,4 +1,4 @@
-package com.pamt.swarabox.ui
+package com.pamt.swarabox.ui.navigation
 
 import com.pamt.swarabox.data.model.SongModel
 import kotlinx.serialization.Serializable

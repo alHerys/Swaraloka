@@ -131,7 +131,7 @@ fun PlayMusicScreen(
                 textAlign = TextAlign.Center
             )
             Text(
-                text = song.artist,
+                text = song.artist ?: "Famous Artist",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF747474),
