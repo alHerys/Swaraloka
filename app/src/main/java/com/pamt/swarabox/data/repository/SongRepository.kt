@@ -44,4 +44,25 @@ class SongRepository {
         
         supabase.from("song").insert(song)
     }
+
+    suspend fun fetchAllSongs(): List<SongModel> {
+        return supabase.from("song")
+            .select(columns = io.github.jan.supabase.postgrest.query.Columns.raw("*, user(*)")) {
+                filter {
+                    eq("is_active", true)
+                }
+                order("created_at", io.github.jan.supabase.postgrest.query.Order.DESCENDING)
+            }.decodeList<SongModel>()
+    }
+
+    suspend fun fetchSongsByArtist(artistId: String): List<SongModel> {
+        return supabase.from("song")
+            .select(columns = io.github.jan.supabase.postgrest.query.Columns.raw("*, user(*)")) {
+                filter {
+                    eq("artist_id", artistId)
+                    eq("is_active", true)
+                }
+                order("created_at", io.github.jan.supabase.postgrest.query.Order.DESCENDING)
+            }.decodeList<SongModel>()
+    }
 }

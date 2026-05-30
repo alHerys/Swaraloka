@@ -15,9 +15,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,153 +40,162 @@ import com.pamt.swarabox.ui.components.CircleContainer
 import com.pamt.swarabox.ui.components.SongTile
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     user: UserModel,
     listMySong: List<SongModel>,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     onLogout: () -> Unit,
     onNavigateToAbout: () -> Unit,
     onNavigateToEdit: () -> Unit,
     onNavigateToPlay: (SongModel) -> Unit,
 ) {
-    LazyColumn(
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0x33000000)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        contentPadding = PaddingValues(24.dp)
+            .background(Color(0x33000000))
     ) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                CircleContainer(
-                    size = 38.dp,
-                    backgroundColor = Color(0xFF343434),
-                    onClick = onNavigateToEdit
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(24.dp)
+        ) {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.edit),
-                        tint = Color.White,
-                        contentDescription = null
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircleContainer(
-                    size = 120.dp,
-                    backgroundColor = Color.Gray
-                ) {
-                    if (user.avatarUrl != null) {
-                        AsyncImage(
-                            model = user.avatarUrl,
-                            contentDescription = "Profile Picture",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
-                        val initials = user.name.split(" ").filter { it.isNotBlank() }.take(2)
-                            .joinToString("") { it.take(1).uppercase() }
-                        Text(
-                            text = initials,
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = Color.White
+                    CircleContainer(
+                        size = 38.dp,
+                        backgroundColor = Color(0xFF343434),
+                        onClick = onNavigateToEdit
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.edit),
+                            tint = Color.White,
+                            contentDescription = null
                         )
                     }
                 }
 
-                Text(
-                    text = user.name,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFFFFFFFF),
-                    modifier = Modifier.padding(top = 16.dp)
-                )
-                Text(
-                    text = user.email,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFF747474),
-                )
+                Spacer(Modifier.height(8.dp))
 
-                Spacer(Modifier.height(40.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircleContainer(
+                        size = 120.dp,
+                        backgroundColor = Color.Gray
+                    ) {
+                        if (user.avatarUrl != null) {
+                            AsyncImage(
+                                model = user.avatarUrl,
+                                contentDescription = "Profile Picture",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            val initials = user.name.split(" ").filter { it.isNotBlank() }.take(2)
+                                .joinToString("") { it.take(1).uppercase() }
+                            Text(
+                                text = initials,
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = Color.White
+                            )
+                        }
+                    }
 
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(
-                            id = R.drawable.library_music
-                        ),
-                        contentDescription = null,
-                        tint = Color.White,
-                    )
-                    Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "My Collections",
-                        fontSize = 18.sp,
+                        text = user.name,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight(500),
                         color = Color(0xFFFFFFFF),
+                        modifier = Modifier.padding(top = 16.dp)
                     )
+                    Text(
+                        text = user.email,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight(500),
+                        color = Color(0xFF747474),
+                    )
+
+                    Spacer(Modifier.height(40.dp))
+
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(
+                                id = R.drawable.library_music
+                            ),
+                            contentDescription = null,
+                            tint = Color.White,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "My Collections",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight(500),
+                            color = Color(0xFFFFFFFF),
+                        )
+                    }
+                    Spacer(Modifier.height(16.dp))
                 }
+            }
+
+            items(listMySong) { song ->
+                SongTile(
+                    song = song,
+                    onClick = { onNavigateToPlay(song) },
+                )
                 Spacer(Modifier.height(16.dp))
             }
-        }
 
-        items(listMySong) { song ->
-            SongTile(
-                song = song,
-                onClick = { onNavigateToPlay(song) },
-            )
-            Spacer(Modifier.height(16.dp))
-        }
+            item {
+                Spacer(Modifier.height(16.dp))
 
-        item {
-            Spacer(Modifier.height(16.dp))
-
-            Button(
-                onClick = onNavigateToAbout,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                contentPadding = PaddingValues(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0x33FEFEFE)
-                )
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                Button(
+                    onClick = onNavigateToAbout,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0x33FEFEFE)
+                    )
                 ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.about),
-                        tint = Color.White,
-                        contentDescription = null
-                    )
-                    Spacer(Modifier.width(16.dp))
-                    Text(
-                        text = "About SwaraBox",
-                        fontSize = 16.sp,
-                        lineHeight = 24.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color.White,
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.about),
+                            tint = Color.White,
+                            contentDescription = null
+                        )
+                        Spacer(Modifier.width(16.dp))
+                        Text(
+                            text = "About SwaraBox",
+                            fontSize = 16.sp,
+                            lineHeight = 24.sp,
+                            fontWeight = FontWeight(500),
+                            color = Color.White,
+                        )
+                    }
                 }
+
+                Spacer(Modifier.height(32.dp))
+
+                AppButton(
+                    onClick = onLogout,
+                    text = "Logout",
+                    containerColor = Color(0xFFF04444),
+                    textColor = Color.White,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
-
-            Spacer(Modifier.height(32.dp))
-
-            AppButton(
-                onClick = onLogout,
-                text = "Logout",
-                containerColor = Color(0xFFF04444),
-                textColor = Color.White,
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 }
@@ -196,6 +207,8 @@ private fun ProfileScreenPreview() {
         ProfileScreen(
             user = UserModel.dummy,
             listMySong = SongModel.dummyList,
+            isRefreshing = false,
+            onRefresh = {},
             onLogout = {},
             onNavigateToAbout = { },
             onNavigateToEdit = { },

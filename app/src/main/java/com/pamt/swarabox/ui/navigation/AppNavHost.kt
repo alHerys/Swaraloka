@@ -36,6 +36,7 @@ import com.pamt.swarabox.ui.screens.RegisterNameScreen
 import com.pamt.swarabox.ui.screens.UploadScreen
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.viewmodel.home.HomeViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
 import com.pamt.swarabox.viewmodel.song.SongUploadUiState
@@ -50,6 +51,7 @@ fun AppNavHost(
     profileViewModel: ProfileViewModel,
     songViewModel: SongViewModel,
     songUploadViewModel: SongUploadViewModel,
+    homeViewModel: HomeViewModel,
     authUiState: AuthUiState,
     profileUiState: ProfileUiState,
     songUploadUiState: SongUploadUiState,
@@ -62,13 +64,18 @@ fun AppNavHost(
         startDestination = startDestination,
     ) {
         composable<Home> {
+            val songs by homeViewModel.songs.collectAsStateWithLifecycle()
+            val isRefreshing by homeViewModel.isRefreshing.collectAsStateWithLifecycle()
+
             HomeScreen(
+                songs = songs,
+                isRefreshing = isRefreshing,
+                onRefresh = { homeViewModel.fetchSongs() },
                 onNavigateToPlay = { song ->
                     songViewModel.playSong(song)
                     navController.navigate(PlayMusic(song))
                 },
-                featuredSong = SongModel.dummyList[0],
-                otherSongs = SongModel.dummyList
+                modifier = modifier
             )
         }
 
@@ -196,9 +203,14 @@ fun AppNavHost(
 
         composable<Profile> {
             if (profileUiState is ProfileUiState.Success) {
+                val mySongs by profileViewModel.mySongs.collectAsStateWithLifecycle()
+                val isRefreshingSongs by profileViewModel.isRefreshingSongs.collectAsStateWithLifecycle()
+
                 ProfileScreen(
                     user = profileUiState.user,
-                    listMySong = SongModel.dummyList,
+                    listMySong = mySongs,
+                    isRefreshing = isRefreshingSongs,
+                    onRefresh = { profileViewModel.fetchMySongs() },
                     onLogout = {
                         profileViewModel.resetUiState()
                         authViewModel.resetFormState()

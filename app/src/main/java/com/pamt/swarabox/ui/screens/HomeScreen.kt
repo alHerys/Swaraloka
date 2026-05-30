@@ -19,10 +19,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,45 +49,81 @@ import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    featuredSong: SongModel,
-    otherSongs: List<SongModel>,
+    songs: List<SongModel>,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
     onNavigateToPlay: (SongModel) -> Unit,
 ) {
-    LazyColumn(
+    val featuredSong = songs.firstOrNull()
+    val otherSongs = if (songs.size > 1) songs.drop(1) else emptyList()
+
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
         modifier = modifier
             .fillMaxSize()
             .background(Color(0x33000000))
-            .padding(horizontal = 20.dp),
-        contentPadding = PaddingValues(bottom = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
-            Column {
-                Spacer(modifier = Modifier.height(12.dp))
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
+            contentPadding = PaddingValues(bottom = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Column {
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                LogoWidget()
+                    LogoWidget()
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                FeaturedCard(featuredSong, onClick = { onNavigateToPlay(featuredSong) })
+                    featuredSong?.let {
+                        FeaturedCard(it, onClick = { onNavigateToPlay(it) })
+                    } ?: run {
+                        // Placeholder or empty state for featured card if needed
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(Color(0xFF262626)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("No songs available", color = Color.Gray)
+                        }
+                    }
 
-                Spacer(modifier = Modifier.height(34.dp))
+                    Spacer(modifier = Modifier.height(34.dp))
 
-                Text(
-                    text = "Other Songs",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.White
-                )
+                    Text(
+                        text = "Other Songs",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White
+                    )
+                }
             }
-        }
 
-        items(otherSongs) { song ->
-            Box {
-                SongTile(
-                    song = song,
-                    onClick = { onNavigateToPlay(song) },
-                )
+            items(otherSongs) { song ->
+                Box {
+                    SongTile(
+                        song = song,
+                        onClick = { onNavigateToPlay(song) },
+                    )
+                }
+            }
+
+            if (otherSongs.isEmpty() && featuredSong != null) {
+                item {
+                    Text(
+                        text = "No more songs to show",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(vertical = 16.dp),
+                        fontSize = 14.sp
+                    )
+                }
             }
         }
     }
@@ -141,7 +179,7 @@ fun FeaturedCard(song: SongModel, onClick: () -> Unit = {}) {
                     color = Color.White
                 )
                 Text(
-                    text = "by ${song.artist}",
+                    text = "by ${song.artistName}",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color(0xFF838383)
@@ -197,9 +235,10 @@ private fun HomeScreenPreview() {
         Scaffold(Modifier.fillMaxSize()) { innerPadding ->
             HomeScreen(
                 modifier = Modifier.padding(innerPadding),
-                featuredSong = SongModel.dummyList[0],
-                otherSongs = SongModel.dummyList,
-                onNavigateToPlay = {}
+                onNavigateToPlay = {},
+                songs = SongModel.dummyList,
+                isRefreshing = false,
+                onRefresh = {  }
             )
         }
     }

@@ -26,11 +26,13 @@ import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.viewmodel.auth.AuthCheckState
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.viewmodel.home.HomeViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
 import com.pamt.swarabox.viewmodel.song.SongUploadUiState
 import com.pamt.swarabox.viewmodel.song.SongUploadViewModel
 import com.pamt.swarabox.viewmodel.song.SongViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -38,7 +40,8 @@ fun AppNavigation(
     authViewModel: AuthViewModel = viewModel(),
     profileViewModel: ProfileViewModel = viewModel(),
     songViewModel: SongViewModel = viewModel(),
-    songUploadViewModel: SongUploadViewModel = viewModel()
+    songUploadViewModel: SongUploadViewModel = viewModel(),
+    homeViewModel: HomeViewModel = viewModel()
 ) {
     val authCheckState by authViewModel.authCheckState.collectAsStateWithLifecycle()
     val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
@@ -51,8 +54,22 @@ fun AppNavigation(
         if (authCheckState is AuthCheckState.Authenticated) {
             authViewModel.clearUiState()
             profileViewModel.fetchProfile()
+            homeViewModel.fetchSongs()
         } else if (authCheckState is AuthCheckState.NotAuthenticated) {
             songViewModel.release()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        launch {
+            homeViewModel.errorEvent.collectLatest { message ->
+                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+            }
+        }
+        launch {
+            profileViewModel.songErrorEvent.collectLatest { message ->
+                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
+            }
         }
     }
 
@@ -101,6 +118,7 @@ fun AppNavigation(
                 profileViewModel = profileViewModel,
                 songViewModel = songViewModel,
                 songUploadViewModel = songUploadViewModel,
+                homeViewModel = homeViewModel,
                 authUiState = authUiState,
                 profileUiState = profileUiState,
                 snackbarHostState = snackbarHostState,
@@ -131,6 +149,7 @@ fun AppNavigation(
                         profileViewModel = profileViewModel,
                         songViewModel = songViewModel,
                         songUploadViewModel = songUploadViewModel,
+                        homeViewModel = homeViewModel,
                         startDestination = Landing,
                         snackbarHostState = snackbarHostState,
                         authUiState = authUiState,

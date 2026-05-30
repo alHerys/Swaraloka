@@ -29,6 +29,7 @@ import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.ui.components.MiniPlayer
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.viewmodel.home.HomeViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
 import com.pamt.swarabox.viewmodel.song.SongUploadUiState
@@ -43,6 +44,7 @@ fun AppBottomNavLayout(
     profileViewModel: ProfileViewModel,
     songViewModel: SongViewModel,
     songUploadViewModel: SongUploadViewModel,
+    homeViewModel: HomeViewModel,
     authUiState: AuthUiState,
     profileUiState: ProfileUiState,
     songUploadUiState: SongUploadUiState,
@@ -112,6 +114,7 @@ fun AppBottomNavLayout(
                 profileViewModel = profileViewModel,
                 songViewModel = songViewModel,
                 songUploadViewModel = songUploadViewModel,
+                homeViewModel = homeViewModel,
                 snackbarHostState = snackbarHostState,
                 startDestination = Home,
                 authUiState = authUiState,
