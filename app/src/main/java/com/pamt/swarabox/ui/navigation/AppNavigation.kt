@@ -26,6 +26,7 @@ import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.viewmodel.auth.AuthCheckState
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.viewmodel.home.HomeUiState
 import com.pamt.swarabox.viewmodel.home.HomeViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
@@ -47,6 +48,7 @@ fun AppNavigation(
     val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
     val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
     val songUploadUiState by songUploadViewModel.uiState.collectAsStateWithLifecycle()
+    val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val navController = rememberNavController()
 
@@ -62,18 +64,13 @@ fun AppNavigation(
 
     LaunchedEffect(Unit) {
         launch {
-            homeViewModel.errorEvent.collectLatest { message ->
-                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
-            }
-        }
-        launch {
             profileViewModel.songErrorEvent.collectLatest { message ->
                 snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
             }
         }
     }
 
-    LaunchedEffect(authUiState, profileUiState, songUploadUiState) {
+    LaunchedEffect(authUiState, profileUiState, songUploadUiState, homeUiState) {
         when {
             authUiState is AuthUiState.Error -> {
                 val message = (authUiState as AuthUiState.Error).message
@@ -100,6 +97,17 @@ fun AppNavigation(
             songUploadUiState is SongUploadUiState.Error -> {
                 val message = (songUploadUiState as SongUploadUiState.Error).message
                 Log.d("UPLOAD ERROR", message)
+                launch {
+                    snackbarHostState.showSnackbar(
+                        message = message,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+
+            homeUiState is HomeUiState.Error -> {
+                val message = (homeUiState as HomeUiState.Error).message
+                Log.d("HOME ERROR", message)
                 launch {
                     snackbarHostState.showSnackbar(
                         message = message,

@@ -4,11 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.repository.SongRepository
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -22,11 +19,15 @@ class HomeViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
-    private val _errorEvent = MutableSharedFlow<String>()
-    val errorEvent: SharedFlow<String> = _errorEvent.asSharedFlow()
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Idle)
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
         fetchSongs()
+    }
+
+    fun clearUiState() {
+        _uiState.value = HomeUiState.Idle
     }
 
     fun fetchSongs() {
@@ -35,8 +36,9 @@ class HomeViewModel(
             try {
                 val fetchedSongs = repository.fetchAllSongs()
                 _songs.value = fetchedSongs
+                _uiState.value = HomeUiState.Success
             } catch (e: Exception) {
-                _errorEvent.emit(e.message ?: "Failed to fetch songs")
+                _uiState.value = HomeUiState.Error(e.message ?: "Failed to fetch songs")
             } finally {
                 _isRefreshing.value = false
             }

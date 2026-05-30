@@ -179,7 +179,7 @@ fun FeaturedCard(song: SongModel, onClick: () -> Unit = {}) {
                     color = Color.White
                 )
                 Text(
-                    text = "by ${song.artistName}",
+                    text = "by ${song.artist}",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color(0xFF838383)
