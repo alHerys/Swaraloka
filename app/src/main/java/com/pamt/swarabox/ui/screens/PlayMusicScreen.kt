@@ -41,21 +41,27 @@ import com.pamt.swarabox.R
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.ui.components.CircleContainer
 import com.pamt.swarabox.ui.components.SongTile
-import com.pamt.swarabox.ui.theme.SwaraBoxTheme
+import com.pamt.swarabox.ui.theme.formatTime
 import com.pamt.swarabox.ui.theme.yellow
-import com.pamt.swarabox.viewmodel.song.SongViewModel
+import com.pamt.swarabox.viewmodel.player.PlayerViewModel
+import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 
 @Composable
 fun PlayMusicScreen(
-    songViewModel: SongViewModel,
+    playerViewModel: PlayerViewModel,
     song: SongModel,
     similarSongs: List<SongModel>,
     onNavigateToPlay: (SongModel) -> Unit,
+    userId: String,
     onBack: () -> Unit
 ) {
-    val isPlaying by songViewModel.isPlaying.collectAsStateWithLifecycle()
-    val currentPosition by songViewModel.currentPosition.collectAsStateWithLifecycle()
-    val duration by songViewModel.duration.collectAsStateWithLifecycle()
+    val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
+    val currentPosition by playerViewModel.currentPosition.collectAsStateWithLifecycle()
+    val duration by playerViewModel.duration.collectAsStateWithLifecycle()
+
+    val similarSongsFiltered = similarSongs
+        .filter { it.id != song.id }
+        .take(5)
 
     // TODO: Implement dynamic background based on thumbnail music that are currently playing
     Column(
@@ -87,18 +93,19 @@ fun PlayMusicScreen(
                 )
             }
 
-            // TODO: Only Show edit functionality if this artist id of song equal to current user id (that mean current user is the song owner)
-            CircleContainer(
-                size = 40.dp,
-                backgroundColor = Color(0x33FFFFFF),
-                onClick = { /* TODO: EDIT SONG FUNCTIONALITY */ }
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.edit),
-                    contentDescription = "Menu",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
+            if (song.artistId == userId) {
+                CircleContainer(
+                    size = 40.dp,
+                    backgroundColor = Color(0x33FFFFFF),
+                    onClick = { /* TODO: EDIT SONG FUNCTIONALITY */ }
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.edit),
+                        contentDescription = "Edit Song",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
         }
 
@@ -131,7 +138,7 @@ fun PlayMusicScreen(
                 textAlign = TextAlign.Center
             )
             Text(
-                text = song.artistName,
+                text = song.artistName ?: "Unknown Artist",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF747474),
@@ -151,7 +158,7 @@ fun PlayMusicScreen(
                 value = if (duration > 0) currentPosition.toFloat() / duration else 0f,
                 onValueChange = {
                     val newPos = (it * duration).toLong()
-                    songViewModel.seekTo(newPos)
+                    playerViewModel.seekTo(newPos)
                 },
                 colors = SliderDefaults.colors(
                     thumbColor = Color.White,
@@ -204,7 +211,7 @@ fun PlayMusicScreen(
                     tint = Color.White,
                     modifier = Modifier
                         .size(30.dp)
-                        .clickable { songViewModel.seekTo(0L) }
+                        .clickable { playerViewModel.seekTo(0L) }
                 )
 
                 Spacer(modifier = Modifier.width(45.dp))
@@ -213,7 +220,7 @@ fun PlayMusicScreen(
                     size = 50.dp,
                     backgroundColor = yellow,
                     onClick = {
-                        songViewModel.togglePlayPause()
+                        playerViewModel.togglePlayPause()
                     }
                 ) {
                     Icon(
@@ -228,21 +235,18 @@ fun PlayMusicScreen(
 
                 Spacer(modifier = Modifier.width(45.dp))
 
-                // Next Button
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.play_skip_forward),
-                    contentDescription = "Next",
+                    contentDescription = "Next Song",
                     tint = Color.White,
                     modifier = Modifier
                         .size(30.dp)
                         .clickable {
-                            val nextSong = similarSongs.random()
-                            onNavigateToPlay(nextSong)
+                            onNavigateToPlay(similarSongsFiltered.random())
                         }
                 )
             }
 
-            // Swipe up indicator / similar music header
             Text(
                 text = "swipe up to find similar music",
                 modifier = Modifier.fillMaxWidth(),
@@ -255,7 +259,7 @@ fun PlayMusicScreen(
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                similarSongs.forEach { songItem ->
+                similarSongsFiltered.forEach { songItem ->
                     SongTile(
                         song = songItem,
                         containerColor = Color(0xFF1A1A1A),
@@ -265,26 +269,5 @@ fun PlayMusicScreen(
             }
         }
     }
-}
-
-private fun formatTime(ms: Long): String {
-    val totalSeconds = ms / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return String.format("%02d:%02d", minutes, seconds)
-}
-
-@Preview(showSystemUi = true)
-@Composable
-fun PlayMusicScreenPreview() {
-    // SwaraBoxTheme {
-    //     PlayMusicScreen(
-    //         songViewModel = ..., // Need a mock or dummy
-    //         song = SongModel.dummyList[0],
-    //         similarSongs = SongModel.dummyList,
-    //         onNavigateToPlay = {},
-    //         onBack = {}
-    //     )
-    // }
 }
 

@@ -81,13 +81,13 @@ class ProfileViewModel(
         }
     }
 
-    fun fetchMySongs() {
+    fun fetchMySongs(forceRefresh: Boolean = false) {
         viewModelScope.launch {
             val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
             if (userId != null) {
                 _isRefreshingSongs.value = true
                 try {
-                    val songs = songRepository.fetchSongsByArtist(userId)
+                    val songs = songRepository.fetchSongsByArtist(userId, forceRefresh = forceRefresh)
                     _mySongs.value = songs
                 } catch (e: Exception) {
                     _songErrorEvent.emit(e.message ?: "Failed to fetch your songs")

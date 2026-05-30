@@ -36,12 +36,12 @@ import com.pamt.swarabox.ui.screens.RegisterNameScreen
 import com.pamt.swarabox.ui.screens.UploadScreen
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
-import com.pamt.swarabox.viewmodel.home.HomeViewModel
+import com.pamt.swarabox.viewmodel.song.SongViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
-import com.pamt.swarabox.viewmodel.song.SongUploadUiState
-import com.pamt.swarabox.viewmodel.song.SongUploadViewModel
-import com.pamt.swarabox.viewmodel.song.SongViewModel
+import com.pamt.swarabox.viewmodel.upload.UploadUiState
+import com.pamt.swarabox.viewmodel.upload.UploadViewModel
+import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import kotlin.reflect.typeOf
 
 @Composable
@@ -49,12 +49,12 @@ fun AppNavHost(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     profileViewModel: ProfileViewModel,
+    playerViewModel: PlayerViewModel,
+    uploadViewModel: UploadViewModel,
     songViewModel: SongViewModel,
-    songUploadViewModel: SongUploadViewModel,
-    homeViewModel: HomeViewModel,
     authUiState: AuthUiState,
     profileUiState: ProfileUiState,
-    songUploadUiState: SongUploadUiState,
+    uploadUiState: UploadUiState,
     snackbarHostState: SnackbarHostState,
     startDestination: Any,
     modifier: Modifier = Modifier
@@ -64,15 +64,15 @@ fun AppNavHost(
         startDestination = startDestination,
     ) {
         composable<Home> {
-            val songs by homeViewModel.songs.collectAsStateWithLifecycle()
-            val isRefreshing by homeViewModel.isRefreshing.collectAsStateWithLifecycle()
+            val songs by songViewModel.songs.collectAsStateWithLifecycle()
+            val isRefreshing by songViewModel.isRefreshing.collectAsStateWithLifecycle()
 
             HomeScreen(
                 songs = songs,
                 isRefreshing = isRefreshing,
-                onRefresh = { homeViewModel.fetchSongs() },
+                onRefresh = { songViewModel.fetchSongs() },
                 onNavigateToPlay = { song ->
-                    songViewModel.playSong(song)
+                    playerViewModel.playSong(song)
                     navController.navigate(PlayMusic(song))
                 },
                 modifier = modifier
@@ -83,15 +83,19 @@ fun AppNavHost(
             typeMap = mapOf(typeOf<SongModel>() to SongModelNavType)
         ) { backStackEntry ->
             val args = backStackEntry.toRoute<PlayMusic>()
+            val similarSongs by songViewModel.songs.collectAsStateWithLifecycle()
+            val userId = (profileUiState as? ProfileUiState.Success)?.user?.userId ?: ""
+
             PlayMusicScreen(
-                songViewModel = songViewModel,
+                playerViewModel = playerViewModel,
                 song = args.song,
-                similarSongs = SongModel.dummyList,
+                similarSongs = similarSongs,
+                userId = userId,
                 onBack = {
                     navController.popBackStack()
                 },
                 onNavigateToPlay = { song ->
-                    songViewModel.playSong(song)
+                    playerViewModel.playSong(song)
                     navController.navigate(PlayMusic(song)) {
                         popUpTo<PlayMusic> {
                             inclusive = true
@@ -104,8 +108,8 @@ fun AppNavHost(
         composable<Upload> {
             UploadScreen(
                 profileUiState = profileUiState,
-                songViewModel = songViewModel,
-                songUploadViewModel = songUploadViewModel,
+                playerViewModel = playerViewModel,
+                uploadViewModel = uploadViewModel,
                 snackbarHostState = snackbarHostState,
                 navController = navController,
             )
@@ -210,7 +214,7 @@ fun AppNavHost(
                     user = profileUiState.user,
                     listMySong = mySongs,
                     isRefreshing = isRefreshingSongs,
-                    onRefresh = { profileViewModel.fetchMySongs() },
+                    onRefresh = { profileViewModel.fetchMySongs(forceRefresh = true) },
                     onLogout = {
                         profileViewModel.resetUiState()
                         authViewModel.resetFormState()
@@ -221,7 +225,7 @@ fun AppNavHost(
                         navController.navigate(EditProfile)
                     },
                     onNavigateToPlay = { song ->
-                        songViewModel.playSong(song)
+                        playerViewModel.playSong(song)
                         navController.navigate(PlayMusic(song))
                     }
                 )

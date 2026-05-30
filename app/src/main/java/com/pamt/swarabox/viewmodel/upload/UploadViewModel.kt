@@ -1,18 +1,19 @@
-package com.pamt.swarabox.viewmodel.song
+package com.pamt.swarabox.viewmodel.upload
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.repository.SongRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class SongUploadViewModel(
+class UploadViewModel(
     private val repository: SongRepository = SongRepository()
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<SongUploadUiState>(SongUploadUiState.Idle)
-    val uiState: StateFlow<SongUploadUiState> = _uiState
+    private val _uiState = MutableStateFlow<UploadUiState>(UploadUiState.Idle)
+    val uiState: StateFlow<UploadUiState> = _uiState
 
     fun uploadSong(
         title: String,
@@ -22,28 +23,30 @@ class SongUploadViewModel(
         duration: Int
     ) {
         viewModelScope.launch {
-            _uiState.value = SongUploadUiState.Loading
+            _uiState.value = UploadUiState.Loading
             try {
                 val audioUrl = repository.uploadAudio(artistId, audioBytes)
 
                 val thumbnailUrl = repository.uploadThumbnail(artistId, imageBytes)
 
-                repository.insertSong(
+                val song = SongModel(
                     artistId = artistId,
                     title = title,
                     songUrl = audioUrl,
                     thumbnailUrl = thumbnailUrl,
-                    duration = duration
+                    songDuration = duration
                 )
 
-                _uiState.value = SongUploadUiState.Success
+                repository.insertSong(song)
+
+                _uiState.value = UploadUiState.Success
             } catch (e: Exception) {
-                _uiState.value = SongUploadUiState.Error(e.message ?: "Failed to upload song")
+                _uiState.value = UploadUiState.Error(e.message ?: "Failed to upload song")
             }
         }
     }
 
     fun resetState() {
-        _uiState.value = SongUploadUiState.Idle
+        _uiState.value = UploadUiState.Idle
     }
 }

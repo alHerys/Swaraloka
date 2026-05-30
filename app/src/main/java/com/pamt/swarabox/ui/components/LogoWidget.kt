@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.pamt.swarabox.R
 
 @Composable
-fun LogoWidget(modifier: Modifier = Modifier) {
+fun LogoWidget() {
     val logoText = buildAnnotatedString {
 
         withStyle(

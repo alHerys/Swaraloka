@@ -61,7 +61,7 @@ fun SongTile(
                     color = Color.White,
                 )
                 Text(
-                    text = song.artistName,
+                    text = song.artistName ?: "Unknown Artist",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color(0xFF838383),

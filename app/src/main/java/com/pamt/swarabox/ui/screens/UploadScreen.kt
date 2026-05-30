@@ -1,7 +1,6 @@
 package com.pamt.swarabox.ui.screens
 
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -46,10 +45,11 @@ import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.CircleContainer
 import com.pamt.swarabox.ui.components.DashedSelector
 import com.pamt.swarabox.ui.components.LoadingOverlay
+import com.pamt.swarabox.ui.theme.formatTime
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
-import com.pamt.swarabox.viewmodel.song.SongUploadUiState
-import com.pamt.swarabox.viewmodel.song.SongUploadViewModel
-import com.pamt.swarabox.viewmodel.song.SongViewModel
+import com.pamt.swarabox.viewmodel.upload.UploadUiState
+import com.pamt.swarabox.viewmodel.upload.UploadViewModel
+import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -57,19 +57,19 @@ import kotlinx.coroutines.launch
 @Composable
 fun UploadScreen(
     profileUiState: ProfileUiState,
-    songViewModel: SongViewModel,
-    songUploadViewModel: SongUploadViewModel,
+    playerViewModel: PlayerViewModel,
+    uploadViewModel: UploadViewModel,
     snackbarHostState: SnackbarHostState,
     navController: NavController
 ) {
     val context = LocalContext.current
-    val songUploadUiState by songUploadViewModel.uiState.collectAsStateWithLifecycle()
+    val songUploadUiState by uploadViewModel.uiState.collectAsStateWithLifecycle()
 
     var title by remember { mutableStateOf("") }
     var selectedAudioUri by remember { mutableStateOf<Uri?>(null) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
-    // Local ExoPlayer for preview
+
     val localPlayer = remember { ExoPlayer.Builder(context).build() }
     var isPlaying by remember { mutableStateOf(false) }
     var currentPosition by remember { mutableLongStateOf(0L) }
@@ -115,14 +115,14 @@ fun UploadScreen(
     }
 
     LaunchedEffect(songUploadUiState) {
-        if (songUploadUiState is SongUploadUiState.Success) {
+        if (songUploadUiState is UploadUiState.Success) {
             launch {
                 snackbarHostState.showSnackbar(
                     message = "Song Uploaded Successfully",
                     duration = SnackbarDuration.Short
                 )
             }
-            songUploadViewModel.resetState()
+            uploadViewModel.resetState()
 
             navController.navigate(Home) {
                 popUpTo<Upload> {
@@ -179,7 +179,7 @@ fun UploadScreen(
             Spacer(Modifier.height(28.dp))
 
             if (selectedImageUri != null) {
-                // Image Preview Area
+
                 Box(
                     modifier = Modifier
                         .size(240.dp)
@@ -193,7 +193,7 @@ fun UploadScreen(
                         contentScale = ContentScale.Crop
                     )
 
-                    // Edit Icon overlay
+
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -213,7 +213,7 @@ fun UploadScreen(
                     }
                 }
             } else {
-                // Image Selection Area
+
                 DashedSelector(
                     label = "Select Image",
                     icon = ImageVector.vectorResource(id = R.drawable.image_upload),
@@ -251,15 +251,15 @@ fun UploadScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Audio Controls
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Dummy spacer or left-side icon (using weight to push it)
+
                         Box(modifier = Modifier.weight(1f))
 
-                        // Center Icon
+
                         CircleContainer(
                             size = 50.dp,
                             backgroundColor = MaterialTheme.colorScheme.primary,
@@ -267,7 +267,7 @@ fun UploadScreen(
                                 if (localPlayer.isPlaying) {
                                     localPlayer.pause()
                                 } else {
-                                    songViewModel.pause()
+                                    playerViewModel.pause()
                                     localPlayer.play()
                                 }
                             }
@@ -282,7 +282,7 @@ fun UploadScreen(
                             )
                         }
 
-                        // Right-side Icon with weight to balance the center
+
                         Box(
                             modifier = Modifier.weight(1f),
                             contentAlignment = Alignment.CenterStart
@@ -300,7 +300,7 @@ fun UploadScreen(
             } else {
                 Spacer(modifier = Modifier.height(21.dp))
 
-                // Audio Selection Area
+
                 DashedSelector(
                     label = "Select .mp3 or .m4a",
                     icon = ImageVector.vectorResource(id = R.drawable.song_upload),
@@ -329,7 +329,7 @@ fun UploadScreen(
                     }
 
                     if (audioBytes != null && imageBytes != null) {
-                        songUploadViewModel.uploadSong(
+                        uploadViewModel.uploadSong(
                             title = title,
                             artistId = artistId,
                             audioBytes = audioBytes,
@@ -341,21 +341,14 @@ fun UploadScreen(
                 text = "Upload",
                 containerColor = Color(0xFF007AFF),
                 textColor = Color.White,
-                enabled = (selectedImageUri != null && selectedAudioUri != null && title.isNotBlank() && songUploadUiState !is SongUploadUiState.Loading),
+                enabled = (selectedImageUri != null && selectedAudioUri != null && title.isNotBlank() && songUploadUiState !is UploadUiState.Loading),
                 modifier = Modifier.width(175.dp)
             )
             Spacer(Modifier.height(40.dp))
         }
 
-        if (songUploadUiState is SongUploadUiState.Loading) {
+        if (songUploadUiState is UploadUiState.Loading) {
             LoadingOverlay()
         }
     }
-}
-
-private fun formatTime(ms: Long): String {
-    val totalSeconds = ms / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return String.format("%02d:%02d", minutes, seconds)
 }

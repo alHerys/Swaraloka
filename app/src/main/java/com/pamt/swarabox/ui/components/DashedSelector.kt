@@ -32,11 +32,11 @@ fun DashedSelector(
 ) {
     val stroke = Stroke(
         width = 2f,
-        pathEffect = PathEffect.Companion.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
     )
 
     Box(
-        modifier = Modifier.Companion
+        modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
             .drawBehind {
@@ -48,21 +48,21 @@ fun DashedSelector(
             }
             .clip(RoundedCornerShape(24.dp))
             .clickable { onClick() },
-        contentAlignment = Alignment.Companion.Center
+        contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.Companion.CenterHorizontally) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = Color.Companion.White,
-                modifier = Modifier.Companion.size(24.dp)
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
             )
-            Spacer(modifier = Modifier.Companion.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = label,
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Companion.Medium,
-                color = Color.Companion.White
+                fontWeight = FontWeight.Medium,
+                color = Color.White
             )
         }
     }

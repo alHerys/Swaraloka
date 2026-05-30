@@ -29,30 +29,30 @@ import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.ui.components.MiniPlayer
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
-import com.pamt.swarabox.viewmodel.home.HomeViewModel
+import com.pamt.swarabox.viewmodel.song.SongViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
-import com.pamt.swarabox.viewmodel.song.SongUploadUiState
-import com.pamt.swarabox.viewmodel.song.SongUploadViewModel
-import com.pamt.swarabox.viewmodel.song.SongViewModel
+import com.pamt.swarabox.viewmodel.upload.UploadUiState
+import com.pamt.swarabox.viewmodel.upload.UploadViewModel
+import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun AppBottomNavLayout(
+fun AppHomeLayout(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     profileViewModel: ProfileViewModel,
+    playerViewModel: PlayerViewModel,
+    uploadViewModel: UploadViewModel,
     songViewModel: SongViewModel,
-    songUploadViewModel: SongUploadViewModel,
-    homeViewModel: HomeViewModel,
     authUiState: AuthUiState,
     profileUiState: ProfileUiState,
-    songUploadUiState: SongUploadUiState,
+    uploadUiState: UploadUiState,
     snackbarHostState: SnackbarHostState
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentSong by songViewModel.currentSong.collectAsStateWithLifecycle()
-    val isPlaying by songViewModel.isPlaying.collectAsStateWithLifecycle()
+    val currentSong by playerViewModel.currentSong.collectAsStateWithLifecycle()
+    val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
     val currentDestination = navBackStackEntry?.destination
     val isKeyboardVisible = WindowInsets.isImeVisible
 
@@ -88,7 +88,7 @@ fun AppBottomNavLayout(
                             MiniPlayer(
                                 song = song,
                                 isPlaying = isPlaying,
-                                onTogglePlay = { songViewModel.togglePlayPause() },
+                                onTogglePlay = { playerViewModel.togglePlayPause() },
                                 onClick = { navController.navigate(PlayMusic(song)) }
                             )
                         }
@@ -112,14 +112,14 @@ fun AppBottomNavLayout(
                 navController = navController,
                 authViewModel = authViewModel,
                 profileViewModel = profileViewModel,
+                playerViewModel = playerViewModel,
+                uploadViewModel = uploadViewModel,
                 songViewModel = songViewModel,
-                songUploadViewModel = songUploadViewModel,
-                homeViewModel = homeViewModel,
                 snackbarHostState = snackbarHostState,
                 startDestination = Home,
                 authUiState = authUiState,
                 profileUiState = profileUiState,
-                songUploadUiState = songUploadUiState,
+                uploadUiState = uploadUiState,
             )
 
             val isLoading =

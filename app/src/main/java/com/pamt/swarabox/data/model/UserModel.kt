@@ -7,14 +7,11 @@ import kotlin.time.Instant
 
 @Serializable
 data class UserModel(
-    @SerialName("user_id")
-    val userId: String,
+    @SerialName("user_id") val userId: String,
     val name: String,
     val email: String,
-    @SerialName("avatar_url")
-    val avatarUrl: String? = null,
-    @SerialName("created_at")
-    val createdAt: Instant,
+    @SerialName("avatar_url") val avatarUrl: String? = null,
+    @SerialName("created_at") val createdAt: Instant,
 ) {
     companion object {
         val dummy = UserModel(

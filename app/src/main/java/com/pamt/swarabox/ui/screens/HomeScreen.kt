@@ -19,23 +19,23 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -44,7 +44,6 @@ import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.ui.components.CircleContainer
 import com.pamt.swarabox.ui.components.LogoWidget
 import com.pamt.swarabox.ui.components.SongTile
-import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 
 @Composable
 fun HomeScreen(
@@ -62,67 +61,46 @@ fun HomeScreen(
         onRefresh = onRefresh,
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0x33000000))
+            .background(Color(0x33000000)),
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                Column {
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    LogoWidget()
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    featuredSong?.let {
-                        FeaturedCard(it, onClick = { onNavigateToPlay(it) })
-                    } ?: run {
-                        // Placeholder or empty state for featured card if needed
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(Color(0xFF262626)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No songs available", color = Color.Gray)
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(34.dp))
-
-                    Text(
-                        text = "Other Songs",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White
-                    )
-                }
-            }
-
-            items(otherSongs) { song ->
-                Box {
-                    SongTile(
-                        song = song,
-                        onClick = { onNavigateToPlay(song) },
-                    )
-                }
-            }
-
-            if (otherSongs.isEmpty() && featuredSong != null) {
+        if (songs.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp),
+                contentPadding = PaddingValues(bottom = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 item {
-                    Text(
-                        text = "No more songs to show",
-                        color = Color.Gray,
-                        modifier = Modifier.padding(vertical = 16.dp),
-                        fontSize = 14.sp
-                    )
+                    Column {
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        LogoWidget()
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        if (featuredSong != null) {
+                            FeaturedCard(featuredSong, onClick = { onNavigateToPlay(featuredSong) })
+                        }
+
+                        Spacer(modifier = Modifier.height(34.dp))
+
+                        Text(
+                            text = "Other Songs",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.White
+                        )
+                    }
+                }
+
+                items(otherSongs) { song ->
+                    Box {
+                        SongTile(
+                            song = song,
+                            onClick = { onNavigateToPlay(song) },
+                        )
+                    }
                 }
             }
         }
@@ -130,7 +108,10 @@ fun HomeScreen(
 }
 
 @Composable
-fun FeaturedCard(song: SongModel, onClick: () -> Unit = {}) {
+fun FeaturedCard(
+    song: SongModel,
+    onClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -139,19 +120,31 @@ fun FeaturedCard(song: SongModel, onClick: () -> Unit = {}) {
             .background(Color(0xFF262626))
             .clickable { onClick() }
     ) {
-        // ... (rest of FeaturedCard remains the same, but use onClick for the button too)
-        // Image at the top, square-ish as per Figma (353x353)
-        AsyncImage(
-            model = song.thumbnailUrl,
-            contentDescription = null,
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
                 .height(353.dp)
+                .fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp)),
-            contentScale = ContentScale.Crop
-        )
+        ) {
+            AsyncImage(
+                model = song.thumbnailUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
 
-        // Content overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp) // Define exact layout area for the gradient tint
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.Black.copy(alpha = 0.8f), Color.Transparent)
+                        )
+                    )
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -179,7 +172,7 @@ fun FeaturedCard(song: SongModel, onClick: () -> Unit = {}) {
                     color = Color.White
                 )
                 Text(
-                    text = "by ${song.artist}",
+                    text = "by ${song.artistName}",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color(0xFF838383)
@@ -224,22 +217,6 @@ fun FeaturedCard(song: SongModel, onClick: () -> Unit = {}) {
                     }
                 }
             }
-        }
-    }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-private fun HomeScreenPreview() {
-    SwaraBoxTheme {
-        Scaffold(Modifier.fillMaxSize()) { innerPadding ->
-            HomeScreen(
-                modifier = Modifier.padding(innerPadding),
-                onNavigateToPlay = {},
-                songs = SongModel.dummyList,
-                isRefreshing = false,
-                onRefresh = {  }
-            )
         }
     }
 }

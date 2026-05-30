@@ -1,15 +1,12 @@
-package com.pamt.swarabox.ui.navigation
+package com.pamt.swarabox
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,37 +15,38 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.pamt.swarabox.ui.components.LoadingOverlay
+import com.pamt.swarabox.ui.navigation.AppAuthLayout
+import com.pamt.swarabox.ui.navigation.AppHomeLayout
 import com.pamt.swarabox.viewmodel.auth.AuthCheckState
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
-import com.pamt.swarabox.viewmodel.home.HomeUiState
-import com.pamt.swarabox.viewmodel.home.HomeViewModel
+import com.pamt.swarabox.viewmodel.song.SongUiState
+import com.pamt.swarabox.viewmodel.song.SongViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
-import com.pamt.swarabox.viewmodel.song.SongUploadUiState
-import com.pamt.swarabox.viewmodel.song.SongUploadViewModel
-import com.pamt.swarabox.viewmodel.song.SongViewModel
-import kotlinx.coroutines.flow.collectLatest
+import com.pamt.swarabox.viewmodel.upload.UploadUiState
+import com.pamt.swarabox.viewmodel.upload.UploadViewModel
+import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun AppNavigation(
+fun AppEntryPoint(
     authViewModel: AuthViewModel = viewModel(),
     profileViewModel: ProfileViewModel = viewModel(),
-    songViewModel: SongViewModel = viewModel(),
-    songUploadViewModel: SongUploadViewModel = viewModel(),
-    homeViewModel: HomeViewModel = viewModel()
+    playerViewModel: PlayerViewModel = viewModel(),
+    uploadViewModel: UploadViewModel = viewModel(),
+    songViewModel: SongViewModel = viewModel()
 ) {
     val authCheckState by authViewModel.authCheckState.collectAsStateWithLifecycle()
     val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
     val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
-    val songUploadUiState by songUploadViewModel.uiState.collectAsStateWithLifecycle()
-    val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+    val songUploadUiState by uploadViewModel.uiState.collectAsStateWithLifecycle()
+    val homeUiState by songViewModel.uiState.collectAsStateWithLifecycle()
+
     val snackbarHostState = remember { SnackbarHostState() }
     val navController = rememberNavController()
 
@@ -56,17 +54,9 @@ fun AppNavigation(
         if (authCheckState is AuthCheckState.Authenticated) {
             authViewModel.clearUiState()
             profileViewModel.fetchProfile()
-            homeViewModel.fetchSongs()
+            songViewModel.fetchSongs()
         } else if (authCheckState is AuthCheckState.NotAuthenticated) {
-            songViewModel.release()
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        launch {
-            profileViewModel.songErrorEvent.collectLatest { message ->
-                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Short)
-            }
+            playerViewModel.release()
         }
     }
 
@@ -94,8 +84,8 @@ fun AppNavigation(
                 }
             }
 
-            songUploadUiState is SongUploadUiState.Error -> {
-                val message = (songUploadUiState as SongUploadUiState.Error).message
+            songUploadUiState is UploadUiState.Error -> {
+                val message = (songUploadUiState as UploadUiState.Error).message
                 Log.d("UPLOAD ERROR", message)
                 launch {
                     snackbarHostState.showSnackbar(
@@ -105,8 +95,8 @@ fun AppNavigation(
                 }
             }
 
-            homeUiState is HomeUiState.Error -> {
-                val message = (homeUiState as HomeUiState.Error).message
+            homeUiState is SongUiState.Error -> {
+                val message = (homeUiState as SongUiState.Error).message
                 Log.d("HOME ERROR", message)
                 launch {
                     snackbarHostState.showSnackbar(
@@ -120,60 +110,33 @@ fun AppNavigation(
 
     when (authCheckState) {
         is AuthCheckState.Authenticated -> {
-            AppBottomNavLayout(
+            AppHomeLayout(
                 navController = navController,
                 authViewModel = authViewModel,
                 profileViewModel = profileViewModel,
+                playerViewModel = playerViewModel,
+                uploadViewModel = uploadViewModel,
                 songViewModel = songViewModel,
-                songUploadViewModel = songUploadViewModel,
-                homeViewModel = homeViewModel,
                 authUiState = authUiState,
                 profileUiState = profileUiState,
                 snackbarHostState = snackbarHostState,
-                songUploadUiState = songUploadUiState,
+                uploadUiState = songUploadUiState,
             )
         }
 
         is AuthCheckState.NotAuthenticated -> {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                snackbarHost = {
-                    SnackbarHost(hostState = snackbarHostState) { data ->
-                        val isError = data.visuals.message.contains("Error", ignoreCase = true) ||
-                                data.visuals.message.contains("Failed", ignoreCase = true)
-                        Snackbar(
-                            snackbarData = data,
-                            containerColor = if(isError) Color(0xFFF04444) else Color(0xFF4CAF50),
-                            contentColor = Color.White,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                    }
-                },
-            ) { innerPadding ->
-                Box(modifier = Modifier.fillMaxSize()) {
-                    AppNavHost(
-                        navController = navController,
-                        authViewModel = authViewModel,
-                        profileViewModel = profileViewModel,
-                        songViewModel = songViewModel,
-                        songUploadViewModel = songUploadViewModel,
-                        homeViewModel = homeViewModel,
-                        startDestination = Landing,
-                        snackbarHostState = snackbarHostState,
-                        authUiState = authUiState,
-                        profileUiState = profileUiState,
-                        songUploadUiState = songUploadUiState,
-                        modifier = Modifier.padding(innerPadding),
-                    )
-
-                    val isLoading =
-                        authUiState is AuthUiState.Loading || authUiState is AuthUiState.Success
-
-                    if (isLoading) {
-                        LoadingOverlay()
-                    }
-                }
-            }
+            AppAuthLayout(
+                navController = navController,
+                authViewModel = authViewModel,
+                profileViewModel = profileViewModel,
+                playerViewModel = playerViewModel,
+                uploadViewModel = uploadViewModel,
+                songViewModel = songViewModel,
+                snackbarHostState = snackbarHostState,
+                authUiState = authUiState,
+                profileUiState = profileUiState,
+                uploadUiState = songUploadUiState
+            )
         }
 
         else -> {
@@ -181,14 +144,7 @@ fun AppNavigation(
                 modifier = Modifier.fillMaxSize(),
                 containerColor = Color(0xFF262626),
             ) { innerPadding ->
-                Box(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                LoadingOverlay(Modifier.padding(innerPadding))
             }
         }
     }
