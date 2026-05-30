@@ -276,7 +276,7 @@ fun AppNavHost(
 
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
-                containerColor = Color(0xFF262626),
+                containerColor = Color(0x33000000),
             ) { innerPadding ->
                 EditProfileScreen(
                     name = name,
