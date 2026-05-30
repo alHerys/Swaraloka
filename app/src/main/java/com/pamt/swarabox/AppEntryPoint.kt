@@ -1,10 +1,8 @@
 package com.pamt.swarabox
 
 import android.util.Log
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -12,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,8 +41,8 @@ fun AppEntryPoint(
     val authCheckState by authViewModel.authCheckState.collectAsStateWithLifecycle()
     val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
     val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
-    val songUploadUiState by uploadViewModel.uiState.collectAsStateWithLifecycle()
-    val homeUiState by songViewModel.uiState.collectAsStateWithLifecycle()
+    val uploadUiState by uploadViewModel.uiState.collectAsStateWithLifecycle()
+    val songUiState by songViewModel.uiState.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val navController = rememberNavController()
@@ -60,7 +57,7 @@ fun AppEntryPoint(
         }
     }
 
-    LaunchedEffect(authUiState, profileUiState, songUploadUiState, homeUiState) {
+    LaunchedEffect(authUiState, profileUiState, uploadUiState, songUiState) {
         when {
             authUiState is AuthUiState.Error -> {
                 val message = (authUiState as AuthUiState.Error).message
@@ -84,8 +81,8 @@ fun AppEntryPoint(
                 }
             }
 
-            songUploadUiState is UploadUiState.Error -> {
-                val message = (songUploadUiState as UploadUiState.Error).message
+            uploadUiState is UploadUiState.Error -> {
+                val message = (uploadUiState as UploadUiState.Error).message
                 Log.d("UPLOAD ERROR", message)
                 launch {
                     snackbarHostState.showSnackbar(
@@ -95,8 +92,8 @@ fun AppEntryPoint(
                 }
             }
 
-            homeUiState is SongUiState.Error -> {
-                val message = (homeUiState as SongUiState.Error).message
+            songUiState is SongUiState.Error -> {
+                val message = (songUiState as SongUiState.Error).message
                 Log.d("HOME ERROR", message)
                 launch {
                     snackbarHostState.showSnackbar(
@@ -120,7 +117,7 @@ fun AppEntryPoint(
                 authUiState = authUiState,
                 profileUiState = profileUiState,
                 snackbarHostState = snackbarHostState,
-                uploadUiState = songUploadUiState,
+                uploadUiState = uploadUiState,
             )
         }
 
@@ -135,7 +132,7 @@ fun AppEntryPoint(
                 snackbarHostState = snackbarHostState,
                 authUiState = authUiState,
                 profileUiState = profileUiState,
-                uploadUiState = songUploadUiState
+                uploadUiState = uploadUiState
             )
         }
 
