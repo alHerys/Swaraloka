@@ -2,7 +2,6 @@ package com.pamt.swarabox.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,14 +12,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,22 +32,62 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.pamt.swarabox.R
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.AuthBackground
+import com.pamt.swarabox.ui.navigation.Landing
+import com.pamt.swarabox.ui.navigation.Login
+import com.pamt.swarabox.ui.navigation.RegisterEmailPassword
+import com.pamt.swarabox.ui.navigation.RegisterName
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
+import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 
 @Composable
 fun RegisterNameScreen(
     modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel,
+    navController: NavController
+) {
+    val name by authViewModel.name.collectAsStateWithLifecycle()
+
+    RegisterNameContent(
+        name = name,
+        onNameChange = { authViewModel.onNameChange(it) },
+        onBack = {
+            navController.navigate(Landing) {
+                popUpTo(RegisterName) {
+                    inclusive = true
+                }
+            }
+        },
+        onNextClicked = {
+            navController.navigate(RegisterEmailPassword)
+        },
+        onNavigateToLogin = {
+            authViewModel.resetFormState()
+            navController.navigate(Login) {
+                popUpTo(RegisterName) {
+                    inclusive = true
+                }
+            }
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun RegisterNameContent(
+    modifier: Modifier = Modifier,
     name: String,
     onNameChange: (String) -> Unit,
-    onNextClicked: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onBack: () -> Unit,
+    onNextClicked: () -> Unit
 ) {
-    val navigationToLogin = buildAnnotatedString {
+    val navigationToLoginLink = buildAnnotatedString {
         withStyle(
             style = SpanStyle(
                 fontSize = 14.sp,
@@ -158,7 +195,7 @@ fun RegisterNameScreen(
 
                         Spacer(Modifier.height(19.dp))
 
-                        Text(text = navigationToLogin)
+                        Text(text = navigationToLoginLink)
                     }
                 }
             }
@@ -171,13 +208,12 @@ fun RegisterNameScreen(
 @Composable
 private fun RegisterNamePreview() {
     SwaraBoxTheme {
-        RegisterNameScreen(
+        RegisterNameContent(
             onNextClicked = { },
             onNavigateToLogin = { },
-            name = "",
             onNameChange = {},
-            onBack = { }
+            onBack = { },
+            name = ""
         )
-
     }
 }

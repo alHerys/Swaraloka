@@ -1,6 +1,7 @@
 package com.pamt.swarabox.ui.navigation
 
 import com.pamt.swarabox.data.model.SongModel
+import com.pamt.swarabox.data.model.UserModel
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -32,7 +33,9 @@ object RegisterEmailPassword
 object Profile
 
 @Serializable
-object EditProfile
+data class EditProfile(
+    val currentUser: UserModel
+)
 
 @Serializable
 data class EditSong(

@@ -64,7 +64,6 @@ fun LandingScreen(
         }
     }
 
-
     AuthBackground {
         Column(
             modifier = modifier

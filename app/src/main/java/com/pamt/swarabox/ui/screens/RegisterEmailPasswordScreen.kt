@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,20 +37,47 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.pamt.swarabox.R
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.AuthBackground
+import com.pamt.swarabox.ui.navigation.RegisterEmailPassword
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
+import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 
 @Composable
 fun RegisterEmailPasswordScreen(
     modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel,
+    navController: NavController,
+) {
+    val email by authViewModel.email.collectAsStateWithLifecycle()
+    val password by authViewModel.password.collectAsStateWithLifecycle()
+    val confirmPassword by authViewModel.confirmPassword.collectAsStateWithLifecycle()
+
+    RegisterEmailPasswordContent(
+        email = email,
+        onEmailChange = { authViewModel.onEmailChange(it) },
+        password = password,
+        onPasswordChange = { authViewModel.onPasswordChange(it) },
+        confirmPassword = confirmPassword,
+        onConfirmPasswordChange = { authViewModel.onConfirmPasswordChange(it) },
+        onRegister = authViewModel::register,
+        onBack = { navController.popBackStack() },
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun RegisterEmailPasswordContent(
+    modifier: Modifier = Modifier,
     email: String,
-    password: String,
-    confirmPassword: String,
     onEmailChange: (String) -> Unit,
+    password: String,
     onPasswordChange: (String) -> Unit,
+    confirmPassword: String,
     onConfirmPasswordChange: (String) -> Unit,
     onRegister: () -> Unit,
     onBack: () -> Unit,
@@ -217,12 +245,11 @@ fun RegisterEmailPasswordScreen(
     }
 }
 
-
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 private fun RegisterEmailPasswordPreview() {
     SwaraBoxTheme {
-        RegisterEmailPasswordScreen(
+        RegisterEmailPasswordContent(
             email = "",
             password = "",
             confirmPassword = "",

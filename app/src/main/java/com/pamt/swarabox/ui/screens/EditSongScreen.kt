@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -72,7 +73,7 @@ fun EditSongScreen(
     currentSong: SongModel,
     snackbarHostState: SnackbarHostState,
     navController: NavController,
-    editSongViewModel: EditSongViewModel,
+    editSongViewModel: EditSongViewModel = viewModel(),
 ) {
     val editSongUiState by editSongViewModel.uiState.collectAsStateWithLifecycle()
     val title by editSongViewModel.title.collectAsStateWithLifecycle()
@@ -83,8 +84,8 @@ fun EditSongScreen(
     val localPlayerCurrentPosition by editSongViewModel.currentPosition.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
-
     val localPlayer = remember { ExoPlayer.Builder(context).build() }
+
     val audioPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
@@ -121,19 +122,32 @@ fun EditSongScreen(
     }
 
     LaunchedEffect(editSongUiState) {
-        if (editSongUiState is EditSongUiState.Success) {
-            launch {
-                snackbarHostState.showSnackbar(
-                    message = "Song Edited Successfully",
-                    duration = SnackbarDuration.Short
-                )
-            }
+        when (editSongUiState) {
+            is EditSongUiState.Success -> {
+                launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Song Edited Successfully",
+                        duration = SnackbarDuration.Short
+                    )
+                }
 
-            navController.navigate(Home(isForcedRefresh = true)) {
-                popUpTo<EditSong> {
-                    inclusive = true
+                navController.navigate(Home(isForcedRefresh = true)) {
+                    popUpTo<EditSong> {
+                        inclusive = true
+                    }
                 }
             }
+
+            is EditSongUiState.Error -> {
+                launch {
+                    snackbarHostState.showSnackbar(
+                        message = (editSongUiState as EditSongUiState.Error).message,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+
+            else -> {}
         }
     }
 
@@ -170,7 +184,22 @@ fun EditSongScreen(
         currentPosition = localPlayerCurrentPosition,
         onPlaySong = { localPlayer.play() },
         onPauseSong = { localPlayer.pause() },
-        onDelete = { /* editSongViewModel.deleteSong(currentSong.id!!) */ },
+        onAudioChange = { audioPicker.launch("audio/*") },
+        onImageChange = { imagePicker.launch("image/*") },
+        onTitleChange = { newTitle ->
+            editSongViewModel.onTitleChange(newTitle)
+        },
+        onSeek = { newPosition ->
+            localPlayer.seekTo(newPosition)
+            editSongViewModel.onCurrentPositionChange(newPosition)
+        },
+        onDelete = {
+            editSongViewModel.deleteSong(
+                songId = currentSong.id!!,
+                songUrl = currentSong.songUrl,
+                thumbnailUrl = currentSong.thumbnailUrl
+            )
+        },
         onCancel = { navController.popBackStack() },
         onEdit = {
             val audioBytes = selectedAudioUri?.let { uri ->
@@ -190,15 +219,6 @@ fun EditSongScreen(
                 oldSongUrl = currentSong.songUrl,
                 oldThumbnailUrl = currentSong.thumbnailUrl,
             )
-        },
-        onAudioChange = { audioPicker.launch("audio/*") },
-        onImageChange = { imagePicker.launch("image/*") },
-        onTitleChange = { newTitle ->
-            editSongViewModel.onTitleChange(newTitle)
-        },
-        onSeek = { newPosition ->
-            localPlayer.seekTo(newPosition)
-            editSongViewModel.onCurrentPositionChange(newPosition)
         }
     )
 }

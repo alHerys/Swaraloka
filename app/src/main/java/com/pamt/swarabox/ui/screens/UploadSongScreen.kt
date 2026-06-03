@@ -112,19 +112,32 @@ fun UploadSongScreen(
     }
 
     LaunchedEffect(songUploadUiState) {
-        if (songUploadUiState is UploadUiState.Success) {
-            launch {
-                snackbarHostState.showSnackbar(
-                    message = "Song Uploaded Successfully",
-                    duration = SnackbarDuration.Short
-                )
-            }
+        when (songUploadUiState) {
+            is UploadUiState.Success -> {
+                launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Song Uploaded Successfully",
+                        duration = SnackbarDuration.Short
+                    )
+                }
 
-            navController.navigate(Home(isForcedRefresh = true)) {
-                popUpTo<Upload> {
-                    inclusive = true
+                navController.navigate(Home(isForcedRefresh = true)) {
+                    popUpTo<Upload> {
+                        inclusive = true
+                    }
                 }
             }
+
+            is UploadUiState.Error -> {
+                launch {
+                    snackbarHostState.showSnackbar(
+                        message = (songUploadUiState as UploadUiState.Error).message,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+
+            else -> {}
         }
     }
 

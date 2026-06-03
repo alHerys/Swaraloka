@@ -1,43 +1,45 @@
 package com.pamt.swarabox.ui.navigation
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
-import com.pamt.swarabox.viewmodel.editSong.EditSongViewModel
-import com.pamt.swarabox.viewmodel.player.PlayerViewModel
-import com.pamt.swarabox.viewmodel.profile.ProfileUiState
-import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
-import com.pamt.swarabox.viewmodel.song.SongViewModel
-import com.pamt.swarabox.viewmodel.uploadSong.UploadUiState
-import com.pamt.swarabox.viewmodel.uploadSong.UploadViewModel
 
 @Composable
 fun AppAuthLayout(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    profileViewModel: ProfileViewModel,
-    playerViewModel: PlayerViewModel,
-    uploadViewModel: UploadViewModel,
-    songViewModel: SongViewModel,
-    editSongViewModel: EditSongViewModel,
     snackbarHostState: SnackbarHostState,
-    authUiState: AuthUiState,
-    profileUiState: ProfileUiState,
-    uploadUiState: UploadUiState
 ) {
+    val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(authUiState) {
+        if (authUiState is AuthUiState.Error) {
+            Log.d("AUTH ERROR", (authUiState as AuthUiState.Error).message)
+            snackbarHostState.showSnackbar(
+                message = (authUiState as AuthUiState.Error).message,
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = {
@@ -46,7 +48,7 @@ fun AppAuthLayout(
                         data.visuals.message.contains("Failed", ignoreCase = true)
                 Snackbar(
                     snackbarData = data,
-                    containerColor = if(isError) Color(0xFFF04444) else Color(0xFF4CAF50),
+                    containerColor = if (isError) Color(0xFF4CAF50) else Color(0xFFF04444),
                     contentColor = Color.White,
                     shape = RoundedCornerShape(8.dp)
                 )
@@ -57,21 +59,12 @@ fun AppAuthLayout(
             AppNavHost(
                 navController = navController,
                 authViewModel = authViewModel,
-                profileViewModel = profileViewModel,
-                playerViewModel = playerViewModel,
-                uploadViewModel = uploadViewModel,
-                songViewModel = songViewModel,
                 startDestination = Landing,
                 snackbarHostState = snackbarHostState,
-                authUiState = authUiState,
-                profileUiState = profileUiState,
-                uploadUiState = uploadUiState,
-                editSongViewModel = editSongViewModel,
                 modifier = Modifier.padding(innerPadding),
             )
 
-            val isLoading =
-                authUiState is AuthUiState.Loading || authUiState is AuthUiState.Success
+            val isLoading = authUiState is AuthUiState.Loading || authUiState is AuthUiState.Success
 
             if (isLoading) {
                 LoadingOverlay()

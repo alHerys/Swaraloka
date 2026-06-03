@@ -29,13 +29,14 @@ import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.ui.components.MiniPlayer
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
-import com.pamt.swarabox.viewmodel.editSong.EditSongViewModel
 import com.pamt.swarabox.viewmodel.song.SongViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
-import com.pamt.swarabox.viewmodel.uploadSong.UploadUiState
-import com.pamt.swarabox.viewmodel.uploadSong.UploadViewModel
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
+
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.runtime.LaunchedEffect
+import com.pamt.swarabox.viewmodel.song.SongUiState
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -44,19 +45,37 @@ fun AppHomeLayout(
     authViewModel: AuthViewModel,
     profileViewModel: ProfileViewModel,
     playerViewModel: PlayerViewModel,
-    uploadViewModel: UploadViewModel,
-    editSongViewModel: EditSongViewModel,
     songViewModel: SongViewModel,
-    authUiState: AuthUiState,
-    profileUiState: ProfileUiState,
-    uploadUiState: UploadUiState,
     snackbarHostState: SnackbarHostState
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentSong by playerViewModel.currentSong.collectAsStateWithLifecycle()
     val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
+
+    val songUiState by songViewModel.uiState.collectAsStateWithLifecycle()
+    val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
+    val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
+
     val currentDestination = navBackStackEntry?.destination
     val isKeyboardVisible = WindowInsets.isImeVisible
+
+    LaunchedEffect(profileUiState, songUiState) {
+        when {
+            profileUiState is ProfileUiState.Error -> {
+                snackbarHostState.showSnackbar(
+                    message = (profileUiState as ProfileUiState.Error).message,
+                    duration = SnackbarDuration.Short
+                )
+            }
+
+            songUiState is SongUiState.Error -> {
+                snackbarHostState.showSnackbar(
+                    message = (songUiState as SongUiState.Error).message,
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
 
     Scaffold(
         snackbarHost = {
@@ -65,7 +84,7 @@ fun AppHomeLayout(
                         data.visuals.message.contains("Failed", ignoreCase = true)
                 Snackbar(
                     snackbarData = data,
-                    containerColor = if (isError) Color(0xFFF04444) else Color(0xFF4CAF50),
+                    containerColor = if (isError) Color(0xFF4CAF50) else Color(0xFFF04444),
                     contentColor = Color.White,
                     shape = RoundedCornerShape(8.dp)
                 )
@@ -75,7 +94,8 @@ fun AppHomeLayout(
             // Only show bottom bar on main screens (Home, Profile, etc.)
             val showBottomBar = (currentDestination?.route?.contains("Home") == true ||
                     currentDestination?.route?.contains("Profile") == true ||
-                    currentDestination?.route?.contains("Upload") == true) &&
+                    currentDestination?.route?.contains("Upload") == true
+                    ) &&
                     !isKeyboardVisible
 
             if (showBottomBar) {
@@ -115,14 +135,10 @@ fun AppHomeLayout(
                 authViewModel = authViewModel,
                 profileViewModel = profileViewModel,
                 playerViewModel = playerViewModel,
-                uploadViewModel = uploadViewModel,
                 songViewModel = songViewModel,
                 snackbarHostState = snackbarHostState,
                 startDestination = Home(),
-                authUiState = authUiState,
                 profileUiState = profileUiState,
-                uploadUiState = uploadUiState,
-                editSongViewModel = editSongViewModel
             )
 
             val isLoading =

@@ -16,10 +16,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,26 +40,70 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.pamt.swarabox.R
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.AuthBackground
+import com.pamt.swarabox.ui.navigation.Landing
+import com.pamt.swarabox.ui.navigation.Login
+import com.pamt.swarabox.ui.navigation.RegisterName
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
+import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    email: String,
-    onEmailChange: (String) -> Unit,
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    onNavigateToRegister: () -> Unit,
-    onLogin: () -> Unit,
-    onBack: () -> Unit,
+    authViewModel: AuthViewModel,
+    navController: NavController
 ) {
     val passwordFocusRequester = remember { FocusRequester() }
+    val email by authViewModel.email.collectAsStateWithLifecycle()
+    val password by authViewModel.password.collectAsStateWithLifecycle()
 
-    val navigationToRegister = buildAnnotatedString {
+    LoginContent(
+        email = email,
+        onEmailChange = { authViewModel.onEmailChange(it) },
+        password = password,
+        onPasswordChange = { authViewModel.onPasswordChange(it) },
+        onNavigateToRegister = {
+            authViewModel.resetFormState()
+            navController.navigate(RegisterName) {
+                popUpTo(Login) {
+                    inclusive = true
+                }
+            }
+        },
+        onLogin = {
+            authViewModel.login()
+        },
+        onBack = {
+            authViewModel.resetFormState()
+            navController.navigate(Landing) {
+                popUpTo(Landing) {
+                    inclusive = true
+                }
+            }
+        },
+        modifier = modifier,
+        passwordFocusRequester = passwordFocusRequester
+    )
+}
+
+@Composable
+private fun LoginContent(
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit,
+    email: String,
+    onEmailChange: (String) -> Unit,
+    passwordFocusRequester: FocusRequester,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    onLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit
+) {
+    val navigationToRegisterLink = buildAnnotatedString {
         withStyle(
             style = SpanStyle(
                 fontSize = 14.sp,
@@ -88,7 +132,6 @@ fun LoginScreen(
         }
     }
 
-
     AuthBackground {
         Column(
             modifier = Modifier
@@ -112,8 +155,8 @@ fun LoginScreen(
                     Icon(
                         painter = painterResource(R.drawable.back_icon),
                         contentDescription = "Back Icon",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
                 Spacer(Modifier.height(30.dp))
@@ -189,7 +232,7 @@ fun LoginScreen(
 
                         Spacer(Modifier.height(19.dp))
 
-                        Text(text = navigationToRegister)
+                        Text(text = navigationToRegisterLink)
                     }
                 }
             }
@@ -202,14 +245,15 @@ fun LoginScreen(
 @Composable
 private fun LoginScreenPreview() {
     SwaraBoxTheme {
-        LoginScreen(
+        LoginContent(
+            onBack = {},
             email = "",
             onEmailChange = {},
+            passwordFocusRequester = remember { FocusRequester() },
             password = "",
             onPasswordChange = {},
-            onNavigateToRegister = {},
             onLogin = {},
-            onBack = {}
+            onNavigateToRegister = {}
         )
     }
 }

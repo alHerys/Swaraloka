@@ -15,12 +15,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.pamt.swarabox.R
 import com.pamt.swarabox.data.model.SongModel
@@ -38,18 +40,54 @@ import com.pamt.swarabox.data.model.UserModel
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.CircleContainer
 import com.pamt.swarabox.ui.components.SongTile
+import com.pamt.swarabox.ui.navigation.EditProfile
+import com.pamt.swarabox.ui.navigation.PlayMusic
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
+import com.pamt.swarabox.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.viewmodel.player.PlayerViewModel
+import com.pamt.swarabox.viewmodel.profile.ProfileUiState
+import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
+    profileViewModel: ProfileViewModel,
+    authViewModel: AuthViewModel,
+    navController: NavController,
+    playerViewModel: PlayerViewModel
+) {
+    val mySongs by profileViewModel.mySongs.collectAsStateWithLifecycle()
+    val isRefreshingSongs by profileViewModel.isRefreshingSongs.collectAsStateWithLifecycle()
+    val uiState by profileViewModel.uiState.collectAsStateWithLifecycle()
+
+    ProfileContent(
+        user = (uiState as? ProfileUiState.Success)?.user ?: UserModel.dummy,
+        listMySong = mySongs,
+        isRefreshing = isRefreshingSongs,
+        onRefresh = { profileViewModel.fetchMySongs(forceRefresh = true) },
+        onLogout = {
+            profileViewModel.resetUiState()
+            authViewModel.resetFormState()
+            authViewModel.logout()
+        },
+        onNavigateToAbout = {},
+        onNavigateToEdit = { currentUser ->
+            navController.navigate(EditProfile(currentUser))
+        },
+        onNavigateToPlay = { song ->
+            navController.navigate(PlayMusic(song))
+        }
+    )
+}
+
+@Composable
+fun ProfileContent(
     user: UserModel,
     listMySong: List<SongModel>,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
     onLogout: () -> Unit,
     onNavigateToAbout: () -> Unit,
-    onNavigateToEdit: () -> Unit,
+    onNavigateToEdit: (UserModel) -> Unit,
     onNavigateToPlay: (SongModel) -> Unit,
 ) {
     PullToRefreshBox(
@@ -72,7 +110,7 @@ fun ProfileScreen(
                     CircleContainer(
                         size = 38.dp,
                         backgroundColor = Color(0xFF343434),
-                        onClick = onNavigateToEdit
+                        onClick = { onNavigateToEdit(user) }
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.edit),
@@ -202,9 +240,9 @@ fun ProfileScreen(
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-private fun ProfileScreenPreview() {
+private fun ProfileContentPreview() {
     SwaraBoxTheme {
-        ProfileScreen(
+        ProfileContent(
             user = UserModel.dummy,
             listMySong = SongModel.dummyList,
             isRefreshing = false,

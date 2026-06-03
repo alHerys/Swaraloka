@@ -22,6 +22,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,38 +33,84 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.pamt.swarabox.R
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.ui.components.CircleContainer
 import com.pamt.swarabox.ui.components.SongTile
+import com.pamt.swarabox.ui.navigation.EditSong
+import com.pamt.swarabox.ui.navigation.PlayMusic
 import com.pamt.swarabox.ui.theme.formatTime
 import com.pamt.swarabox.ui.theme.yellow
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
+import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
+import com.pamt.swarabox.viewmodel.song.SongViewModel
 
 @Composable
 fun PlayMusicScreen(
-    playerViewModel: PlayerViewModel,
     song: SongModel,
-    similarSongs: List<SongModel>,
-    onNavigateToPlay: (SongModel) -> Unit,
-    onNavigateToEdit: (SongModel) -> Unit,
     userId: String,
-    onBack: () -> Unit
+    playerViewModel: PlayerViewModel,
+    navController: NavController,
+    songViewModel: SongViewModel,
 ) {
     val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
     val currentPosition by playerViewModel.currentPosition.collectAsStateWithLifecycle()
     val duration by playerViewModel.duration.collectAsStateWithLifecycle()
+    val similarSongs by songViewModel.songs.collectAsStateWithLifecycle()
 
     val similarSongsFiltered = similarSongs
         .filter { it.id != song.id }
         .take(5)
 
+    LaunchedEffect(song) {
+        playerViewModel.playSong(song)
+    }
+
+    PlayMusicContent(
+        song = song,
+        userId = userId,
+        duration = duration,
+        currentPosition = currentPosition,
+        isPlaying = isPlaying,
+        similiarSong = similarSongsFiltered,
+        onBack = { navController.popBackStack() },
+        onTogglePlayPause = { playerViewModel.togglePlayPause() },
+        onNavigateToEdit = { songItem ->
+            navController.navigate(EditSong(songItem))
+        },
+        onNavigateToPlay = { songItem ->
+            navController.navigate(PlayMusic(songItem)) {
+                popUpTo<PlayMusic> {
+                    inclusive = true
+                }
+            }
+        },
+        onSeekTo = { newPosition ->
+            playerViewModel.seekTo(newPosition)
+        },
+    )
+}
+
+@Composable
+fun PlayMusicContent(
+    song: SongModel,
+    userId: String,
+    duration: Long,
+    currentPosition: Long,
+    isPlaying: Boolean,
+    similiarSong: List<SongModel>,
+    onBack: () -> Unit,
+    onNavigateToEdit: (SongModel) -> Unit,
+    onNavigateToPlay: (SongModel) -> Unit,
+    onTogglePlayPause: () -> Unit,
+    onSeekTo: (Long) -> Unit
+) {
     // TODO: Implement dynamic background based on thumbnail music that are currently playing
     Column(
         modifier = Modifier
@@ -99,7 +146,6 @@ fun PlayMusicScreen(
                     size = 40.dp,
                     backgroundColor = Color(0x33FFFFFF),
                     onClick = {
-                        playerViewModel.pause()
                         onNavigateToEdit(song)
                     }
                 ) {
@@ -162,7 +208,7 @@ fun PlayMusicScreen(
                 value = if (duration > 0) currentPosition.toFloat() / duration else 0f,
                 onValueChange = {
                     val newPos = (it * duration).toLong()
-                    playerViewModel.seekTo(newPos)
+                    onSeekTo(newPos)
                 },
                 colors = SliderDefaults.colors(
                     thumbColor = Color.White,
@@ -215,7 +261,7 @@ fun PlayMusicScreen(
                     tint = Color.White,
                     modifier = Modifier
                         .size(30.dp)
-                        .clickable { playerViewModel.seekTo(0L) }
+                        .clickable { onSeekTo(0L) }
                 )
 
                 Spacer(modifier = Modifier.width(45.dp))
@@ -223,9 +269,7 @@ fun PlayMusicScreen(
                 CircleContainer(
                     size = 50.dp,
                     backgroundColor = yellow,
-                    onClick = {
-                        playerViewModel.togglePlayPause()
-                    }
+                    onClick = onTogglePlayPause
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(
@@ -246,7 +290,7 @@ fun PlayMusicScreen(
                     modifier = Modifier
                         .size(30.dp)
                         .clickable {
-                            onNavigateToPlay(similarSongsFiltered.random())
+                            onNavigateToPlay(similiarSong.random())
                         }
                 )
             }
@@ -263,7 +307,7 @@ fun PlayMusicScreen(
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                similarSongsFiltered.forEach { songItem ->
+                similiarSong.forEach { songItem ->
                     SongTile(
                         song = songItem,
                         containerColor = Color(0xFF1A1A1A),
