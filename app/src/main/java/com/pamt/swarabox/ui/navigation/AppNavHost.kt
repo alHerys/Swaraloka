@@ -69,16 +69,18 @@ fun AppNavHost(
         composable<EditSong>(
             typeMap = mapOf(typeOf<SongModel>() to SongModelNavType)
         ) { backStackEntry ->
-            val args = backStackEntry.toRoute<EditSong>()
+            val currentSong = backStackEntry.toRoute<EditSong>().currentSong
             EditSongScreen(
-                currentSong = args.currentSong,
+                currentSong = currentSong,
                 snackbarHostState = snackbarHostState,
                 navController = navController,
                 editSongViewModel = editSongViewModel
             )
         }
 
-        composable<Home> {
+        composable<Home> {backStackEntry ->
+            val isForcedRefresh = backStackEntry.toRoute<Home>().isForcedRefresh
+
             val songs by songViewModel.songs.collectAsStateWithLifecycle()
             val isRefreshing by songViewModel.isRefreshing.collectAsStateWithLifecycle()
 
@@ -90,7 +92,8 @@ fun AppNavHost(
                     playerViewModel.playSong(song)
                     navController.navigate(PlayMusic(song))
                 },
-                modifier = modifier
+                modifier = modifier,
+                isForcedRefresh = isForcedRefresh
             )
         }
 

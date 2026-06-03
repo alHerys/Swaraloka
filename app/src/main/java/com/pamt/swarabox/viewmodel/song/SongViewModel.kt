@@ -22,12 +22,12 @@ class SongViewModel(
     private val _uiState = MutableStateFlow<SongUiState>(SongUiState.Idle)
     val uiState: StateFlow<SongUiState> = _uiState.asStateFlow()
 
-    init {
-        fetchSongs()
-    }
-
     fun clearUiState() {
         _uiState.value = SongUiState.Idle
+    }
+
+    fun onIsRefreshingChange(value: Boolean) {
+        _isRefreshing.value = value
     }
 
     fun fetchSongs() {

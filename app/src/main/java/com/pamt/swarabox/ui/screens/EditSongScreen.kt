@@ -33,10 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,10 +75,12 @@ fun EditSongScreen(
     editSongViewModel: EditSongViewModel,
 ) {
     val editSongUiState by editSongViewModel.uiState.collectAsStateWithLifecycle()
-    var title by remember { mutableStateOf(currentSong.title) }
-    var selectedAudioUri by remember { mutableStateOf<Uri?>(null) }
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    var duration by remember { mutableStateOf<Long?>(null) }
+    val title by editSongViewModel.title.collectAsStateWithLifecycle()
+    val selectedAudioUri by editSongViewModel.selectedAudioUri.collectAsStateWithLifecycle()
+    val selectedImageUri by editSongViewModel.selectedImageUri.collectAsStateWithLifecycle()
+    val duration by editSongViewModel.duration.collectAsStateWithLifecycle()
+    val isPlaying by editSongViewModel.isPlaying.collectAsStateWithLifecycle()
+    val localPlayerCurrentPosition by editSongViewModel.currentPosition.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
 
@@ -89,17 +88,18 @@ fun EditSongScreen(
     val audioPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        if (uri != null) selectedAudioUri = uri
+        if (uri != null) editSongViewModel.onAudioChange(uri)
     }
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        if (uri != null) selectedImageUri = uri
+        if (uri != null) editSongViewModel.onImageChange(uri)
     }
 
-    var isPlaying by remember { mutableStateOf(false) }
-    var localPlayerCurrentPosition by remember { mutableLongStateOf(0L) }
+    LaunchedEffect(Unit) {
+        editSongViewModel.onTitleChange(currentSong.title)
+    }
 
     LaunchedEffect(selectedAudioUri) {
         if (selectedAudioUri != null) {
@@ -108,15 +108,13 @@ fun EditSongScreen(
         } else {
             localPlayer.stop()
             localPlayer.clearMediaItems()
-            localPlayerCurrentPosition = 0L
-            duration = 0L
         }
     }
 
     LaunchedEffect(isPlaying) {
         if (isPlaying) {
             while (isActive) {
-                localPlayerCurrentPosition = localPlayer.currentPosition
+                editSongViewModel.onCurrentPositionChange(localPlayer.currentPosition)
                 delay(1000)
             }
         }
@@ -130,9 +128,8 @@ fun EditSongScreen(
                     duration = SnackbarDuration.Short
                 )
             }
-            editSongViewModel.resetState()
 
-            navController.navigate(Home) {
+            navController.navigate(Home(isForcedRefresh = true)) {
                 popUpTo<EditSong> {
                     inclusive = true
                 }
@@ -142,13 +139,13 @@ fun EditSongScreen(
 
     DisposableEffect(Unit) {
         val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(isPlayingChanged: Boolean) {
-                isPlaying = isPlayingChanged
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                editSongViewModel.onIsPlayingChange(isPlaying)
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == Player.STATE_READY) {
-                    duration = localPlayer.duration.coerceAtLeast(0L)
+                    editSongViewModel.onDurationChange(localPlayer.duration.coerceAtLeast(0L))
                 }
             }
         }
@@ -158,11 +155,13 @@ fun EditSongScreen(
         onDispose {
             localPlayer.removeListener(listener)
             localPlayer.release()
+            editSongViewModel.resetState()
         }
     }
 
     EditSongContent(
         editSongUiState = editSongUiState,
+        oldTitle = currentSong.title,
         isPlaying = isPlaying,
         title = title,
         selectedAudioUri = selectedAudioUri,
@@ -183,20 +182,23 @@ fun EditSongScreen(
 
             editSongViewModel.updateSong(
                 songId = currentSong.id!!,
+                artistId = currentSong.artistId!!,
                 title = title,
                 audioBytes = audioBytes,
                 imageBytes = imageBytes,
                 duration = duration?.toInt(),
+                oldSongUrl = currentSong.songUrl,
+                oldThumbnailUrl = currentSong.thumbnailUrl,
             )
         },
         onAudioChange = { audioPicker.launch("audio/*") },
         onImageChange = { imagePicker.launch("image/*") },
         onTitleChange = { newTitle ->
-            title = newTitle
+            editSongViewModel.onTitleChange(newTitle)
         },
         onSeek = { newPosition ->
             localPlayer.seekTo(newPosition)
-            localPlayerCurrentPosition = newPosition
+            editSongViewModel.onCurrentPositionChange(newPosition)
         }
     )
 }
@@ -204,6 +206,7 @@ fun EditSongScreen(
 @Composable
 private fun EditSongContent(
     editSongUiState: EditSongUiState,
+    oldTitle: String,
     duration: Long?,
     title: String,
     selectedAudioUri: Uri?,
@@ -410,8 +413,9 @@ private fun EditSongContent(
                 containerColor = Color(0xFF007AFF),
                 textColor = Color.White,
                 enabled = (
-                        (title.isNotBlank() || selectedImageUri != null || selectedAudioUri != null)
-                                && editSongUiState !is EditSongUiState.Loading),
+                        (title.isNotBlank() && title.trim() != oldTitle || selectedImageUri != null || selectedAudioUri != null)
+                                && editSongUiState !is EditSongUiState.Loading
+                        ),
                 modifier = Modifier.width(175.dp)
             )
             Spacer(Modifier.height(40.dp))

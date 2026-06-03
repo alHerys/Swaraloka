@@ -26,20 +26,13 @@ class UploadViewModel(
         viewModelScope.launch {
             _uiState.value = UploadUiState.Loading
             try {
-                val audioUrl = repository.uploadAudio(artistId, audioBytes)
-
-                val thumbnailUrl = repository.uploadThumbnail(artistId, imageBytes)
-
-                val song = SongModel(
-                    artistId = artistId,
+                repository.insertSong(
                     title = title,
-                    songUrl = audioUrl,
-                    thumbnailUrl = thumbnailUrl,
-                    songDuration = duration
+                    artistId = artistId,
+                    audioBytes = audioBytes,
+                    imageBytes = imageBytes,
+                    duration = duration
                 )
-
-                repository.insertSong(song)
-
                 _uiState.value = UploadUiState.Success
             } catch (e: Exception) {
                 _uiState.value = UploadUiState.Error(e.message ?: "Failed to upload song")

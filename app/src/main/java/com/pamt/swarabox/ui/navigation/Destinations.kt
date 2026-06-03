@@ -4,7 +4,9 @@ import com.pamt.swarabox.data.model.SongModel
 import kotlinx.serialization.Serializable
 
 @Serializable
-object Home
+data class Home(
+    val isForcedRefresh: Boolean = false
+)
 
 @Serializable
 object Upload

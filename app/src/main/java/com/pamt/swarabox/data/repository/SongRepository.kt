@@ -14,25 +14,31 @@ class SongRepository {
         private var cachedSongs: List<SongModel> = emptyList()
     }
 
-    suspend fun uploadAudio(userId: String, audioBytes: ByteArray): String {
-        val fileName = "audio_${userId}_${UUID.randomUUID()}.mp3"
-        val bucket = supabase.storage.from("lagu")
-        bucket.upload(fileName, audioBytes) {
-            upsert = true
-        }
-        return bucket.publicUrl(fileName)
-    }
+    suspend fun insertSong(
+        title: String,
+        artistId: String,
+        audioBytes: ByteArray,
+        imageBytes: ByteArray,
+        duration: Int
+    ) {
+        val audioUrl = uploadOrReplaceAudio(
+            userId = artistId,
+            audioBytes = audioBytes
+        )
 
-    suspend fun uploadThumbnail(userId: String, imageBytes: ByteArray): String {
-        val fileName = "thumb_${userId}_${UUID.randomUUID()}.png"
-        val bucket = supabase.storage.from("gambar")
-        bucket.upload(fileName, imageBytes) {
-            upsert = true
-        }
-        return bucket.publicUrl(fileName)
-    }
+        val thumbnailUrl = uploadOrReplaceThumbnail(
+            userId = artistId,
+            imageBytes = imageBytes
+        )
 
-    suspend fun insertSong(song: SongModel) {
+        val song = SongModel(
+            artistId = artistId,
+            title = title,
+            songUrl = audioUrl,
+            thumbnailUrl = thumbnailUrl,
+            songDuration = duration
+        )
+
         supabase.from("song").insert(song)
     }
 
@@ -43,10 +49,100 @@ class SongRepository {
         return cachedSongs
     }
 
-    suspend fun fetchSongsByArtist(artistId: String, forceRefresh: Boolean = false): List<SongModel> {
+    suspend fun fetchSongsByArtist(
+        artistId: String,
+        forceRefresh: Boolean = false
+    ): List<SongModel> {
         if (forceRefresh || cachedSongs.isEmpty()) {
             fetchAllSongs(forceRefresh = true)
         }
         return cachedSongs.filter { it.artistId == artistId }
+    }
+
+    suspend fun updateSong(
+        songId: String,
+        artistId: String,
+        title: String?,
+        oldSongUrl: String,
+        oldThumbnailUrl: String,
+        audioBytes: ByteArray?,
+        imageBytes: ByteArray?,
+        duration: Int?
+    ) {
+        val songUrl = audioBytes?.let {
+            uploadOrReplaceAudio(
+                userId = artistId,
+                audioBytes = it,
+                oldSongUrl = oldSongUrl
+            )
+        }
+        val thumbnailUrl = imageBytes?.let {
+            uploadOrReplaceThumbnail(
+                userId = artistId,
+                imageBytes = it,
+                oldThumbnailUrl = oldThumbnailUrl
+            )
+        }
+        supabase.from("song").update({
+            title?.let { set("title", it) }
+            thumbnailUrl?.let { set("thumbnail_url", it) }
+            songUrl?.let {
+                set("song_url", it)
+                set("song_duration", duration)
+            }
+        }) {
+            filter {
+                eq("song_id", songId)
+            }
+        }
+    }
+
+    suspend fun deleteSong(
+        songId: String,
+        songUrl: String,
+        thumbnailUrl: String
+    ) {
+        supabase.from("song").delete {
+            filter { eq("song_id", songId) }
+        }
+
+        deleteFile("lagu", songUrl)
+        deleteFile("gambar", thumbnailUrl)
+    }
+
+    private suspend fun uploadOrReplaceAudio(
+        userId: String,
+        oldSongUrl: String? = null,
+        audioBytes: ByteArray
+    ): String {
+        val fileName = oldSongUrl?.substringAfter("/lagu/")
+            ?: "audio_${userId}_${UUID.randomUUID()}.mp3"
+        val bucket = supabase.storage.from("lagu")
+        bucket.upload(fileName, audioBytes) {
+            upsert = true
+        }
+        return bucket.publicUrl(fileName)
+    }
+
+    private suspend fun uploadOrReplaceThumbnail(
+        userId: String,
+        oldThumbnailUrl: String? = null,
+        imageBytes: ByteArray
+    ): String {
+        val filePath = oldThumbnailUrl?.substringAfter("/gambar/")
+            ?: "thumb_${userId}_${UUID.randomUUID()}.png"
+        val bucket = supabase.storage.from("gambar")
+        bucket.upload(filePath, imageBytes) {
+            upsert = true
+        }
+        return bucket.publicUrl(filePath)
+    }
+
+    private suspend fun deleteFile(
+        bucket: String,
+        fileUrl: String
+    ) {
+        val filePath = fileUrl.substringAfter("/${bucket}/")
+        supabase.storage.from(bucket).delete(filePath)
     }
 }

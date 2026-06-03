@@ -23,9 +23,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,11 +49,18 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     songs: List<SongModel>,
     isRefreshing: Boolean,
+    isForcedRefresh: Boolean = false,
     onRefresh: () -> Unit,
     onNavigateToPlay: (SongModel) -> Unit,
 ) {
     val featuredSong = songs.firstOrNull()
     val otherSongs = if (songs.size > 1) songs.drop(1) else emptyList()
+
+    LaunchedEffect(isForcedRefresh) {
+        if (isForcedRefresh) {
+            onRefresh()
+        }
+    }
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,

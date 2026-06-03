@@ -121,7 +121,7 @@ fun UploadSongScreen(
             }
             uploadViewModel.resetState()
 
-            navController.navigate(Home) {
+            navController.navigate(Home(isForcedRefresh = true)) {
                 popUpTo<Upload> {
                     inclusive = true
                 }
@@ -133,6 +133,7 @@ fun UploadSongScreen(
         if (selectedAudioUri != null) {
             localPlayer.setMediaItem(MediaItem.fromUri(selectedAudioUri!!))
             localPlayer.prepare()
+            localPlayer.play()
         } else {
             localPlayer.stop()
             localPlayer.clearMediaItems()

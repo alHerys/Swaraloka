@@ -118,7 +118,7 @@ fun AppHomeLayout(
                 uploadViewModel = uploadViewModel,
                 songViewModel = songViewModel,
                 snackbarHostState = snackbarHostState,
-                startDestination = Home,
+                startDestination = Home(),
                 authUiState = authUiState,
                 profileUiState = profileUiState,
                 uploadUiState = uploadUiState,

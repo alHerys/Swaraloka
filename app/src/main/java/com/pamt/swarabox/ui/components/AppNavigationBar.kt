@@ -36,8 +36,8 @@ fun AppNavigationBar(
         NavigationBarItem(
             selected = currentDestination?.route?.contains("Home") == true,
             onClick = {
-                navController.navigate(Home) {
-                    popUpTo(Home) { inclusive = false }
+                navController.navigate(Home()) {
+                    popUpTo<Home> { inclusive = false }
                 }
             },
             icon = {
@@ -58,7 +58,7 @@ fun AppNavigationBar(
             selected = currentDestination?.route?.contains("Upload") == true,
             onClick = {
                 navController.navigate(Upload) {
-                    popUpTo(Home) { inclusive = false }
+                    popUpTo<Home> { inclusive = false }
                 }
             },
             icon = {
@@ -99,7 +99,7 @@ fun AppNavigationBar(
             selected = currentDestination?.route?.contains("Profile") == true,
             onClick = {
                 navController.navigate(Profile) {
-                    popUpTo(Home) { inclusive = false }
+                    popUpTo<Home> { inclusive = false }
                 }
             },
             icon = {
