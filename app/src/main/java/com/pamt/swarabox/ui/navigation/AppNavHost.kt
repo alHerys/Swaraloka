@@ -86,6 +86,7 @@ fun AppNavHost(
 
             HomeScreen(
                 songs = songs,
+                playerViewModel = playerViewModel,
                 isRefreshing = isRefreshing,
                 onRefresh = { songViewModel.fetchSongs() },
                 onNavigateToPlay = { song ->

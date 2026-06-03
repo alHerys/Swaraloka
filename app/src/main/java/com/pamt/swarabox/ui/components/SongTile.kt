@@ -45,7 +45,7 @@ fun SongTile(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AsyncImage(
-                model = song.thumbnailUrl,
+                model = "${song.thumbnailUrl}?t=${System.currentTimeMillis()}",
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)

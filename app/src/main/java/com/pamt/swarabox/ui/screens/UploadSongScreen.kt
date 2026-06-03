@@ -64,15 +64,14 @@ fun UploadSongScreen(
 ) {
     val context = LocalContext.current
     val songUploadUiState by uploadViewModel.uiState.collectAsStateWithLifecycle()
-
-    var title by remember { mutableStateOf("") }
-    var selectedAudioUri by remember { mutableStateOf<Uri?>(null) }
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val title by uploadViewModel.title.collectAsStateWithLifecycle()
+    val selectedAudioUri by uploadViewModel.selectedAudioUri.collectAsStateWithLifecycle()
+    val selectedImageUri by uploadViewModel.selectedImageUri.collectAsStateWithLifecycle()
+    val isLocalPlayerPlaying by uploadViewModel.isLocalPlayerPlaying.collectAsStateWithLifecycle()
+    val currentPosition by uploadViewModel.currentPosition.collectAsStateWithLifecycle()
+    val duration by uploadViewModel.duration.collectAsStateWithLifecycle()
 
     val localPlayer = remember { ExoPlayer.Builder(context).build() }
-    var isLocalPlayerPlaying by remember { mutableStateOf(false) }
-    var currentPosition by remember { mutableLongStateOf(0L) }
-    var duration by remember { mutableLongStateOf(0L) }
 
     val artistId = (profileUiState as? ProfileUiState.Success)?.user?.userId ?: ""
 
@@ -80,7 +79,7 @@ fun UploadSongScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
-            selectedAudioUri = uri
+            uploadViewModel.onAudioSelected(uri)
         }
     }
 
@@ -88,44 +87,7 @@ fun UploadSongScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
-            selectedImageUri = uri
-        }
-    }
-
-    DisposableEffect(Unit) {
-        val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(isPlayingChanged: Boolean) {
-                isLocalPlayerPlaying = isPlayingChanged
-            }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == Player.STATE_READY) {
-                    duration = localPlayer.duration.coerceAtLeast(0L)
-                }
-            }
-        }
-        localPlayer.addListener(listener)
-        onDispose {
-            localPlayer.removeListener(listener)
-            localPlayer.release()
-        }
-    }
-
-    LaunchedEffect(songUploadUiState) {
-        if (songUploadUiState is UploadUiState.Success) {
-            launch {
-                snackbarHostState.showSnackbar(
-                    message = "Song Uploaded Successfully",
-                    duration = SnackbarDuration.Short
-                )
-            }
-            uploadViewModel.resetState()
-
-            navController.navigate(Home(isForcedRefresh = true)) {
-                popUpTo<Upload> {
-                    inclusive = true
-                }
-            }
+            uploadViewModel.onImageSelected(uri)
         }
     }
 
@@ -137,23 +99,121 @@ fun UploadSongScreen(
         } else {
             localPlayer.stop()
             localPlayer.clearMediaItems()
-            currentPosition = 0L
-            duration = 0L
         }
     }
 
     LaunchedEffect(isLocalPlayerPlaying) {
         if (isLocalPlayerPlaying) {
             while (isActive) {
-                currentPosition = localPlayer.currentPosition
+                uploadViewModel.onCurrentPositionChange(localPlayer.currentPosition)
                 delay(1000)
             }
         }
     }
 
+    LaunchedEffect(songUploadUiState) {
+        if (songUploadUiState is UploadUiState.Success) {
+            launch {
+                snackbarHostState.showSnackbar(
+                    message = "Song Uploaded Successfully",
+                    duration = SnackbarDuration.Short
+                )
+            }
+
+            navController.navigate(Home(isForcedRefresh = true)) {
+                popUpTo<Upload> {
+                    inclusive = true
+                }
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(isPlayingChanged: Boolean) {
+                uploadViewModel.onIsLocalPlayerPlayingChange(isPlayingChanged)
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    uploadViewModel.onDurationChange(localPlayer.duration.coerceAtLeast(0L))
+                }
+            }
+        }
+        localPlayer.addListener(listener)
+        onDispose {
+            localPlayer.removeListener(listener)
+            localPlayer.release()
+            uploadViewModel.resetState()
+        }
+    }
+
+    UploadSongContent(
+        title = title,
+        onTitleChange = { uploadViewModel.onTitleChange(it) },
+        selectedAudioUri = selectedAudioUri,
+        onAudioSelected = { audioPicker.launch("audio/*") },
+        onAudioRemove = { uploadViewModel.onAudioRemove() },
+        selectedImageUri = selectedImageUri,
+        onImageSelected = { imagePicker.launch("image/*") },
+        onImageRemove = { uploadViewModel.onImageRemove() },
+        isLocalPlayerPlaying = isLocalPlayerPlaying,
+        currentPosition = currentPosition,
+        duration = duration,
+        songUploadUiState = songUploadUiState,
+        onPlayPauseClick = {
+            if (localPlayer.isPlaying) {
+                localPlayer.pause()
+            } else {
+                playerViewModel.pause()
+                localPlayer.play()
+            }
+        },
+        onSeek = { 
+            localPlayer.seekTo(it)
+            uploadViewModel.onCurrentPositionChange(it)
+        },
+        onUploadClick = {
+            val audioBytes = selectedAudioUri?.let { uri ->
+                context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+            }
+            val imageBytes = selectedImageUri?.let { uri ->
+                context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+            }
+
+            if (audioBytes != null && imageBytes != null) {
+                uploadViewModel.uploadSong(
+                    title = title,
+                    artistId = artistId,
+                    audioBytes = audioBytes,
+                    imageBytes = imageBytes,
+                    duration = duration.toInt()
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun UploadSongContent(
+    title: String,
+    onTitleChange: (String) -> Unit,
+    selectedAudioUri: Uri?,
+    onAudioSelected: () -> Unit,
+    onAudioRemove: () -> Unit,
+    selectedImageUri: Uri?,
+    onImageSelected: () -> Unit,
+    onImageRemove: () -> Unit,
+    isLocalPlayerPlaying: Boolean,
+    currentPosition: Long,
+    duration: Long,
+    songUploadUiState: UploadUiState,
+    onPlayPauseClick: () -> Unit,
+    onSeek: (Long) -> Unit,
+    onUploadClick: () -> Unit
+) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         Column(
             modifier = Modifier
@@ -197,7 +257,7 @@ fun UploadSongScreen(
                             .size(24.dp)
                             .clip(CircleShape)
                             .background(Color.Black.copy(alpha = 0.5f))
-                            .clickable { selectedImageUri = null },
+                            .clickable { onImageRemove() },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -212,7 +272,7 @@ fun UploadSongScreen(
                 DashedSelector(
                     label = "Select Image",
                     icon = ImageVector.vectorResource(id = R.drawable.image_upload),
-                    onClick = { imagePicker.launch("image/*") }
+                    onClick = onImageSelected
                 )
             }
 
@@ -223,8 +283,7 @@ fun UploadSongScreen(
                         value = if (duration > 0) currentPosition.toFloat() / duration else 0f,
                         onValueChange = {
                             val newPos = (it * duration).toLong()
-                            localPlayer.seekTo(newPos)
-                            currentPosition = newPos
+                            onSeek(newPos)
                         },
                         colors = SliderDefaults.colors(
                             thumbColor = Color.White,
@@ -256,14 +315,7 @@ fun UploadSongScreen(
                         CircleContainer(
                             size = 50.dp,
                             backgroundColor = MaterialTheme.colorScheme.primary,
-                            onClick = {
-                                if (localPlayer.isPlaying) {
-                                    localPlayer.pause()
-                                } else {
-                                    playerViewModel.pause()
-                                    localPlayer.play()
-                                }
-                            }
+                            onClick = onPlayPauseClick
                         ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(
@@ -279,7 +331,7 @@ fun UploadSongScreen(
                             modifier = Modifier.weight(1f),
                             contentAlignment = Alignment.CenterStart
                         ) {
-                            IconButton(onClick = { selectedAudioUri = null }) {
+                            IconButton(onClick = onAudioRemove) {
                                 Icon(
                                     imageVector = ImageVector.vectorResource(id = R.drawable.cancel),
                                     contentDescription = "Replace Audio",
@@ -295,7 +347,7 @@ fun UploadSongScreen(
                 DashedSelector(
                     label = "Select .mp3 or .m4a",
                     icon = ImageVector.vectorResource(id = R.drawable.song_upload),
-                    onClick = { audioPicker.launch("audio/*") }
+                    onClick = onAudioSelected
                 )
 
                 Spacer(modifier = Modifier.height(28.dp))
@@ -303,7 +355,7 @@ fun UploadSongScreen(
 
             AppTextField(
                 value = title,
-                onValueChange = { title = it },
+                onValueChange = onTitleChange,
                 label = "Title",
                 placeholder = "Enter song title"
             )
@@ -311,24 +363,7 @@ fun UploadSongScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             AppButton(
-                onClick = {
-                    val audioBytes = selectedAudioUri?.let { uri ->
-                        context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                    }
-                    val imageBytes = selectedImageUri?.let { uri ->
-                        context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                    }
-
-                    if (audioBytes != null && imageBytes != null) {
-                        uploadViewModel.uploadSong(
-                            title = title,
-                            artistId = artistId,
-                            audioBytes = audioBytes,
-                            imageBytes = imageBytes,
-                            duration = duration.toInt()
-                        )
-                    }
-                },
+                onClick = onUploadClick,
                 text = "Upload",
                 containerColor = Color(0xFF007AFF),
                 textColor = Color.White,
@@ -342,4 +377,5 @@ fun UploadSongScreen(
             LoadingOverlay()
         }
     }
+
 }
