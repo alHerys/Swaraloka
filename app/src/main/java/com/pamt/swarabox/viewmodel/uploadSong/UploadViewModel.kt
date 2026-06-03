@@ -1,4 +1,4 @@
-package com.pamt.swarabox.viewmodel.upload
+package com.pamt.swarabox.viewmodel.uploadSong
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,6 +6,7 @@ import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.repository.SongRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class UploadViewModel(
@@ -13,7 +14,7 @@ class UploadViewModel(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UploadUiState>(UploadUiState.Idle)
-    val uiState: StateFlow<UploadUiState> = _uiState
+    val uiState: StateFlow<UploadUiState> = _uiState.asStateFlow()
 
     fun uploadSong(
         title: String,

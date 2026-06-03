@@ -21,12 +21,13 @@ import com.pamt.swarabox.ui.navigation.AppHomeLayout
 import com.pamt.swarabox.viewmodel.auth.AuthCheckState
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.viewmodel.editSong.EditSongViewModel
 import com.pamt.swarabox.viewmodel.song.SongUiState
 import com.pamt.swarabox.viewmodel.song.SongViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
-import com.pamt.swarabox.viewmodel.upload.UploadUiState
-import com.pamt.swarabox.viewmodel.upload.UploadViewModel
+import com.pamt.swarabox.viewmodel.uploadSong.UploadUiState
+import com.pamt.swarabox.viewmodel.uploadSong.UploadViewModel
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import kotlinx.coroutines.launch
 
@@ -36,7 +37,8 @@ fun AppEntryPoint(
     profileViewModel: ProfileViewModel = viewModel(),
     playerViewModel: PlayerViewModel = viewModel(),
     uploadViewModel: UploadViewModel = viewModel(),
-    songViewModel: SongViewModel = viewModel()
+    songViewModel: SongViewModel = viewModel(),
+    editSongViewModel: EditSongViewModel = viewModel(),
 ) {
     val authCheckState by authViewModel.authCheckState.collectAsStateWithLifecycle()
     val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
@@ -114,6 +116,7 @@ fun AppEntryPoint(
                 playerViewModel = playerViewModel,
                 uploadViewModel = uploadViewModel,
                 songViewModel = songViewModel,
+                editSongViewModel = editSongViewModel,
                 authUiState = authUiState,
                 profileUiState = profileUiState,
                 snackbarHostState = snackbarHostState,
@@ -132,7 +135,8 @@ fun AppEntryPoint(
                 snackbarHostState = snackbarHostState,
                 authUiState = authUiState,
                 profileUiState = profileUiState,
-                uploadUiState = uploadUiState
+                uploadUiState = uploadUiState,
+                editSongViewModel = editSongViewModel
             )
         }
 

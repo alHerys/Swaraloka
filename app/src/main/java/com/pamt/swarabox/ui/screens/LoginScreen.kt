@@ -112,8 +112,8 @@ fun LoginScreen(
                     Icon(
                         painter = painterResource(R.drawable.back_icon),
                         contentDescription = "Back Icon",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
                     )
                 }
                 Spacer(Modifier.height(30.dp))

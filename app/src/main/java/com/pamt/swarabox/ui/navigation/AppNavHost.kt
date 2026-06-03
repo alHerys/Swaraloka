@@ -26,6 +26,7 @@ import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.model.SongModelNavType
 import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.ui.screens.EditProfileScreen
+import com.pamt.swarabox.ui.screens.EditSongScreen
 import com.pamt.swarabox.ui.screens.HomeScreen
 import com.pamt.swarabox.ui.screens.LandingScreen
 import com.pamt.swarabox.ui.screens.LoginScreen
@@ -33,14 +34,15 @@ import com.pamt.swarabox.ui.screens.PlayMusicScreen
 import com.pamt.swarabox.ui.screens.ProfileScreen
 import com.pamt.swarabox.ui.screens.RegisterEmailPasswordScreen
 import com.pamt.swarabox.ui.screens.RegisterNameScreen
-import com.pamt.swarabox.ui.screens.UploadScreen
+import com.pamt.swarabox.ui.screens.UploadSongScreen
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.viewmodel.editSong.EditSongViewModel
 import com.pamt.swarabox.viewmodel.song.SongViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
-import com.pamt.swarabox.viewmodel.upload.UploadUiState
-import com.pamt.swarabox.viewmodel.upload.UploadViewModel
+import com.pamt.swarabox.viewmodel.uploadSong.UploadUiState
+import com.pamt.swarabox.viewmodel.uploadSong.UploadViewModel
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import kotlin.reflect.typeOf
 
@@ -55,6 +57,7 @@ fun AppNavHost(
     authUiState: AuthUiState,
     profileUiState: ProfileUiState,
     uploadUiState: UploadUiState,
+    editSongViewModel: EditSongViewModel,
     snackbarHostState: SnackbarHostState,
     startDestination: Any,
     modifier: Modifier = Modifier
@@ -63,6 +66,18 @@ fun AppNavHost(
         navController = navController,
         startDestination = startDestination,
     ) {
+        composable<EditSong>(
+            typeMap = mapOf(typeOf<SongModel>() to SongModelNavType)
+        ) { backStackEntry ->
+            val args = backStackEntry.toRoute<EditSong>()
+            EditSongScreen(
+                currentSong = args.currentSong,
+                snackbarHostState = snackbarHostState,
+                navController = navController,
+                editSongViewModel = editSongViewModel
+            )
+        }
+
         composable<Home> {
             val songs by songViewModel.songs.collectAsStateWithLifecycle()
             val isRefreshing by songViewModel.isRefreshing.collectAsStateWithLifecycle()
@@ -102,11 +117,14 @@ fun AppNavHost(
                         }
                     }
                 },
+                onNavigateToEdit = { currentSong ->
+                    navController.navigate(EditSong(currentSong))
+                },
             )
         }
 
         composable<Upload> {
-            UploadScreen(
+            UploadSongScreen(
                 profileUiState = profileUiState,
                 playerViewModel = playerViewModel,
                 uploadViewModel = uploadViewModel,

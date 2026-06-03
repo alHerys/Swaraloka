@@ -1,4 +1,4 @@
-package com.pamt.swarabox.viewmodel.upload
+package com.pamt.swarabox.viewmodel.uploadSong
 
 sealed class UploadUiState {
     object Idle : UploadUiState()

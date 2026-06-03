@@ -52,6 +52,7 @@ fun PlayMusicScreen(
     song: SongModel,
     similarSongs: List<SongModel>,
     onNavigateToPlay: (SongModel) -> Unit,
+    onNavigateToEdit: (SongModel) -> Unit,
     userId: String,
     onBack: () -> Unit
 ) {
@@ -97,7 +98,10 @@ fun PlayMusicScreen(
                 CircleContainer(
                     size = 40.dp,
                     backgroundColor = Color(0x33FFFFFF),
-                    onClick = { /* TODO: EDIT SONG FUNCTIONALITY */ }
+                    onClick = {
+                        playerViewModel.pause()
+                        onNavigateToEdit(song)
+                    }
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.edit),

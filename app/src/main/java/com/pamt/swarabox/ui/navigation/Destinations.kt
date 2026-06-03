@@ -31,3 +31,8 @@ object Profile
 
 @Serializable
 object EditProfile
+
+@Serializable
+data class EditSong(
+    val currentSong: SongModel
+)

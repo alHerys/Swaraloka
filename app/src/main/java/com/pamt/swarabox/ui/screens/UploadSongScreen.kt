@@ -47,15 +47,15 @@ import com.pamt.swarabox.ui.components.DashedSelector
 import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.ui.theme.formatTime
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
-import com.pamt.swarabox.viewmodel.upload.UploadUiState
-import com.pamt.swarabox.viewmodel.upload.UploadViewModel
+import com.pamt.swarabox.viewmodel.uploadSong.UploadUiState
+import com.pamt.swarabox.viewmodel.uploadSong.UploadViewModel
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 @Composable
-fun UploadScreen(
+fun UploadSongScreen(
     profileUiState: ProfileUiState,
     playerViewModel: PlayerViewModel,
     uploadViewModel: UploadViewModel,
@@ -69,17 +69,14 @@ fun UploadScreen(
     var selectedAudioUri by remember { mutableStateOf<Uri?>(null) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
-
     val localPlayer = remember { ExoPlayer.Builder(context).build() }
-    var isPlaying by remember { mutableStateOf(false) }
+    var isLocalPlayerPlaying by remember { mutableStateOf(false) }
     var currentPosition by remember { mutableLongStateOf(0L) }
     var duration by remember { mutableLongStateOf(0L) }
 
     val artistId = (profileUiState as? ProfileUiState.Success)?.user?.userId ?: ""
 
-    val scrollState = rememberScrollState()
-
-    val audioLauncher = rememberLauncherForActivityResult(
+    val audioPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
@@ -87,7 +84,7 @@ fun UploadScreen(
         }
     }
 
-    val imageLauncher = rememberLauncherForActivityResult(
+    val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
@@ -98,7 +95,7 @@ fun UploadScreen(
     DisposableEffect(Unit) {
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlayingChanged: Boolean) {
-                isPlaying = isPlayingChanged
+                isLocalPlayerPlaying = isPlayingChanged
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
@@ -129,7 +126,6 @@ fun UploadScreen(
                     inclusive = true
                 }
             }
-
         }
     }
 
@@ -145,8 +141,8 @@ fun UploadScreen(
         }
     }
 
-    LaunchedEffect(isPlaying) {
-        if (isPlaying) {
+    LaunchedEffect(isLocalPlayerPlaying) {
+        if (isLocalPlayerPlaying) {
             while (isActive) {
                 currentPosition = localPlayer.currentPosition
                 delay(1000)
@@ -163,7 +159,7 @@ fun UploadScreen(
                 .fillMaxSize()
                 .background(Color(0x33000000))
                 .imePadding()
-                .verticalScroll(scrollState)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -193,7 +189,6 @@ fun UploadScreen(
                         contentScale = ContentScale.Crop
                     )
 
-
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -213,11 +208,10 @@ fun UploadScreen(
                     }
                 }
             } else {
-
                 DashedSelector(
                     label = "Select Image",
                     icon = ImageVector.vectorResource(id = R.drawable.image_upload),
-                    onClick = { imageLauncher.launch("image/*") }
+                    onClick = { imagePicker.launch("image/*") }
                 )
             }
 
@@ -251,14 +245,12 @@ fun UploadScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
 
                         Box(modifier = Modifier.weight(1f))
-
 
                         CircleContainer(
                             size = 50.dp,
@@ -274,14 +266,13 @@ fun UploadScreen(
                         ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(
-                                    if (isPlaying) R.drawable.pause else R.drawable.play
+                                    if (isLocalPlayerPlaying) R.drawable.pause else R.drawable.play
                                 ),
-                                contentDescription = if (isPlaying) "Pause" else "Play",
+                                contentDescription = if (isLocalPlayerPlaying) "Pause" else "Play",
                                 tint = Color.Black,
                                 modifier = Modifier.size(24.dp)
                             )
                         }
-
 
                         Box(
                             modifier = Modifier.weight(1f),
@@ -300,11 +291,10 @@ fun UploadScreen(
             } else {
                 Spacer(modifier = Modifier.height(21.dp))
 
-
                 DashedSelector(
                     label = "Select .mp3 or .m4a",
                     icon = ImageVector.vectorResource(id = R.drawable.song_upload),
-                    onClick = { audioLauncher.launch("audio/*") }
+                    onClick = { audioPicker.launch("audio/*") }
                 )
 
                 Spacer(modifier = Modifier.height(28.dp))

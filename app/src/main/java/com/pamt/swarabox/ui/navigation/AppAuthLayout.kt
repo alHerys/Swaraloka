@@ -16,12 +16,13 @@ import androidx.navigation.NavHostController
 import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.viewmodel.editSong.EditSongViewModel
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
 import com.pamt.swarabox.viewmodel.song.SongViewModel
-import com.pamt.swarabox.viewmodel.upload.UploadUiState
-import com.pamt.swarabox.viewmodel.upload.UploadViewModel
+import com.pamt.swarabox.viewmodel.uploadSong.UploadUiState
+import com.pamt.swarabox.viewmodel.uploadSong.UploadViewModel
 
 @Composable
 fun AppAuthLayout(
@@ -31,6 +32,7 @@ fun AppAuthLayout(
     playerViewModel: PlayerViewModel,
     uploadViewModel: UploadViewModel,
     songViewModel: SongViewModel,
+    editSongViewModel: EditSongViewModel,
     snackbarHostState: SnackbarHostState,
     authUiState: AuthUiState,
     profileUiState: ProfileUiState,
@@ -64,6 +66,7 @@ fun AppAuthLayout(
                 authUiState = authUiState,
                 profileUiState = profileUiState,
                 uploadUiState = uploadUiState,
+                editSongViewModel = editSongViewModel,
                 modifier = Modifier.padding(innerPadding),
             )
 

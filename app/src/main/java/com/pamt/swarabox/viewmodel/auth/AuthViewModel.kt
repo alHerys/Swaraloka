@@ -7,6 +7,7 @@ import com.pamt.swarabox.data.repository.AuthRepository
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class AuthViewModel(
@@ -14,22 +15,22 @@ class AuthViewModel(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
-    val uiState: StateFlow<AuthUiState> = _uiState
+    val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     private val _authCheckState = MutableStateFlow<AuthCheckState>(AuthCheckState.Checking)
-    val authCheckState: StateFlow<AuthCheckState> = _authCheckState
+    val authCheckState: StateFlow<AuthCheckState> = _authCheckState.asStateFlow()
 
     private val _email = MutableStateFlow("")
-    val email: StateFlow<String> = _email
+    val email: StateFlow<String> = _email.asStateFlow()
 
     private val _password = MutableStateFlow("")
-    val password: StateFlow<String> = _password
+    val password: StateFlow<String> = _password.asStateFlow()
 
     private val _confirmPassword = MutableStateFlow("")
-    val confirmPassword: StateFlow<String> = _confirmPassword
+    val confirmPassword: StateFlow<String> = _confirmPassword.asStateFlow()
 
     private val _name = MutableStateFlow("")
-    val name: StateFlow<String> = _name
+    val name: StateFlow<String> = _name.asStateFlow()
 
     init {
         observeAuthStatus()

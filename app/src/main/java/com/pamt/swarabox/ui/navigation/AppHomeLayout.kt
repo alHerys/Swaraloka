@@ -29,11 +29,12 @@ import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.ui.components.MiniPlayer
 import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.viewmodel.editSong.EditSongViewModel
 import com.pamt.swarabox.viewmodel.song.SongViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
-import com.pamt.swarabox.viewmodel.upload.UploadUiState
-import com.pamt.swarabox.viewmodel.upload.UploadViewModel
+import com.pamt.swarabox.viewmodel.uploadSong.UploadUiState
+import com.pamt.swarabox.viewmodel.uploadSong.UploadViewModel
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -44,6 +45,7 @@ fun AppHomeLayout(
     profileViewModel: ProfileViewModel,
     playerViewModel: PlayerViewModel,
     uploadViewModel: UploadViewModel,
+    editSongViewModel: EditSongViewModel,
     songViewModel: SongViewModel,
     authUiState: AuthUiState,
     profileUiState: ProfileUiState,
@@ -120,6 +122,7 @@ fun AppHomeLayout(
                 authUiState = authUiState,
                 profileUiState = profileUiState,
                 uploadUiState = uploadUiState,
+                editSongViewModel = editSongViewModel
             )
 
             val isLoading =

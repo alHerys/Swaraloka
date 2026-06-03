@@ -23,10 +23,10 @@ class ProfileViewModel(
 ) : ViewModel() {
 
     private val _name = MutableStateFlow("")
-    val name: StateFlow<String> =_name
+    val name: StateFlow<String> =_name.asStateFlow()
 
     private val _avatarUrl = MutableStateFlow("")
-    val avatarUrl: StateFlow<String> = _avatarUrl
+    val avatarUrl: StateFlow<String> = _avatarUrl.asStateFlow()
 
     private val _mySongs = MutableStateFlow<List<SongModel>>(emptyList())
     val mySongs: StateFlow<List<SongModel>> = _mySongs.asStateFlow()
@@ -38,7 +38,7 @@ class ProfileViewModel(
     val songErrorEvent: SharedFlow<String> = _songErrorEvent.asSharedFlow()
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Idle)
-    val uiState: StateFlow<ProfileUiState> = _uiState
+    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     private var lastSuccessUser: UserModel? = null
 
