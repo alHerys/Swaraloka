@@ -25,23 +25,23 @@ data class UserModel(
             avatarUrl = null,
             createdAt = Clock.System.now()
         )
-    }
-}
 
-val UserModelNavType = object : NavType<UserModel>(isNullableAllowed = false) {
-    override fun get(bundle: Bundle, key: String): UserModel? {
-        return bundle.getString(key)?.let { Json.decodeFromString(it) }
-    }
+        val UserModelNavType = object : NavType<UserModel>(isNullableAllowed = false) {
+            override fun get(bundle: Bundle, key: String): UserModel? {
+                return bundle.getString(key)?.let { Json.decodeFromString(it) }
+            }
 
-    override fun parseValue(value: String): UserModel {
-        return Json.decodeFromString(Uri.decode(value))
-    }
+            override fun parseValue(value: String): UserModel {
+                return Json.decodeFromString(Uri.decode(value))
+            }
 
-    override fun put(bundle: Bundle, key: String, value: UserModel) {
-        bundle.putString(key, Json.encodeToString(value))
-    }
+            override fun put(bundle: Bundle, key: String, value: UserModel) {
+                bundle.putString(key, Json.encodeToString(value))
+            }
 
-    override fun serializeAsValue(value: UserModel): String {
-        return Uri.encode(Json.encodeToString(value))
+            override fun serializeAsValue(value: UserModel): String {
+                return Uri.encode(Json.encodeToString(value))
+            }
+        }
     }
 }

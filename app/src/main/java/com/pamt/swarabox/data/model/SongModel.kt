@@ -53,23 +53,24 @@ data class SongModel(
                 createdAt = Instant.fromEpochMilliseconds(System.currentTimeMillis())
             )
         )
-    }
-}
 
-val SongModelNavType = object : NavType<SongModel>(isNullableAllowed = false) {
-    override fun get(bundle: Bundle, key: String): SongModel? {
-        return bundle.getString(key)?.let { Json.decodeFromString(it) }
-    }
+        val SongModelNavType = object : NavType<SongModel>(isNullableAllowed = false) {
+            override fun get(bundle: Bundle, key: String): SongModel? {
+                return bundle.getString(key)?.let { Json.decodeFromString(it) }
+            }
 
-    override fun parseValue(value: String): SongModel {
-        return Json.decodeFromString(Uri.decode(value))
-    }
+            override fun parseValue(value: String): SongModel {
+                return Json.decodeFromString(Uri.decode(value))
+            }
 
-    override fun put(bundle: Bundle, key: String, value: SongModel) {
-        bundle.putString(key, Json.encodeToString(value))
-    }
+            override fun put(bundle: Bundle, key: String, value: SongModel) {
+                bundle.putString(key, Json.encodeToString(value))
+            }
 
-    override fun serializeAsValue(value: SongModel): String {
-        return Uri.encode(Json.encodeToString(value))
+            override fun serializeAsValue(value: SongModel): String {
+                return Uri.encode(Json.encodeToString(value))
+            }
+        }
+
     }
 }

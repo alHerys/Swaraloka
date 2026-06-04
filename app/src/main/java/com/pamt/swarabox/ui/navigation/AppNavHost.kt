@@ -2,37 +2,31 @@ package com.pamt.swarabox.ui.navigation
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.pamt.swarabox.data.model.SongModel
-import com.pamt.swarabox.data.model.SongModelNavType
+import com.pamt.swarabox.data.model.UserModel
+import com.pamt.swarabox.ui.screens.EditProfileScreen
 import com.pamt.swarabox.ui.screens.EditSongScreen
 import com.pamt.swarabox.ui.screens.HomeScreen
 import com.pamt.swarabox.ui.screens.LandingScreen
 import com.pamt.swarabox.ui.screens.LoginScreen
 import com.pamt.swarabox.ui.screens.PlayMusicScreen
-import com.pamt.swarabox.ui.screens.ProfileContent
+import com.pamt.swarabox.ui.screens.ProfileScreen
 import com.pamt.swarabox.ui.screens.RegisterEmailPasswordScreen
 import com.pamt.swarabox.ui.screens.RegisterNameScreen
 import com.pamt.swarabox.ui.screens.UploadSongScreen
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
-import com.pamt.swarabox.viewmodel.song.SongViewModel
+import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
+import com.pamt.swarabox.viewmodel.song.SongViewModel
 import com.pamt.swarabox.viewmodel.uploadSong.UploadViewModel
-import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import kotlin.reflect.typeOf
-
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pamt.swarabox.data.model.UserModel
-import com.pamt.swarabox.data.model.UserModelNavType
-import com.pamt.swarabox.ui.screens.EditProfileScreen
-import com.pamt.swarabox.ui.screens.ProfileScreen
 
 @Composable
 fun AppNavHost(
@@ -98,7 +92,7 @@ fun AppNavHost(
         }
 
         composable<PlayMusic>(
-            typeMap = mapOf(typeOf<SongModel>() to SongModelNavType)
+            typeMap = mapOf(typeOf<SongModel>() to SongModel.SongModelNavType)
         ) { backStackEntry ->
             val song = backStackEntry.toRoute<PlayMusic>().song
             val userId = (profileUiState as? ProfileUiState.Success)?.user?.userId ?: ""
@@ -112,7 +106,7 @@ fun AppNavHost(
         }
 
         composable<EditSong>(
-            typeMap = mapOf(typeOf<SongModel>() to SongModelNavType)
+            typeMap = mapOf(typeOf<SongModel>() to SongModel.SongModelNavType)
         ) { backStackEntry ->
             val currentSong = backStackEntry.toRoute<EditSong>().currentSong
             EditSongScreen(
@@ -143,7 +137,7 @@ fun AppNavHost(
         }
 
         composable<EditProfile>(
-            typeMap = mapOf(typeOf<UserModel>() to UserModelNavType)
+            typeMap = mapOf(typeOf<UserModel>() to UserModel.UserModelNavType)
         ) { backStackEntry ->
             val currentUser = backStackEntry.toRoute<EditProfile>().currentUser
             EditProfileScreen(
