@@ -64,6 +64,7 @@ import com.pamt.swarabox.ui.navigation.Home
 import com.pamt.swarabox.ui.theme.formatTime
 import com.pamt.swarabox.viewmodel.editSong.EditSongUiState
 import com.pamt.swarabox.viewmodel.editSong.EditSongViewModel
+import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -73,6 +74,7 @@ fun EditSongScreen(
     currentSong: SongModel,
     snackbarHostState: SnackbarHostState,
     navController: NavController,
+    playerViewModel: PlayerViewModel,
     editSongViewModel: EditSongViewModel = viewModel(),
 ) {
     val editSongUiState by editSongViewModel.uiState.collectAsStateWithLifecycle()
@@ -182,7 +184,10 @@ fun EditSongScreen(
         selectedImageUri = selectedImageUri,
         duration = duration,
         currentPosition = localPlayerCurrentPosition,
-        onPlaySong = { localPlayer.play() },
+        onPlaySong = {
+            playerViewModel.pause()
+            localPlayer.play()
+        },
         onPauseSong = { localPlayer.pause() },
         onAudioChange = { audioPicker.launch("audio/*") },
         onImageChange = { imagePicker.launch("image/*") },
@@ -249,7 +254,6 @@ private fun EditSongContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0x33000000))
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp),

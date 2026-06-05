@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,9 +35,13 @@ import com.pamt.swarabox.viewmodel.song.SongViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
-
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.pamt.swarabox.viewmodel.song.SongUiState
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -129,25 +135,53 @@ fun AppHomeLayout(
             }
         }
     ) { innerPadding ->
-        Box(Modifier.padding(innerPadding)) {
-            AppNavHost(
-                navController = navController,
-                authViewModel = authViewModel,
-                profileViewModel = profileViewModel,
-                playerViewModel = playerViewModel,
-                songViewModel = songViewModel,
-                snackbarHostState = snackbarHostState,
-                startDestination = Home(),
-                profileUiState = profileUiState,
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (isPlaying) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    AsyncImage(
+                        model = currentSong?.thumbnailUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.blur(20.dp)
+                    )
 
-            val isLoading =
-                authUiState is AuthUiState.Loading ||
-                        profileUiState is ProfileUiState.Loading ||
-                        profileUiState is ProfileUiState.Idle
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.5f))
+                    )
+                }
+            }
 
-            if (isLoading) {
-                LoadingOverlay()
+            Box(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .then(
+                        if (!isPlaying) Modifier.background(Color(0x33000000))
+                        else Modifier
+                    )
+            ) {
+                AppNavHost(
+                    navController = navController,
+                    authViewModel = authViewModel,
+                    profileViewModel = profileViewModel,
+                    playerViewModel = playerViewModel,
+                    songViewModel = songViewModel,
+                    snackbarHostState = snackbarHostState,
+                    startDestination = Home(),
+                    profileUiState = profileUiState,
+                )
+
+                val isLoading =
+                    authUiState is AuthUiState.Loading ||
+                            profileUiState is ProfileUiState.Loading ||
+                            profileUiState is ProfileUiState.Idle
+
+                if (isLoading) {
+                    LoadingOverlay()
+                }
             }
         }
     }

@@ -231,7 +231,6 @@ private fun UploadSongContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0x33000000))
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp),

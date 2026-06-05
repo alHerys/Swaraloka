@@ -3,7 +3,6 @@ package com.pamt.swarabox.viewmodel.uploadSong
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.repository.SongRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,6 +46,7 @@ class UploadViewModel(
         _selectedAudioUri.value = null
         _currentPosition.value = 0L
         _duration.value = 0L
+        _isLocalPlayerPlaying.value = false
     }
 
     fun onImageSelected(uri: Uri) {

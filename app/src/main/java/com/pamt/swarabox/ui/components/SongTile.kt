@@ -34,11 +34,11 @@ fun SongTile(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = containerColor, shape = RoundedCornerShape(size = 12.dp)
+                color = containerColor,
+                shape = RoundedCornerShape(size = 12.dp)
             )
             .padding(16.dp)
             .clickable { onClick(song) }
-
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -49,14 +49,14 @@ fun SongTile(
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(5.dp)),
+                    .clip(RoundedCornerShape(5.dp)),
                 contentScale = ContentScale.Crop,
             )
             Spacer(Modifier.width(16.dp))
             Column {
                 Text(
                     text = song.title,
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight(500),
                     color = Color.White,
                 )

@@ -115,7 +115,6 @@ fun PlayMusicContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0x33000000))
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(24.dp))

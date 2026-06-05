@@ -77,9 +77,7 @@ private fun HomeContent(
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color(0x33000000)),
+        modifier = modifier.fillMaxSize()
     ) {
         if (songs.isNotEmpty()) {
             LazyColumn(

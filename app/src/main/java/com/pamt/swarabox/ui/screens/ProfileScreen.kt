@@ -1,6 +1,5 @@
 package com.pamt.swarabox.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,7 +43,6 @@ import com.pamt.swarabox.ui.navigation.EditProfile
 import com.pamt.swarabox.ui.navigation.PlayMusic
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
-import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
 
@@ -52,8 +50,7 @@ import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
 fun ProfileScreen(
     profileViewModel: ProfileViewModel,
     authViewModel: AuthViewModel,
-    navController: NavController,
-    playerViewModel: PlayerViewModel
+    navController: NavController
 ) {
     val mySongs by profileViewModel.mySongs.collectAsStateWithLifecycle()
     val isRefreshingSongs by profileViewModel.isRefreshingSongs.collectAsStateWithLifecycle()
@@ -93,9 +90,7 @@ fun ProfileContent(
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = onRefresh,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0x33000000))
+        modifier = Modifier.fillMaxSize()
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),

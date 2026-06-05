@@ -112,6 +112,7 @@ fun AppNavHost(
             EditSongScreen(
                 currentSong = currentSong,
                 snackbarHostState = snackbarHostState,
+                playerViewModel = playerViewModel!!,
                 navController = navController,
             )
         }
@@ -130,7 +131,6 @@ fun AppNavHost(
         composable<Profile> {
             ProfileScreen(
                 profileViewModel = profileViewModel!!,
-                playerViewModel = playerViewModel!!,
                 authViewModel = authViewModel,
                 navController = navController,
             )
