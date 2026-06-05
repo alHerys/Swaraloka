@@ -102,7 +102,9 @@ class SongRepository {
         songUrl: String,
         thumbnailUrl: String
     ) {
-        supabase.from("song").delete {
+        supabase.from("song").update({
+            set("is_active", false)
+        }) {
             filter { eq("song_id", songId) }
         }
 

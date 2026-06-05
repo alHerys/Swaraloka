@@ -112,6 +112,7 @@ class EditSongViewModel(
                     songUrl = songUrl,
                     thumbnailUrl = thumbnailUrl
                 )
+                _uiState.value = EditSongUiState.Success
             } catch (e: Exception) {
                 _uiState.value = EditSongUiState.Error(
                     message = e.message ?: "Error occured while deleting song"

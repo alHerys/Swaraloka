@@ -33,6 +33,9 @@ object RegisterEmailPassword
 object Profile
 
 @Serializable
+object About
+
+@Serializable
 data class EditProfile(
     val currentUser: UserModel
 )

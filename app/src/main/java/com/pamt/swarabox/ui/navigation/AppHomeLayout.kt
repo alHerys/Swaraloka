@@ -1,6 +1,9 @@
 package com.pamt.swarabox.ui.navigation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -19,14 +22,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import coil.compose.AsyncImage
 import com.pamt.swarabox.ui.components.AppNavigationBar
+import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.ui.components.MiniPlayer
+import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
@@ -85,14 +93,15 @@ fun AppHomeLayout(
         },
         bottomBar = {
             val routeWithBottomBar = listOf(Home::class, Profile::class, Upload::class)
-            val isHaveBottomBar = routeWithBottomBar.any { currentDestination?.hasRoute(it) == true }
+            val isHaveBottomBar =
+                routeWithBottomBar.any { currentDestination?.hasRoute(it) == true }
 
             if (isHaveBottomBar) {
                 Column {
                     AnimatedVisibility(
                         visible = currentSong != null,
-                        enter = slideInVertically(initialOffsetY = { it }),
-                        exit = slideOutVertically(targetOffsetY = { it }),
+                        enter = slideInVertically(initialOffsetY = { it }, animationSpec = tween(1000)),
+                        exit = slideOutVertically(targetOffsetY = { it }, animationSpec = tween(1000)),
                         modifier = Modifier.background(Color.Transparent)
                     ) {
                         currentSong?.let { song ->
@@ -122,18 +131,45 @@ fun AppHomeLayout(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0x33000000))
-                .padding(innerPadding)
         ) {
-            AppNavHost(
-                navController = navController,
-                authViewModel = authViewModel,
-                profileViewModel = profileViewModel,
-                playerViewModel = playerViewModel,
-                songViewModel = songViewModel,
-                snackbarHostState = snackbarHostState,
-                startDestination = Home(),
-                profileUiState = profileUiState,
-            )
+            AnimatedVisibility(
+                visible = isPlaying,
+                enter = fadeIn(animationSpec = tween(durationMillis = 2000, delayMillis = 1000)),
+                exit = fadeOut(animationSpec = tween(durationMillis = 3000))
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    AsyncImage(
+                        model = currentSong?.thumbnailUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.blur(20.dp),
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.8f))
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                AppNavHost(
+                    navController = navController,
+                    authViewModel = authViewModel,
+                    profileViewModel = profileViewModel,
+                    playerViewModel = playerViewModel,
+                    songViewModel = songViewModel,
+                    snackbarHostState = snackbarHostState,
+                    startDestination = Home(),
+                    profileUiState = profileUiState,
+                )
+
+            }
         }
     }
 }

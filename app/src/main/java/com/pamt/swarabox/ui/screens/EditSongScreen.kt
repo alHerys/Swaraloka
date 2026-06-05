@@ -33,7 +33,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +56,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.pamt.swarabox.R
 import com.pamt.swarabox.data.model.SongModel
+import com.pamt.swarabox.ui.components.AppAlertDialog
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.CircleContainer
@@ -84,6 +87,9 @@ fun EditSongScreen(
     val duration by editSongViewModel.duration.collectAsStateWithLifecycle()
     val isPlaying by editSongViewModel.isPlaying.collectAsStateWithLifecycle()
     val localPlayerCurrentPosition by editSongViewModel.currentPosition.collectAsStateWithLifecycle()
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val localPlayer = remember { ExoPlayer.Builder(context).build() }
@@ -198,34 +204,58 @@ fun EditSongScreen(
             localPlayer.seekTo(newPosition)
             editSongViewModel.onCurrentPositionChange(newPosition)
         },
-        onDelete = {
-            editSongViewModel.deleteSong(
-                songId = currentSong.id!!,
-                songUrl = currentSong.songUrl,
-                thumbnailUrl = currentSong.thumbnailUrl
-            )
-        },
+        onDelete = { showDeleteDialog = true },
         onCancel = { navController.popBackStack() },
-        onEdit = {
-            val audioBytes = selectedAudioUri?.let { uri ->
-                context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-            }
-            val imageBytes = selectedImageUri?.let { uri ->
-                context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-            }
-
-            editSongViewModel.updateSong(
-                songId = currentSong.id!!,
-                artistId = currentSong.artistId!!,
-                title = title,
-                audioBytes = audioBytes,
-                imageBytes = imageBytes,
-                duration = duration?.toInt(),
-                oldSongUrl = currentSong.songUrl,
-                oldThumbnailUrl = currentSong.thumbnailUrl,
-            )
-        }
+        onEdit = { showEditDialog = true }
     )
+
+    if (showEditDialog) {
+        AppAlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            onConfirm = {
+                showEditDialog = false
+                val audioBytes = selectedAudioUri?.let { uri ->
+                    context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                }
+                val imageBytes = selectedImageUri?.let { uri ->
+                    context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                }
+
+                editSongViewModel.updateSong(
+                    songId = currentSong.id!!,
+                    artistId = currentSong.artistId!!,
+                    title = title,
+                    audioBytes = audioBytes,
+                    imageBytes = imageBytes,
+                    duration = duration?.toInt(),
+                    oldSongUrl = currentSong.songUrl,
+                    oldThumbnailUrl = currentSong.thumbnailUrl,
+                )
+            },
+            title = "Save Changes",
+            text = "Are you sure you want to update this song? This will replace the existing data.",
+            confirmText = "Save",
+            confirmButtonColor = MaterialTheme.colorScheme.primary
+        )
+    }
+
+    if (showDeleteDialog) {
+        AppAlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            onConfirm = {
+                showDeleteDialog = false
+                editSongViewModel.deleteSong(
+                    songId = currentSong.id!!,
+                    songUrl = currentSong.songUrl,
+                    thumbnailUrl = currentSong.thumbnailUrl
+                )
+            },
+            title = "Delete Song",
+            text = "Are you sure you want to delete this song? This action cannot be undone.",
+            confirmText = "Delete",
+            confirmButtonColor = Color.Red
+        )
+    }
 }
 
 @Composable

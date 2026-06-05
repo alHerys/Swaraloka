@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,18 +28,27 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.airbnb.lottie.LottieComposition
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.pamt.swarabox.R
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.model.UserModel
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.CircleContainer
+import com.pamt.swarabox.ui.components.LogoWidget
 import com.pamt.swarabox.ui.components.SongTile
+import com.pamt.swarabox.ui.navigation.About
 import com.pamt.swarabox.ui.navigation.EditProfile
 import com.pamt.swarabox.ui.navigation.PlayMusic
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
@@ -56,17 +66,30 @@ fun ProfileScreen(
     val isRefreshingSongs by profileViewModel.isRefreshingSongs.collectAsStateWithLifecycle()
     val uiState by profileViewModel.uiState.collectAsStateWithLifecycle()
 
+    val lottieComposition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.emptymysong)
+    )
+
+    val lottieProgress by animateLottieCompositionAsState(
+        composition = lottieComposition,
+        iterations = LottieConstants.IterateForever
+    )
+
     ProfileContent(
         user = (uiState as? ProfileUiState.Success)?.user ?: UserModel.dummy,
         listMySong = mySongs,
         isRefreshing = isRefreshingSongs,
+        lottieComposition = lottieComposition,
+        lottieProgress = lottieProgress,
         onRefresh = { profileViewModel.fetchMySongs(forceRefresh = true) },
         onLogout = {
             profileViewModel.resetUiState()
             authViewModel.resetFormState()
             authViewModel.logout()
         },
-        onNavigateToAbout = {},
+        onNavigateToAbout = {
+            navController.navigate(About)
+        },
         onNavigateToEdit = { currentUser ->
             navController.navigate(EditProfile(currentUser))
         },
@@ -86,6 +109,8 @@ fun ProfileContent(
     onNavigateToAbout: () -> Unit,
     onNavigateToEdit: (UserModel) -> Unit,
     onNavigateToPlay: (SongModel) -> Unit,
+    lottieComposition: LottieComposition?,
+    lottieProgress: Float,
 ) {
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -176,6 +201,29 @@ fun ProfileContent(
                         )
                     }
                     Spacer(Modifier.height(16.dp))
+
+                    if (listMySong.isEmpty()) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            LottieAnimation(
+                                composition = lottieComposition,
+                                progress = { lottieProgress },
+                                modifier = Modifier.size(200.dp)
+                            )
+                            Spacer(modifier = Modifier.height(18.dp))
+                            Text(
+                                text = "Your Collection is empty",
+                                textAlign = TextAlign.Center,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color.White
+                            )
+
+                            Spacer(Modifier.height(16.dp))
+                        }
+                    }
                 }
             }
 
@@ -210,7 +258,7 @@ fun ProfileContent(
                         )
                         Spacer(Modifier.width(16.dp))
                         Text(
-                            text = "About SwaraBox",
+                            text = "About Swaraloka",
                             fontSize = 16.sp,
                             lineHeight = 24.sp,
                             fontWeight = FontWeight(500),
@@ -230,22 +278,5 @@ fun ProfileContent(
                 )
             }
         }
-    }
-}
-
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-private fun ProfileContentPreview() {
-    SwaraBoxTheme {
-        ProfileContent(
-            user = UserModel.dummy,
-            listMySong = SongModel.dummyList,
-            isRefreshing = false,
-            onRefresh = {},
-            onLogout = {},
-            onNavigateToAbout = { },
-            onNavigateToEdit = { },
-            onNavigateToPlay = {},
-        )
     }
 }

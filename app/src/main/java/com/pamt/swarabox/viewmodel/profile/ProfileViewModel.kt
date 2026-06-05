@@ -59,8 +59,10 @@ class ProfileViewModel(
             if (userId != null) {
                 _isRefreshingSongs.value = true
                 try {
-                    val songs =
-                        songRepository.fetchSongsByArtist(userId, forceRefresh = forceRefresh)
+                    val songs = songRepository.fetchSongsByArtist(
+                        artistId = userId,
+                        forceRefresh = forceRefresh
+                    )
                     _mySongs.value = songs
                 } catch (e: Exception) {
                     _uiState.value = ProfileUiState.Error(e.message ?: "Failed to fetch your songs")

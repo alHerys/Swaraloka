@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.model.UserModel
+import com.pamt.swarabox.ui.screens.AboutScreen
 import com.pamt.swarabox.ui.screens.EditProfileScreen
 import com.pamt.swarabox.ui.screens.EditSongScreen
 import com.pamt.swarabox.ui.screens.HomeScreen
@@ -128,6 +129,10 @@ fun AppNavHost(
                 snackbarHostState = snackbarHostState,
                 navController = navController,
             )
+        }
+
+        composable<About> {
+            AboutScreen(navController = navController)
         }
 
         composable<Profile> {

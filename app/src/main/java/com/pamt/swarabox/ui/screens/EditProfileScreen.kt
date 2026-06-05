@@ -23,6 +23,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +43,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.pamt.swarabox.R
 import com.pamt.swarabox.data.model.UserModel
+import com.pamt.swarabox.ui.components.AppAlertDialog
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.CircleContainer
@@ -61,6 +65,8 @@ fun EditProfileScreen(
     val editProfileUiState by editProfileViewModel.uiState.collectAsStateWithLifecycle()
     val name by editProfileViewModel.name.collectAsStateWithLifecycle()
     val selectedImageUri by editProfileViewModel.selectedImageUri.collectAsStateWithLifecycle()
+
+    var showEditDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -111,21 +117,35 @@ fun EditProfileScreen(
         onNameChange = { editProfileViewModel.onNameChange(it) },
         onAvatarChange = { launcher.launch("image/*") },
         onEdit = {
-            val imageBytes = selectedImageUri?.let { uri ->
-                context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-            }
-            editProfileViewModel.updateProfile(
-                userId = currentUser.userId,
-                name = name,
-                oldAvatarUrl = currentUser.avatarUrl,
-                imageBytes = imageBytes
-            )
+            showEditDialog = true
         },
         onCancel = {
             navController.popBackStack()
         },
         isLoading = editProfileUiState is EditProfileUiState.Loading
     )
+
+    if (showEditDialog) {
+        AppAlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            onConfirm = {
+                showEditDialog = false
+                val imageBytes = selectedImageUri?.let { uri ->
+                    context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                }
+                editProfileViewModel.updateProfile(
+                    userId = currentUser.userId,
+                    name = name,
+                    oldAvatarUrl = currentUser.avatarUrl,
+                    imageBytes = imageBytes
+                )
+            },
+            title = "Save Changes",
+            text = "Are you sure you want to update your profile?",
+            confirmText = "Save",
+            confirmButtonColor = MaterialTheme.colorScheme.primary
+        )
+    }
 
     DisposableEffect(Unit) {
         onDispose {
@@ -171,14 +191,26 @@ fun EditProfileContent(
                     size = 120.dp,
                     onClick = onAvatarChange
                 ) {
-                    AsyncImage(
-                        model = avatar,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
+                    if (avatar.isNotBlank()) {
+                        AsyncImage(
+                            model = avatar,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        val initials = name.split(" ")
+                            .filter { it.isNotBlank() }
+                            .take(2)
+                            .joinToString("") { it.take(1).uppercase() }
+                        Text(
+                            text = initials,
+                            style = MaterialTheme.typography.headlineLarge,
+                            color = Color.White
+                        )
+                    }
                 }
 
                 Box(
