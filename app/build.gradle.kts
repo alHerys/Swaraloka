@@ -87,4 +87,7 @@ dependencies {
 
     // ExoPlayer
     implementation(libs.androidx.media3.exoplayer)
+
+    // Splash Screen
+    implementation(libs.androidx.core.splashscreen)
 }

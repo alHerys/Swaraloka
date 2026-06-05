@@ -78,24 +78,6 @@ fun AppNavigationBar(
         )
 
         NavigationBarItem(
-            selected = false,
-            onClick = { /* TODO */ },
-            icon = {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.history),
-                    contentDescription = "History",
-                )
-            },
-            label = { Text("History", color = Color.White) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = selectedIconColor,
-                unselectedIconColor = unselectedIconColor,
-                indicatorColor = indicatorColor
-            ),
-            modifier = Modifier.size(24.dp),
-        )
-
-        NavigationBarItem(
             selected = currentDestination?.route?.contains("Profile") == true,
             onClick = {
                 navController.navigate(Profile) {

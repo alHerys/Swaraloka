@@ -16,13 +16,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,8 +47,6 @@ import com.pamt.swarabox.ui.navigation.PlayMusic
 import com.pamt.swarabox.ui.theme.formatTime
 import com.pamt.swarabox.ui.theme.yellow
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
-import com.pamt.swarabox.viewmodel.profile.ProfileUiState
-import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
 import com.pamt.swarabox.viewmodel.song.SongViewModel
 
 @Composable
@@ -60,6 +58,7 @@ fun PlayMusicScreen(
     songViewModel: SongViewModel,
 ) {
     val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
+    val isBuffering by playerViewModel.isBuffering.collectAsStateWithLifecycle()
     val currentPosition by playerViewModel.currentPosition.collectAsStateWithLifecycle()
     val duration by playerViewModel.duration.collectAsStateWithLifecycle()
     val similarSongs by songViewModel.songs.collectAsStateWithLifecycle()
@@ -68,16 +67,13 @@ fun PlayMusicScreen(
         .filter { it.id != song.id }
         .take(5)
 
-    LaunchedEffect(song) {
-        playerViewModel.playSong(song)
-    }
-
     PlayMusicContent(
         song = song,
         userId = userId,
         duration = duration,
         currentPosition = currentPosition,
         isPlaying = isPlaying,
+        isBuffering = isBuffering,
         similiarSong = similarSongsFiltered,
         onBack = { navController.popBackStack() },
         onTogglePlayPause = { playerViewModel.togglePlayPause() },
@@ -109,9 +105,9 @@ fun PlayMusicContent(
     onNavigateToEdit: (SongModel) -> Unit,
     onNavigateToPlay: (SongModel) -> Unit,
     onTogglePlayPause: () -> Unit,
-    onSeekTo: (Long) -> Unit
+    onSeekTo: (Long) -> Unit,
+    isBuffering: Boolean
 ) {
-    // TODO: Implement dynamic background based on thumbnail music that are currently playing
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -119,7 +115,6 @@ fun PlayMusicContent(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Top Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -160,7 +155,6 @@ fun PlayMusicContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Thumbnail
         AsyncImage(
             model = song.thumbnailUrl,
             contentDescription = null,
@@ -174,7 +168,6 @@ fun PlayMusicContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Song Info
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -197,7 +190,6 @@ fun PlayMusicContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Progress Bar
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -238,7 +230,7 @@ fun PlayMusicContent(
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        // Similar Songs List (Bottom sheet style container)
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -247,13 +239,13 @@ fun PlayMusicContent(
                 .padding(horizontal = 16.dp, vertical = 21.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Playback Controls
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                // Previous Button
+
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.play_skip_back),
                     contentDescription = "Previous",
@@ -270,14 +262,22 @@ fun PlayMusicContent(
                     backgroundColor = yellow,
                     onClick = onTogglePlayPause
                 ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(
-                            if (isPlaying) R.drawable.pause else R.drawable.play
-                        ),
-                        contentDescription = if (isPlaying) "Pause" else "Play",
-                        tint = Color.Black,
-                        modifier = Modifier.size(24.dp)
-                    )
+                    if (isBuffering) {
+                        CircularProgressIndicator(
+                            color = Color.Black,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(
+                                if (isPlaying) R.drawable.pause else R.drawable.play
+                            ),
+                            contentDescription = if (isPlaying) "Pause" else "Play",
+                            tint = Color.Black,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(45.dp))

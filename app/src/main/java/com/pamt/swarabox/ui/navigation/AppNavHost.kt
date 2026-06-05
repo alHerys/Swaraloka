@@ -96,10 +96,12 @@ fun AppNavHost(
         ) { backStackEntry ->
             val song = backStackEntry.toRoute<PlayMusic>().song
             val userId = (profileUiState as? ProfileUiState.Success)?.user?.userId ?: ""
+            playerViewModel!!.playSong(song)
+
             PlayMusicScreen(
                 song = song,
                 userId = userId,
-                playerViewModel = playerViewModel!!,
+                playerViewModel = playerViewModel,
                 songViewModel = songViewModel!!,
                 navController = navController,
             )

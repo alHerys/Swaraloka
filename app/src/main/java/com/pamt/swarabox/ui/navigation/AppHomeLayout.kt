@@ -6,45 +6,34 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pamt.swarabox.ui.components.AppNavigationBar
-import com.pamt.swarabox.ui.components.LoadingOverlay
 import com.pamt.swarabox.ui.components.MiniPlayer
-import com.pamt.swarabox.viewmodel.auth.AuthUiState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
-import com.pamt.swarabox.viewmodel.song.SongViewModel
+import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
-import com.pamt.swarabox.viewmodel.player.PlayerViewModel
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.paint
-import androidx.compose.ui.layout.ContentScale
-import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.pamt.swarabox.viewmodel.song.SongUiState
+import com.pamt.swarabox.viewmodel.song.SongViewModel
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AppHomeLayout(
     navController: NavHostController,
@@ -60,10 +49,8 @@ fun AppHomeLayout(
 
     val songUiState by songViewModel.uiState.collectAsStateWithLifecycle()
     val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
-    val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
 
     val currentDestination = navBackStackEntry?.destination
-    val isKeyboardVisible = WindowInsets.isImeVisible
 
     LaunchedEffect(profileUiState, songUiState) {
         when {
@@ -90,21 +77,17 @@ fun AppHomeLayout(
                         data.visuals.message.contains("Failed", ignoreCase = true)
                 Snackbar(
                     snackbarData = data,
-                    containerColor = if (isError) Color(0xFF4CAF50) else Color(0xFFF04444),
+                    containerColor = if (isError) Color(0xFFF04444) else Color(0xFF4CAF50),
                     contentColor = Color.White,
                     shape = RoundedCornerShape(8.dp)
                 )
             }
         },
         bottomBar = {
-            // Only show bottom bar on main screens (Home, Profile, etc.)
-            val showBottomBar = (currentDestination?.route?.contains("Home") == true ||
-                    currentDestination?.route?.contains("Profile") == true ||
-                    currentDestination?.route?.contains("Upload") == true
-                    ) &&
-                    !isKeyboardVisible
+            val routeWithBottomBar = listOf(Home::class, Profile::class, Upload::class)
+            val isHaveBottomBar = routeWithBottomBar.any { currentDestination?.hasRoute(it) == true }
 
-            if (showBottomBar) {
+            if (isHaveBottomBar) {
                 Column {
                     AnimatedVisibility(
                         visible = currentSong != null,
@@ -135,54 +118,22 @@ fun AppHomeLayout(
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (isPlaying) {
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    AsyncImage(
-                        model = currentSong?.thumbnailUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.blur(20.dp)
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.5f))
-                    )
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .then(
-                        if (!isPlaying) Modifier.background(Color(0x33000000))
-                        else Modifier
-                    )
-            ) {
-                AppNavHost(
-                    navController = navController,
-                    authViewModel = authViewModel,
-                    profileViewModel = profileViewModel,
-                    playerViewModel = playerViewModel,
-                    songViewModel = songViewModel,
-                    snackbarHostState = snackbarHostState,
-                    startDestination = Home(),
-                    profileUiState = profileUiState,
-                )
-
-                val isLoading =
-                    authUiState is AuthUiState.Loading ||
-                            profileUiState is ProfileUiState.Loading ||
-                            profileUiState is ProfileUiState.Idle
-
-                if (isLoading) {
-                    LoadingOverlay()
-                }
-            }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0x33000000))
+                .padding(innerPadding)
+        ) {
+            AppNavHost(
+                navController = navController,
+                authViewModel = authViewModel,
+                profileViewModel = profileViewModel,
+                playerViewModel = playerViewModel,
+                songViewModel = songViewModel,
+                snackbarHostState = snackbarHostState,
+                startDestination = Home(),
+                profileUiState = profileUiState,
+            )
         }
     }
 }

@@ -24,6 +24,9 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
+    private val _isBuffering = MutableStateFlow(false)
+    val isBuffering: StateFlow<Boolean> = _isBuffering.asStateFlow()
+
     private val _currentPosition = MutableStateFlow(0L)
     val currentPosition: StateFlow<Long> = _currentPosition.asStateFlow()
 
@@ -44,6 +47,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
+                _isBuffering.value = playbackState == Player.STATE_BUFFERING
                 if (playbackState == Player.STATE_READY) {
                     _duration.value = _exoPlayer.duration.coerceAtLeast(0L)
                 }

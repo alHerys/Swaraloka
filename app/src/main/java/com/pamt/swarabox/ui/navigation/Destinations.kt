@@ -41,6 +41,3 @@ data class EditProfile(
 data class EditSong(
     val currentSong: SongModel
 )
-
-@Serializable
-object History
