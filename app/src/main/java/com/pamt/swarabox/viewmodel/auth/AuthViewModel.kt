@@ -44,8 +44,6 @@ class AuthViewModel(
                     is SessionStatus.NotAuthenticated -> AuthCheckState.NotAuthenticated
                     is SessionStatus.Initializing -> AuthCheckState.Checking
                     is SessionStatus.RefreshFailure -> {
-                        // Jika refresh gagal (misal koneksi internet), tetap cek session yang ada
-                        // atau anggap tidak terautentikasi jika session expired.
                         if (repository.isLoggedIn()) AuthCheckState.Authenticated
                         else AuthCheckState.NotAuthenticated
                     }

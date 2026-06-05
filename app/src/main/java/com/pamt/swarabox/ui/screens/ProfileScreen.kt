@@ -29,7 +29,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,12 +45,10 @@ import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.model.UserModel
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.CircleContainer
-import com.pamt.swarabox.ui.components.LogoWidget
 import com.pamt.swarabox.ui.components.SongTile
 import com.pamt.swarabox.ui.navigation.About
 import com.pamt.swarabox.ui.navigation.EditProfile
 import com.pamt.swarabox.ui.navigation.PlayMusic
-import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel

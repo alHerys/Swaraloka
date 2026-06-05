@@ -36,13 +36,9 @@ class AuthRepository {
     }
 
     suspend fun isLoggedIn(): Boolean {
-        // Menunggu Supabase selesai memuat session dari storage lokal (SharedPreferences/Settings)
-        // Jika tidak ditunggu, currentSessionOrNull() mungkin masih null saat app baru dibuka.
         try {
             awaitAuthInitialization()
-        } catch (e: Exception) {
-            // Jika gagal inisialisasi, anggap belum login
-        }
+        } catch (e: Exception) { }
 
         return supabase.auth.currentSessionOrNull() != null
     }

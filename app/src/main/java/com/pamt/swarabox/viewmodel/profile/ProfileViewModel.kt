@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamt.swarabox.data.SupabaseClientProvider
 import com.pamt.swarabox.data.model.SongModel
-import com.pamt.swarabox.data.model.UserModel
 import com.pamt.swarabox.data.repository.ProfileRepository
 import com.pamt.swarabox.data.repository.SongRepository
 import io.github.jan.supabase.auth.auth
