@@ -17,10 +17,11 @@
   <!-- Ukuran yang disarankan: 120×120 px                           -->
   <!-- ============================================================ -->
   <a href="https://github.com/alHerys/SwaraBox">
-    <img src="https://raw.githubusercontent.com/alHerys/SwaraBox/main/presentasi/logo.png" alt="SwaraBox Logo" width="120" height="120">
+    <img width="192" height="192" alt="ic_launcher_round" src="https://github.com/user-attachments/assets/adfdf56f-d349-4a21-846e-38f12cd0063c" />
   </a>
 
-  <h3 align="center">SwaraBox</h3>
+  <h3 align="center">Swaraloka
+</h3>
 
   <p align="center">
     Platform streaming musik Android berbasis Supabase — upload, kelola, dan nikmati lagu kapan saja.
@@ -55,13 +56,7 @@
 <!-- ABOUT THE PROJECT -->
 ## Tentang Proyek
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/alHerys/SwaraBox/main/presentasi/2.%20login.png" alt="SwaraBox Screenshot" width="280">
-</div>
-
-<br/>
-
-**SwaraBox** adalah aplikasi Android untuk streaming dan manajemen musik pribadi. Pengguna dapat mendaftar akun, mengunggah lagu milik sendiri (audio + thumbnail), memutarnya secara langsung, serta mengelola profil dan koleksi lagu — semua tersinkronisasi ke cloud melalui **Supabase**.
+**Swaraloka** adalah aplikasi Android untuk streaming dan manajemen musik pribadi. Pengguna dapat mendaftar akun, mengunggah lagu milik sendiri (audio + thumbnail), memutarnya secara langsung, serta mengelola profil dan koleksi lagu — semua tersinkronisasi ke cloud melalui **Supabase**.
 
 Aplikasi ini dibangun sebagai proyek akademik dengan menerapkan:
 - Pola arsitektur **MVVM (Model-View-ViewModel)**
@@ -101,20 +96,9 @@ Aplikasi ini dibangun sebagai proyek akademik dengan menerapkan:
 SwaraBox mengikuti pola **MVVM** yang dibagi ke tiga lapisan utama.
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/alHerys/SwaraBox/main/presentasi/struktur.png" alt="Diagram Arsitektur" width="800">
+  <img width="1236" height="868" alt="struktur" src="https://github.com/user-attachments/assets/d59dda27-b959-41e6-87d9-9f6dce9dd81c" />
 </div>
 
-<br/>
-
-```
-MainActivity
-└── AppEntryPoint
-    ├── AuthCheckState.Checking     → LoadingOverlay
-    ├── AuthCheckState.NotAuthenticated → AppAuthLayout
-    │   └── NavHost (Landing, Login, Register)
-    └── AuthCheckState.Authenticated    → AppHomeLayout
-        └── NavHost (Home, Profile, Upload, EditSong, EditProfile, PlayMusic, About)
-```
 
 ### Lapisan UI
 Seluruh UI dibangun dengan **Jetpack Compose**. Setiap screen menerima state dari ViewModel melalui `collectAsStateWithLifecycle()` dan mengirimkan event balik ke ViewModel — tidak ada logika bisnis di dalam Composable.
@@ -188,37 +172,36 @@ Diagram berikut menggambarkan alur data dari UI ke Supabase untuk setiap fitur u
 ### Register
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/alHerys/SwaraBox/main/presentasi/1.%20register.png" alt="Alur Register" width="750">
+<img width="1236" height="996" alt="1  register" src="https://github.com/user-attachments/assets/407dc4ef-1884-423e-9980-aa45468f71d6" />
 </div>
 
 ### Login
-
 <div align="center">
-  <img src="https://raw.githubusercontent.com/alHerys/SwaraBox/main/presentasi/2.%20login.png" alt="Alur Login" width="750">
+<img width="1060" height="1126" alt="2  login" src="https://github.com/user-attachments/assets/c828789a-cd09-4010-b52a-795a7edd5ea0" />
 </div>
 
 ### Fetch Lagu
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/alHerys/SwaraBox/main/presentasi/5.%20fetch%20lagu.png" alt="Alur Fetch Lagu" width="750">
+<img width="1204" height="965" alt="5  fetch lagu" src="https://github.com/user-attachments/assets/8ba84e6d-294b-4c85-b224-691323e57c00" />
 </div>
 
 ### Upload Lagu
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/alHerys/SwaraBox/main/presentasi/4.%20upload.png" alt="Alur Upload" width="750">
+<img width="1076" height="852" alt="4  upload" src="https://github.com/user-attachments/assets/a8a48167-10a7-4b81-b9be-48446b681b20" />
 </div>
 
 ### Edit & Hapus Lagu
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/alHerys/SwaraBox/main/presentasi/6.%20edit%20hapus%20lagu.png" alt="Alur Edit Hapus Lagu" width="750">
+<img width="884" height="852" alt="6  edit hapus lagu" src="https://github.com/user-attachments/assets/b67614fa-97ae-4dad-a9bb-45fb71636c35" />
 </div>
 
 ### Profil & Edit Profil
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/alHerys/SwaraBox/main/presentasi/3.%20fetch%20edit%20profile.png" alt="Alur Profil" width="750">
+<img width="1124" height="1124" alt="3  fetch edit profile" src="https://github.com/user-attachments/assets/3e3a87f4-1f2d-4486-baa3-e29525c27566" />
 </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -301,7 +284,7 @@ SwaraBox menggunakan **Supabase PostgreSQL** dengan skema berikut.
 
 **Alvianto Hery Sarborn**
 
-Project Link: [https://github.com/alHerys/SwaraBox](https://github.com/alHerys/SwaraBox)
+Project Link: [https://github.com/alHerys/Swaraloka](https://github.com/alHerys/Swaraloka)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
