@@ -62,8 +62,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
             }
             return
         }
-
         _currentSong.value = song
+
         val mediaItem = MediaItem.fromUri(song.songUrl)
         _exoPlayer.setMediaItem(mediaItem)
         _exoPlayer.prepare()

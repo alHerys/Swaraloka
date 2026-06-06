@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +31,8 @@ fun SongTile(
     onClick: (SongModel) -> Unit,
     containerColor: Color = Color(0xFF262626)
 ) {
+//    val imageUrl = remember(song) { "${song.thumbnailUrl}?t=${System.currentTimeMillis()}" }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -45,7 +48,7 @@ fun SongTile(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             AsyncImage(
-                model = "${song.thumbnailUrl}?t=${System.currentTimeMillis()}",
+                model = song.thumbnailUrl,
                 contentDescription = null,
                 modifier = Modifier
                     .size(40.dp)

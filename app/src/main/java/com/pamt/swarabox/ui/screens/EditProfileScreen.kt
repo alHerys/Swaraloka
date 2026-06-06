@@ -187,7 +187,7 @@ fun EditProfileContent(
                     .clickable { onAvatarChange() }
             ) {
                 CircleContainer(
-                    backgroundColor = Color(0xFF262626),
+                    backgroundColor = Color(0xFF343434),
                     size = 120.dp,
                     onClick = onAvatarChange
                 ) {

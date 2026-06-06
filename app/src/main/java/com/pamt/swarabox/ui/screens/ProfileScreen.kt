@@ -45,6 +45,7 @@ import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.model.UserModel
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.CircleContainer
+import com.pamt.swarabox.ui.components.LottieEmpty
 import com.pamt.swarabox.ui.components.SongTile
 import com.pamt.swarabox.ui.navigation.About
 import com.pamt.swarabox.ui.navigation.EditProfile
@@ -63,21 +64,10 @@ fun ProfileScreen(
     val isRefreshingSongs by profileViewModel.isRefreshingSongs.collectAsStateWithLifecycle()
     val uiState by profileViewModel.uiState.collectAsStateWithLifecycle()
 
-    val lottieComposition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(R.raw.emptymysong)
-    )
-
-    val lottieProgress by animateLottieCompositionAsState(
-        composition = lottieComposition,
-        iterations = LottieConstants.IterateForever
-    )
-
     ProfileContent(
         user = (uiState as? ProfileUiState.Success)?.user ?: UserModel.dummy,
         listMySong = mySongs,
         isRefreshing = isRefreshingSongs,
-        lottieComposition = lottieComposition,
-        lottieProgress = lottieProgress,
         onRefresh = { profileViewModel.fetchMySongs(forceRefresh = true) },
         onLogout = {
             profileViewModel.resetUiState()
@@ -106,8 +96,6 @@ fun ProfileContent(
     onNavigateToAbout: () -> Unit,
     onNavigateToEdit: (UserModel) -> Unit,
     onNavigateToPlay: (SongModel) -> Unit,
-    lottieComposition: LottieComposition?,
-    lottieProgress: Float,
 ) {
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -145,7 +133,7 @@ fun ProfileContent(
                 ) {
                     CircleContainer(
                         size = 120.dp,
-                        backgroundColor = Color.Gray
+                        backgroundColor = Color(0xFF343434)
                     ) {
                         if (user.avatarUrl != null) {
                             AsyncImage(
@@ -200,26 +188,13 @@ fun ProfileContent(
                     Spacer(Modifier.height(16.dp))
 
                     if (listMySong.isEmpty()) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            LottieAnimation(
-                                composition = lottieComposition,
-                                progress = { lottieProgress },
-                                modifier = Modifier.size(200.dp)
-                            )
-                            Spacer(modifier = Modifier.height(18.dp))
-                            Text(
-                                text = "Your Collection is empty",
-                                textAlign = TextAlign.Center,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.White
-                            )
-
-                            Spacer(Modifier.height(16.dp))
-                        }
+                        LottieEmpty(
+                            lottieId = R.raw.emptymysong,
+                            caption = "Your Collection is empty",
+                            size = 200.dp,
+                            fontsize = 16.sp
+                        )
+                        Spacer(Modifier.height(16.dp))
                     }
                 }
             }

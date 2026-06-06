@@ -1,11 +1,11 @@
 package com.pamt.swarabox.ui.navigation
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -96,22 +97,14 @@ fun AppHomeLayout(
 
             if (isHaveBottomBar) {
                 Column {
-                    AnimatedVisibility(
-                        visible = currentSong != null,
-                        enter = slideInVertically(initialOffsetY = { it }, animationSpec = tween(1000)),
-                        exit = slideOutVertically(targetOffsetY = { it }, animationSpec = tween(1000)),
-                        modifier = Modifier.background(Color.Transparent)
-                    ) {
-                        currentSong?.let { song ->
-                            MiniPlayer(
-                                song = song,
-                                isPlaying = isPlaying,
-                                onTogglePlay = { playerViewModel.togglePlayPause() },
-                                onClick = { navController.navigate(PlayMusic(song)) }
-                            )
-                        }
+                    currentSong?.let { song ->
+                        MiniPlayer(
+                            song = song,
+                            isPlaying = isPlaying,
+                            onTogglePlay = { playerViewModel.togglePlayPause() },
+                            onClick = { navController.navigate(PlayMusic(song)) }
+                        )
                     }
-
                     AppNavigationBar(
                         navController = navController,
                         currentDestination = currentDestination,
@@ -123,31 +116,47 @@ fun AppHomeLayout(
                     )
                 }
             }
-        }
+        },
+        containerColor = Color.Transparent
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0x33000000))
+                .background(color = Color(0xFF212121))
+                .background(color = Color(0x33000000))
         ) {
             AnimatedVisibility(
                 visible = isPlaying,
-                enter = fadeIn(animationSpec = tween(durationMillis = 2000, delayMillis = 1000)),
-                exit = fadeOut(animationSpec = tween(durationMillis = 3000))
+                enter = fadeIn(animationSpec = tween(durationMillis = 800)),
+                exit = fadeOut(animationSpec = tween(durationMillis = 800))
             ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    AsyncImage(
-                        model = currentSong?.thumbnailUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.blur(20.dp),
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.8f))
-                    )
+                AnimatedContent(
+                    targetState = currentSong,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(800)) togetherWith fadeOut(
+                            animationSpec = tween(
+                                800
+                            )
+                        )
+                    },
+                    label = "BackgroundTransition"
+                ) { song ->
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        AsyncImage(
+                            model = song?.thumbnailUrl,
+                            placeholder = ColorPainter(Color(0x33000000)),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .blur(30.dp),
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.6f))
+                        )
+                    }
                 }
             }
 
@@ -163,10 +172,9 @@ fun AppHomeLayout(
                     playerViewModel = playerViewModel,
                     songViewModel = songViewModel,
                     snackbarHostState = snackbarHostState,
-                    startDestination = Home(),
+                    startDestination = Home,
                     profileUiState = profileUiState,
                 )
-
             }
         }
     }

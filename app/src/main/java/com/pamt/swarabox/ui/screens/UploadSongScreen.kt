@@ -50,6 +50,8 @@ import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.uploadSong.UploadUiState
 import com.pamt.swarabox.viewmodel.uploadSong.UploadViewModel
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
+import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
+import com.pamt.swarabox.viewmodel.song.SongViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -57,6 +59,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun UploadSongScreen(
     profileUiState: ProfileUiState,
+    profileViewModel: ProfileViewModel,
+    songViewModel: SongViewModel,
     playerViewModel: PlayerViewModel,
     uploadViewModel: UploadViewModel,
     snackbarHostState: SnackbarHostState,
@@ -95,6 +99,7 @@ fun UploadSongScreen(
         if (selectedAudioUri != null) {
             localPlayer.setMediaItem(MediaItem.fromUri(selectedAudioUri!!))
             localPlayer.prepare()
+            playerViewModel.pause()
             localPlayer.play()
         } else {
             localPlayer.stop()
@@ -114,6 +119,7 @@ fun UploadSongScreen(
     LaunchedEffect(songUploadUiState) {
         when (songUploadUiState) {
             is UploadUiState.Success -> {
+                songViewModel.fetchSongs()
                 launch {
                     snackbarHostState.showSnackbar(
                         message = "Song Uploaded Successfully",
@@ -121,8 +127,10 @@ fun UploadSongScreen(
                     )
                 }
 
-                navController.navigate(Home(isForcedRefresh = true)) {
-                    popUpTo<Upload> {
+                profileViewModel.fetchMySongs()
+                playerViewModel.release()
+                navController.navigate(Home) {
+                    popUpTo(0) {
                         inclusive = true
                     }
                 }

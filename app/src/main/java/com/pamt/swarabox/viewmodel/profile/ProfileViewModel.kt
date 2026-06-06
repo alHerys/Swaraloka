@@ -32,16 +32,7 @@ class ProfileViewModel(
                 val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                 if (userId != null) {
                     val user = repository.getCurrentProfile(userId)
-
-                    // Menambahkan timestamp untuk mem-bypass cache Coil
-                    val timestamp = System.currentTimeMillis()
-                    val userWithCacheBuster = user.copy(
-                        avatarUrl = user.avatarUrl?.let { "$it?t=$timestamp" }
-                    )
-
-                    _uiState.value = ProfileUiState.Success(userWithCacheBuster)
-
-                    // Fetch songs too
+                    _uiState.value = ProfileUiState.Success(user) // ✅ tidak ada cache buster
                     fetchMySongs()
                 } else {
                     _uiState.value = ProfileUiState.Error("Session end, please relogged to app")
@@ -70,6 +61,11 @@ class ProfileViewModel(
                 }
             }
         }
+    }
+
+    // Dipanggil setelah delete lagu berhasil
+    fun onSongDeleted(songId: String) {
+        _mySongs.value = _mySongs.value.filter { it.id != songId }
     }
 
     fun resetUiState() {

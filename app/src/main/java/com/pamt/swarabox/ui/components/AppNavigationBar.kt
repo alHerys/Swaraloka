@@ -36,7 +36,7 @@ fun AppNavigationBar(
         NavigationBarItem(
             selected = currentDestination?.route?.contains("Home") == true,
             onClick = {
-                navController.navigate(Home()) {
+                navController.navigate(Home) {
                     popUpTo<Home> { inclusive = false }
                 }
             },

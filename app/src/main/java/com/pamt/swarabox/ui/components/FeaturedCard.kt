@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +43,8 @@ fun FeaturedCard(
     song: SongModel,
     onClick: () -> Unit
 ) {
+//    val imageUrl = remember(song) { "${song.thumbnailUrl}?t=${System.currentTimeMillis()}" }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -57,7 +60,7 @@ fun FeaturedCard(
                 .clip(RoundedCornerShape(14.dp)),
         ) {
             AsyncImage(
-                model = "${song.thumbnailUrl}?t=${System.currentTimeMillis()}",
+                model = song.thumbnailUrl,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop

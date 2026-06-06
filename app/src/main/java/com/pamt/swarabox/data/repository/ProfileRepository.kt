@@ -2,6 +2,7 @@ package com.pamt.swarabox.data.repository
 
 import com.pamt.swarabox.data.SupabaseClientProvider
 import com.pamt.swarabox.data.model.UserModel
+import com.pamt.swarabox.ui.theme.compress
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.storage.storage
 
@@ -42,10 +43,12 @@ class ProfileRepository {
     suspend fun uploadAvatar(userId: String, byteArray: ByteArray): String {
         val fileName = "avatar_$userId.png"
         val bucket = supabase.storage.from("gambar")
-        bucket.upload(fileName, byteArray) {
+        bucket.upload(fileName, byteArray.compress(maxSize = 256)) {
             upsert = true
         }
-        return bucket.publicUrl(fileName)
+        val baseUrl = bucket.publicUrl(fileName)
+        return "$baseUrl?v=${System.currentTimeMillis()}"
+
     }
 
 }

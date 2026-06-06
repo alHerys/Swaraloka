@@ -2,6 +2,7 @@ package com.pamt.swarabox.data.repository
 
 import com.pamt.swarabox.data.SupabaseClientProvider
 import com.pamt.swarabox.data.model.SongModel
+import com.pamt.swarabox.ui.theme.compress
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.storage.storage
@@ -40,6 +41,8 @@ class SongRepository {
         )
 
         supabase.from("song").insert(song)
+
+        cachedSongs = emptyList()
     }
 
     suspend fun fetchAllSongs(forceRefresh: Boolean = false): List<SongModel> {
@@ -95,6 +98,8 @@ class SongRepository {
                 eq("song_id", songId)
             }
         }
+
+        cachedSongs = emptyList()
     }
 
     suspend fun deleteSong(
@@ -110,6 +115,8 @@ class SongRepository {
 
         deleteFile("lagu", songUrl)
         deleteFile("gambar", thumbnailUrl)
+
+        cachedSongs = emptyList()
     }
 
     private suspend fun uploadOrReplaceAudio(
@@ -134,10 +141,12 @@ class SongRepository {
         val filePath = oldThumbnailUrl?.substringAfter("/gambar/")
             ?: "thumb_${userId}_${UUID.randomUUID()}.png"
         val bucket = supabase.storage.from("gambar")
-        bucket.upload(filePath, imageBytes) {
+        bucket.upload(filePath, imageBytes.compress(maxSize = 400)) {
             upsert = true
         }
-        return bucket.publicUrl(filePath)
+
+        val baseUrl = bucket.publicUrl(filePath)
+        return "$baseUrl?v=${System.currentTimeMillis()}"
     }
 
     private suspend fun deleteFile(

@@ -2,6 +2,7 @@ package com.pamt.swarabox.ui.navigation
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -81,12 +82,9 @@ fun AppNavHost(
             )
         }
 
-        composable<Home> { backStackEntry ->
-            val isForcedRefresh = backStackEntry.toRoute<Home>().isForcedRefresh
+        composable<Home> {
             HomeScreen(
                 modifier = modifier,
-                isForcedRefresh = isForcedRefresh,
-                playerViewModel = playerViewModel!!,
                 songViewModel = songViewModel!!,
                 navController = navController
             )
@@ -97,12 +95,15 @@ fun AppNavHost(
         ) { backStackEntry ->
             val song = backStackEntry.toRoute<PlayMusic>().song
             val userId = (profileUiState as? ProfileUiState.Success)?.user?.userId ?: ""
-            playerViewModel!!.playSong(song)
+
+            LaunchedEffect(song) {
+                playerViewModel!!.playSong(song)
+            }
 
             PlayMusicScreen(
                 song = song,
                 userId = userId,
-                playerViewModel = playerViewModel,
+                playerViewModel = playerViewModel!!,
                 songViewModel = songViewModel!!,
                 navController = navController,
             )
@@ -116,6 +117,8 @@ fun AppNavHost(
                 currentSong = currentSong,
                 snackbarHostState = snackbarHostState,
                 playerViewModel = playerViewModel!!,
+                profileViewModel = profileViewModel!!,
+                songViewModel = songViewModel!!,
                 navController = navController,
             )
         }
@@ -123,10 +126,12 @@ fun AppNavHost(
         composable<Upload> {
             val uploadViewModel: UploadViewModel = viewModel()
             UploadSongScreen(
-                profileUiState = profileUiState ?: ProfileUiState.Idle,
+                profileUiState = profileUiState!!,
                 playerViewModel = playerViewModel!!,
+                profileViewModel = profileViewModel!!,
                 uploadViewModel = uploadViewModel,
                 snackbarHostState = snackbarHostState,
+                songViewModel = songViewModel!!,
                 navController = navController,
             )
         }

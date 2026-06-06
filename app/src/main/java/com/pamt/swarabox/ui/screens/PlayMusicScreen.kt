@@ -289,7 +289,9 @@ fun PlayMusicContent(
                     modifier = Modifier
                         .size(30.dp)
                         .clickable {
-                            onNavigateToPlay(similiarSong.random())
+                            if (similiarSong.isNotEmpty()) {
+                                onNavigateToPlay(similiarSong.random())
+                            }
                         }
                 )
             }

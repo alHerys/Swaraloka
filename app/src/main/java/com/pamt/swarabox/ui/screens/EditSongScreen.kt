@@ -62,12 +62,13 @@ import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.CircleContainer
 import com.pamt.swarabox.ui.components.DashedSelector
 import com.pamt.swarabox.ui.components.LoadingOverlay
-import com.pamt.swarabox.ui.navigation.EditSong
 import com.pamt.swarabox.ui.navigation.Home
 import com.pamt.swarabox.ui.theme.formatTime
 import com.pamt.swarabox.viewmodel.editSong.EditSongUiState
 import com.pamt.swarabox.viewmodel.editSong.EditSongViewModel
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
+import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
+import com.pamt.swarabox.viewmodel.song.SongViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -78,6 +79,8 @@ fun EditSongScreen(
     snackbarHostState: SnackbarHostState,
     navController: NavController,
     playerViewModel: PlayerViewModel,
+    songViewModel: SongViewModel,
+    profileViewModel: ProfileViewModel,
     editSongViewModel: EditSongViewModel = viewModel(),
 ) {
     val editSongUiState by editSongViewModel.uiState.collectAsStateWithLifecycle()
@@ -132,15 +135,19 @@ fun EditSongScreen(
     LaunchedEffect(editSongUiState) {
         when (editSongUiState) {
             is EditSongUiState.Success -> {
+                songViewModel.fetchSongs()
                 launch {
+                    val message = if (showDeleteDialog) "Song Deleted Successfully" else "Song Edited Successfully"
                     snackbarHostState.showSnackbar(
-                        message = "Song Edited Successfully",
+                        message = message,
                         duration = SnackbarDuration.Short
                     )
                 }
 
-                navController.navigate(Home(isForcedRefresh = true)) {
-                    popUpTo<EditSong> {
+                profileViewModel.fetchMySongs()
+                playerViewModel.release()
+                navController.navigate(Home) {
+                    popUpTo(0) {
                         inclusive = true
                     }
                 }

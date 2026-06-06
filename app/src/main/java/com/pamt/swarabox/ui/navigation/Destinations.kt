@@ -5,9 +5,7 @@ import com.pamt.swarabox.data.model.UserModel
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Home(
-    val isForcedRefresh: Boolean = false
-)
+object Home
 
 @Serializable
 object Upload
