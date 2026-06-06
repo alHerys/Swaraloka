@@ -1,4 +1,4 @@
-package com.pamt.swarabox.ui.screens
+package com.pamt.swarabox.ui.screens.home
 
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -56,9 +56,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun EditProfileScreen(
     modifier: Modifier = Modifier,
+    editProfileViewModel: EditProfileViewModel = viewModel(),
     currentUser: UserModel,
     profileViewModel: ProfileViewModel,
-    editProfileViewModel: EditProfileViewModel = viewModel(),
     snackbarHostState: SnackbarHostState,
     navController: NavController,
 ) {
@@ -105,7 +105,6 @@ fun EditProfileScreen(
                     (editProfileUiState as EditProfileUiState.Error).message
                 )
             }
-
             else -> {}
         }
     }

@@ -1,4 +1,4 @@
-package com.pamt.swarabox.ui.screens
+package com.pamt.swarabox.ui.screens.auth
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,9 +26,6 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
@@ -42,45 +38,56 @@ import com.pamt.swarabox.R
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.AuthBackground
+import com.pamt.swarabox.ui.navigation.Landing
+import com.pamt.swarabox.ui.navigation.Login
+import com.pamt.swarabox.ui.navigation.RegisterEmailPassword
+import com.pamt.swarabox.ui.navigation.RegisterName
 import com.pamt.swarabox.ui.theme.SwaraBoxTheme
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 
 @Composable
-fun RegisterEmailPasswordScreen(
+fun RegisterNameScreen(
     modifier: Modifier = Modifier,
     authViewModel: AuthViewModel,
-    navController: NavController,
+    navController: NavController
 ) {
-    val email by authViewModel.email.collectAsStateWithLifecycle()
-    val password by authViewModel.password.collectAsStateWithLifecycle()
-    val confirmPassword by authViewModel.confirmPassword.collectAsStateWithLifecycle()
+    val name by authViewModel.name.collectAsStateWithLifecycle()
 
-    RegisterEmailPasswordContent(
-        email = email,
-        onEmailChange = { authViewModel.onEmailChange(it) },
-        password = password,
-        onPasswordChange = { authViewModel.onPasswordChange(it) },
-        confirmPassword = confirmPassword,
-        onConfirmPasswordChange = { authViewModel.onConfirmPasswordChange(it) },
-        onRegister = authViewModel::register,
-        onBack = { navController.popBackStack() },
+    RegisterNameContent(
+        name = name,
+        onNameChange = { authViewModel.onNameChange(it) },
+        onBack = {
+            navController.navigate(Landing) {
+                popUpTo(RegisterName) {
+                    inclusive = true
+                }
+            }
+        },
+        onNextClicked = {
+            navController.navigate(RegisterEmailPassword)
+        },
+        onNavigateToLogin = {
+            authViewModel.resetFormState()
+            navController.navigate(Login) {
+                popUpTo(RegisterName) {
+                    inclusive = true
+                }
+            }
+        },
         modifier = modifier
     )
 }
 
 @Composable
-private fun RegisterEmailPasswordContent(
+private fun RegisterNameContent(
     modifier: Modifier = Modifier,
-    email: String,
-    onEmailChange: (String) -> Unit,
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    confirmPassword: String,
-    onConfirmPasswordChange: (String) -> Unit,
-    onRegister: () -> Unit,
+    name: String,
+    onNameChange: (String) -> Unit,
+    onNavigateToLogin: () -> Unit,
     onBack: () -> Unit,
+    onNextClicked: () -> Unit
 ) {
-    val policyAgreementText = buildAnnotatedString {
+    val navigationToLoginLink = buildAnnotatedString {
         withStyle(
             style = SpanStyle(
                 fontSize = 14.sp,
@@ -88,12 +95,12 @@ private fun RegisterEmailPasswordContent(
                 color = Color(0xFFCCCCCC),
             )
         ) {
-            append("By continuing, you agree to SwaraBox’s ")
+            append("Already have an account? ")
         }
         withLink(
             LinkAnnotation.Clickable(
-                tag = "CONDITION",
-                linkInteractionListener = { }
+                tag = "LOGIN",
+                linkInteractionListener = { onNavigateToLogin() }
             )
         ) {
             withStyle(
@@ -104,33 +111,7 @@ private fun RegisterEmailPasswordContent(
                     textDecoration = TextDecoration.Underline,
                 )
             ) {
-                append("Condition of Use")
-            }
-        }
-        withStyle(
-            style = SpanStyle(
-                fontSize = 14.sp,
-                fontWeight = FontWeight(400),
-                color = Color(0xFFCCCCCC),
-            )
-        ) {
-            append(" and ")
-        }
-        withLink(
-            LinkAnnotation.Clickable(
-                tag = "PRIVACY",
-                linkInteractionListener = { }
-            )
-        ) {
-            withStyle(
-                style = SpanStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight(400),
-                    color = Color.White,
-                    textDecoration = TextDecoration.Underline,
-                )
-            ) {
-                append("Privacy Notice")
+                append("Login")
             }
         }
     }
@@ -163,7 +144,7 @@ private fun RegisterEmailPasswordContent(
                     )
                 }
                 Text(
-                    "Enter your email & password",
+                    "What's your name?",
                     fontSize = 53.sp,
                     lineHeight = 64.sp,
                     fontWeight = FontWeight(500),
@@ -175,7 +156,7 @@ private fun RegisterEmailPasswordContent(
                 color = Color(0xff262626),
                 shape = RoundedCornerShape(
                     topEnd = 27.dp,
-                    topStart = 27.dp,
+                    topStart = 27.dp
                 )
             ) {
                 Column(
@@ -188,54 +169,33 @@ private fun RegisterEmailPasswordContent(
                             end = 18.dp,
                         ),
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        AppTextField(
-                            value = email,
-                            label = "Email",
-                            onValueChange = onEmailChange,
-                            placeholder = "jeren@example.com",
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-                        )
-                        AppTextField(
-                            value = password,
-                            label = "Passowrd",
-                            onValueChange = onPasswordChange,
-                            placeholder = "..........",
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-                        )
-                        AppTextField(
-                            value = confirmPassword,
-                            label = "Confirm Password",
-                            onValueChange = onConfirmPasswordChange,
-                            placeholder = "..........",
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-                        )
-                    }
 
-                    Spacer(Modifier.height(30.dp))
+                    AppTextField(
+                        value = name,
+                        label = "Name",
+                        onValueChange = onNameChange,
+                        placeholder = "Your Name",
+                    )
+
+                    Spacer(Modifier.height(50.dp))
 
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
                         AppButton(
-                            text = "Register",
-                            modifier = Modifier.fillMaxWidth(),
+                            text = "Next",
                             containerColor = Color(0xFFF0B505),
                             textColor = Color(0xFF212121),
-                            onClick = onRegister,
-                            enabled = email.isNotBlank() && password.isNotBlank() && (password == confirmPassword)
+                            onClick = onNextClicked,
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = name.isNotBlank()
                         )
 
                         Spacer(Modifier.height(19.dp))
 
-                        Text(
-                            text = policyAgreementText,
-                            textAlign = TextAlign.Center,
-                            lineHeight = 18.sp
-                        )
+                        Text(text = navigationToLoginLink)
                     }
                 }
             }
@@ -243,19 +203,17 @@ private fun RegisterEmailPasswordContent(
     }
 }
 
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun RegisterEmailPasswordPreview() {
+private fun RegisterNamePreview() {
     SwaraBoxTheme {
-        RegisterEmailPasswordContent(
-            email = "",
-            password = "",
-            confirmPassword = "",
-            onEmailChange = { },
-            onPasswordChange = { },
-            onConfirmPasswordChange = { },
-            onBack = {},
-            onRegister = { }
+        RegisterNameContent(
+            onNextClicked = { },
+            onNavigateToLogin = { },
+            onNameChange = {},
+            onBack = { },
+            name = ""
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.pamt.swarabox.ui.navigation
+package com.pamt.swarabox.ui.screens
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -34,7 +34,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import com.pamt.swarabox.ui.components.AppNavigationBar
 import com.pamt.swarabox.ui.components.MiniPlayer
+import com.pamt.swarabox.ui.navigation.AppNavHost
+import com.pamt.swarabox.ui.navigation.Home
+import com.pamt.swarabox.ui.navigation.PlayMusic
+import com.pamt.swarabox.ui.navigation.Profile
+import com.pamt.swarabox.ui.navigation.Upload
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
+import com.pamt.swarabox.viewmodel.player.PlayerUiState
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
@@ -52,7 +58,7 @@ fun AppHomeLayout(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentSong by playerViewModel.currentSong.collectAsStateWithLifecycle()
-    val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
+    val playerUiState by playerViewModel.uiState.collectAsStateWithLifecycle()
 
     val songUiState by songViewModel.uiState.collectAsStateWithLifecycle()
     val profileUiState by profileViewModel.uiState.collectAsStateWithLifecycle()
@@ -100,7 +106,7 @@ fun AppHomeLayout(
                     currentSong?.let { song ->
                         MiniPlayer(
                             song = song,
-                            isPlaying = isPlaying,
+                            isPlaying = playerUiState is PlayerUiState.Playing,
                             onTogglePlay = { playerViewModel.togglePlayPause() },
                             onClick = { navController.navigate(PlayMusic(song)) }
                         )
@@ -126,7 +132,7 @@ fun AppHomeLayout(
                 .background(color = Color(0x33000000))
         ) {
             AnimatedVisibility(
-                visible = isPlaying,
+                visible = playerUiState is PlayerUiState.Playing,
                 enter = fadeIn(animationSpec = tween(durationMillis = 800)),
                 exit = fadeOut(animationSpec = tween(durationMillis = 800))
             ) {

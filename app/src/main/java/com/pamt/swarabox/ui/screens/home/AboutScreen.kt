@@ -1,4 +1,4 @@
-package com.pamt.swarabox.ui.screens
+package com.pamt.swarabox.ui.screens.home
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image

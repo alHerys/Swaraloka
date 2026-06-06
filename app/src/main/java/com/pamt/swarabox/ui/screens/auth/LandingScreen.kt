@@ -1,4 +1,4 @@
-package com.pamt.swarabox.ui.screens
+package com.pamt.swarabox.ui.screens.auth
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.layout.Arrangement

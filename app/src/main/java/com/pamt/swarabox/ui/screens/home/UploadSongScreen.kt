@@ -1,4 +1,4 @@
-package com.pamt.swarabox.ui.screens
+package com.pamt.swarabox.ui.screens.home
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -39,7 +40,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.pamt.swarabox.R
 import com.pamt.swarabox.ui.navigation.Home
-import com.pamt.swarabox.ui.navigation.Upload
 import com.pamt.swarabox.ui.components.AppButton
 import com.pamt.swarabox.ui.components.AppTextField
 import com.pamt.swarabox.ui.components.CircleContainer
@@ -62,9 +62,9 @@ fun UploadSongScreen(
     profileViewModel: ProfileViewModel,
     songViewModel: SongViewModel,
     playerViewModel: PlayerViewModel,
-    uploadViewModel: UploadViewModel,
     snackbarHostState: SnackbarHostState,
-    navController: NavController
+    navController: NavController,
+    uploadViewModel: UploadViewModel = viewModel(),
 ) {
     val context = LocalContext.current
     val songUploadUiState by uploadViewModel.uiState.collectAsStateWithLifecycle()

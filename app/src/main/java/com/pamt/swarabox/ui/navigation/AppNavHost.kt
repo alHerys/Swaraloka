@@ -4,30 +4,28 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.model.UserModel
-import com.pamt.swarabox.ui.screens.AboutScreen
-import com.pamt.swarabox.ui.screens.EditProfileScreen
-import com.pamt.swarabox.ui.screens.EditSongScreen
-import com.pamt.swarabox.ui.screens.HomeScreen
-import com.pamt.swarabox.ui.screens.LandingScreen
-import com.pamt.swarabox.ui.screens.LoginScreen
-import com.pamt.swarabox.ui.screens.PlayMusicScreen
-import com.pamt.swarabox.ui.screens.ProfileScreen
-import com.pamt.swarabox.ui.screens.RegisterEmailPasswordScreen
-import com.pamt.swarabox.ui.screens.RegisterNameScreen
-import com.pamt.swarabox.ui.screens.UploadSongScreen
+import com.pamt.swarabox.ui.screens.home.AboutScreen
+import com.pamt.swarabox.ui.screens.home.EditProfileScreen
+import com.pamt.swarabox.ui.screens.home.EditSongScreen
+import com.pamt.swarabox.ui.screens.home.HomeScreen
+import com.pamt.swarabox.ui.screens.auth.LandingScreen
+import com.pamt.swarabox.ui.screens.auth.LoginScreen
+import com.pamt.swarabox.ui.screens.home.PlayMusicScreen
+import com.pamt.swarabox.ui.screens.home.ProfileScreen
+import com.pamt.swarabox.ui.screens.auth.RegisterEmailPasswordScreen
+import com.pamt.swarabox.ui.screens.auth.RegisterNameScreen
+import com.pamt.swarabox.ui.screens.home.UploadSongScreen
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import com.pamt.swarabox.viewmodel.profile.ProfileUiState
 import com.pamt.swarabox.viewmodel.profile.ProfileViewModel
 import com.pamt.swarabox.viewmodel.song.SongViewModel
-import com.pamt.swarabox.viewmodel.uploadSong.UploadViewModel
 import kotlin.reflect.typeOf
 
 @Composable
@@ -124,12 +122,10 @@ fun AppNavHost(
         }
 
         composable<Upload> {
-            val uploadViewModel: UploadViewModel = viewModel()
             UploadSongScreen(
                 profileUiState = profileUiState!!,
                 playerViewModel = playerViewModel!!,
                 profileViewModel = profileViewModel!!,
-                uploadViewModel = uploadViewModel,
                 snackbarHostState = snackbarHostState,
                 songViewModel = songViewModel!!,
                 navController = navController,

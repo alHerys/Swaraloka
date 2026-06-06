@@ -1,4 +1,4 @@
-package com.pamt.swarabox.ui.screens
+package com.pamt.swarabox.ui.screens.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,6 +46,7 @@ import com.pamt.swarabox.ui.navigation.EditSong
 import com.pamt.swarabox.ui.navigation.PlayMusic
 import com.pamt.swarabox.ui.theme.formatTime
 import com.pamt.swarabox.ui.theme.yellow
+import com.pamt.swarabox.viewmodel.player.PlayerUiState
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel
 import com.pamt.swarabox.viewmodel.song.SongViewModel
 
@@ -57,11 +58,10 @@ fun PlayMusicScreen(
     navController: NavController,
     songViewModel: SongViewModel,
 ) {
-    val isPlaying by playerViewModel.isPlaying.collectAsStateWithLifecycle()
-    val isBuffering by playerViewModel.isBuffering.collectAsStateWithLifecycle()
     val currentPosition by playerViewModel.currentPosition.collectAsStateWithLifecycle()
     val duration by playerViewModel.duration.collectAsStateWithLifecycle()
     val similarSongs by songViewModel.songs.collectAsStateWithLifecycle()
+    val playerUiState by playerViewModel.uiState.collectAsStateWithLifecycle()
 
     val similarSongsFiltered = similarSongs
         .filter { it.id != song.id }
@@ -72,8 +72,8 @@ fun PlayMusicScreen(
         userId = userId,
         duration = duration,
         currentPosition = currentPosition,
-        isPlaying = isPlaying,
-        isBuffering = isBuffering,
+        isPlaying = playerUiState is PlayerUiState.Playing,
+        isBuffering = playerUiState is PlayerUiState.Loading,
         similiarSong = similarSongsFiltered,
         onBack = { navController.popBackStack() },
         onTogglePlayPause = { playerViewModel.togglePlayPause() },

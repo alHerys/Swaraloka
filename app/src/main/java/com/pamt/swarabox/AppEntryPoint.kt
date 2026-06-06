@@ -14,8 +14,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.pamt.swarabox.ui.components.LoadingOverlay
-import com.pamt.swarabox.ui.navigation.AppAuthLayout
-import com.pamt.swarabox.ui.navigation.AppHomeLayout
+import com.pamt.swarabox.ui.screens.AppAuthLayout
+import com.pamt.swarabox.ui.screens.AppHomeLayout
 import com.pamt.swarabox.viewmodel.auth.AuthCheckState
 import com.pamt.swarabox.viewmodel.auth.AuthViewModel
 import com.pamt.swarabox.viewmodel.player.PlayerViewModel

@@ -1,4 +1,4 @@
-package com.pamt.swarabox.ui.screens
+package com.pamt.swarabox.ui.screens.home
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
