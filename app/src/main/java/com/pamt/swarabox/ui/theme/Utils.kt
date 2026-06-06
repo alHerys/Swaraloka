@@ -5,11 +5,14 @@ import android.graphics.BitmapFactory
 import java.io.ByteArrayOutputStream
 import java.util.Locale
 import androidx.core.graphics.scale
+import io.github.jan.supabase.auth.exception.AuthErrorCode
+import io.github.jan.supabase.auth.exception.AuthRestException
 import io.github.jan.supabase.exceptions.BadRequestRestException
 import io.github.jan.supabase.exceptions.HttpRequestException
 import io.github.jan.supabase.exceptions.NotFoundRestException
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.exceptions.UnauthorizedRestException
+import io.github.jan.supabase.postgrest.exception.PostgrestRestException
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
 import java.net.UnknownHostException
@@ -41,8 +44,46 @@ fun ByteArray.compress(maxSize: Int = 512, quality: Int = 75): ByteArray {
  */
 fun Throwable.convertMessage(): String {
     return when (this) {
+        is AuthRestException -> {
+            when (this.errorCode) {
+                AuthErrorCode.InvalidCredentials -> "The email or password you entered is incorrect. Please try again."
+                AuthErrorCode.SessionExpired, AuthErrorCode.BadJwt -> "Your session has expired. Please sign in again."
+                AuthErrorCode.UserNotFound -> "Account not found. Make sure the email address is registered."
+                AuthErrorCode.UserAlreadyExists, AuthErrorCode.EmailExists -> "This email is already registered. Use a different email or sign in to the existing account."
+                AuthErrorCode.WeakPassword -> "Password is too weak. Use at least 6 characters."
+                AuthErrorCode.EmailAddressInvalid -> "Invalid email format. Please double-check your email address."
+                AuthErrorCode.SignupDisabled -> "New account registration is currently disabled. Please try again later."
+                AuthErrorCode.OverEmailSendRateLimit, AuthErrorCode.OverRequestRateLimit -> "Too many attempts. Please wait a moment before trying again."
+                else -> {
+                    val raw = "$errorDescription $error".lowercase()
+                    when {
+                        raw.contains("invalid login credentials") -> "The email or password you entered is incorrect. Please try again."
+                        else -> "Authentication error. Please try again."
+                    }
+                }
+            }
+        }
+
+        is PostgrestRestException -> {
+            val pgCode = code ?: ""
+            val raw = "$error ${hint ?: ""} ${details?.toString() ?: ""}".lowercase()
+            when {
+                pgCode == "23505" || raw.contains("duplicate key") || raw.contains("unique constraint") ->
+                    "Data already exists. Cannot save a duplicate."
+                pgCode == "23503" || raw.contains("foreign key") ->
+                    "Related data not found. Make sure the data reference is correct."
+                pgCode == "23502" || raw.contains("not-null constraint") || raw.contains("null value") ->
+                    "A required column is empty."
+                pgCode == "23514" || raw.contains("check constraint") ->
+                    "The value you entered does not meet the required conditions."
+                pgCode == "42501" || raw.contains("permission denied") || raw.contains("row-level security") || raw.contains("insufficient privilege") ->
+                    "You don't have permission to perform this action."
+                else -> "A database error occurred. Please try again later."
+            }
+        }
+
         is UnauthorizedRestException -> {
-            val raw = message?.lowercase() ?: ""
+            val raw = "$error ${description ?: ""}".lowercase()
             when {
                 raw.contains("invalid login credentials") ||
                         raw.contains("invalid email or password") ->
@@ -60,7 +101,7 @@ fun Throwable.convertMessage(): String {
         }
 
         is BadRequestRestException -> {
-            val raw = message?.lowercase() ?: ""
+            val raw = "$error ${description ?: ""}".lowercase()
             when {
                 raw.contains("user already registered") ||
                         raw.contains("email address already in use") ||
@@ -92,7 +133,7 @@ fun Throwable.convertMessage(): String {
         }
 
         is NotFoundRestException -> {
-            val raw = message?.lowercase() ?: ""
+            val raw = "$error ${description ?: ""}".lowercase()
             when {
                 raw.contains("user") ->
                     "User account not found."
@@ -105,7 +146,7 @@ fun Throwable.convertMessage(): String {
         }
 
         is RestException -> {
-            val raw = message?.lowercase() ?: ""
+            val raw = "$error ${description ?: ""}".lowercase()
             when {
                 raw.contains("permission denied") ||
                         raw.contains("row-level security") ||
@@ -135,8 +176,6 @@ fun Throwable.convertMessage(): String {
                 else -> "A server error occurred. Please try again later."
             }
         }
-
-
 
         is UnknownHostException ->
             "Unable to connect to the internet. Please check your network connection."
@@ -170,7 +209,6 @@ fun Throwable.convertMessage(): String {
                         raw.contains("invalid file type") ->
                     "File type is not supported. Please use a compatible format."
 
-
                 raw.contains("unable to resolve host") ||
                         raw.contains("failed to connect") ||
                         raw.contains("no internet") ->
@@ -181,7 +219,6 @@ fun Throwable.convertMessage(): String {
 
                 raw.contains("ssl") || raw.contains("certificate") ->
                     "A connection security error occurred. Please try again later."
-
 
                 raw.contains("session") ->
                     "Your session has expired. Please sign in again."

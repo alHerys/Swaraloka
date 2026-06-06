@@ -57,7 +57,7 @@ fun ProfileScreen(
     val uiState by profileViewModel.uiState.collectAsStateWithLifecycle()
 
     ProfileContent(
-        user = (uiState as? ProfileUiState.Success)?.user ?: UserModel.dummy,
+        user = (uiState as? ProfileUiState.Success)?.user,
         listMySong = mySongs,
         isRefreshing = isRefreshingSongs,
         onRefresh = { profileViewModel.fetchMySongs(forceRefresh = true) },
@@ -79,8 +79,8 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileContent(
-    user: UserModel,
+private fun ProfileContent(
+    user: UserModel?,
     listMySong: List<SongModel>,
     isRefreshing: Boolean,
     onRefresh: () -> Unit,
@@ -107,7 +107,11 @@ fun ProfileContent(
                     CircleContainer(
                         size = 38.dp,
                         backgroundColor = Color(0xFF343434),
-                        onClick = { onNavigateToEdit(user) }
+                        onClick = {
+                            if (user != null) {
+                                onNavigateToEdit(user)
+                            }
+                        }
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.edit),
@@ -127,7 +131,7 @@ fun ProfileContent(
                         size = 120.dp,
                         backgroundColor = Color(0xFF343434)
                     ) {
-                        if (user.avatarUrl != null) {
+                        if (user?.avatarUrl != null) {
                             AsyncImage(
                                 model = user.avatarUrl,
                                 contentDescription = "Profile Picture",
@@ -135,25 +139,30 @@ fun ProfileContent(
                                 contentScale = ContentScale.Crop
                             )
                         } else {
-                            val initials = user.name.split(" ").filter { it.isNotBlank() }.take(2)
-                                .joinToString("") { it.take(1).uppercase() }
-                            Text(
-                                text = initials,
-                                style = MaterialTheme.typography.headlineLarge,
-                                color = Color.White
-                            )
+                            val initials = user?.name
+                                ?.split(" ")
+                                ?.filter { it.isNotBlank() }
+                                ?.take(2)
+                                ?.joinToString("") { it.take(1).uppercase() }
+                            if (initials != null) {
+                                Text(
+                                    text = initials,
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
 
                     Text(
-                        text = user.name,
+                        text = user?.name ?: "Loading...",
                         fontSize = 22.sp,
                         fontWeight = FontWeight(500),
                         color = Color(0xFFFFFFFF),
                         modifier = Modifier.padding(top = 16.dp)
                     )
                     Text(
-                        text = user.email,
+                        text = user?.email ?: "Loading...",
                         fontSize = 14.sp,
                         fontWeight = FontWeight(500),
                         color = Color(0xFF747474),
