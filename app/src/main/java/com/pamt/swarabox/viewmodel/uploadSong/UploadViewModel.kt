@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamt.swarabox.data.repository.SongRepository
+import com.pamt.swarabox.ui.theme.convertMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -88,7 +89,7 @@ class UploadViewModel(
                 )
                 _uiState.value = UploadUiState.Success
             } catch (e: Exception) {
-                _uiState.value = UploadUiState.Error(e.message ?: "Failed to upload song")
+                _uiState.value = UploadUiState.Error(e.convertMessage())
             }
         }
     }

@@ -140,6 +140,7 @@ fun EditSongScreen(
                     val message = if (showDeleteDialog) "Song Deleted Successfully" else "Song Edited Successfully"
                     snackbarHostState.showSnackbar(
                         message = message,
+                        actionLabel = "success",
                         duration = SnackbarDuration.Short
                     )
                 }
@@ -157,6 +158,7 @@ fun EditSongScreen(
                 launch {
                     snackbarHostState.showSnackbar(
                         message = (editSongUiState as EditSongUiState.Error).message,
+                        actionLabel = "error",
                         duration = SnackbarDuration.Short
                     )
                 }

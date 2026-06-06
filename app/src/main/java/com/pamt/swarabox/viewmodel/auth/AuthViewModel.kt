@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamt.swarabox.data.repository.AuthRepository
+import com.pamt.swarabox.ui.theme.convertMessage
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +37,7 @@ class AuthViewModel(
         observeAuthStatus()
     }
 
+    // Memantau perubahan status sesi dari Supabase secara real-time
     private fun observeAuthStatus() {
         viewModelScope.launch {
             repository.sessionStatus.collect { status ->
@@ -80,7 +82,7 @@ class AuthViewModel(
 
             } catch (e: Exception) {
                 _uiState.value = AuthUiState.Error(
-                    message = e.message ?: "Login gagal"
+                    message = e.convertMessage()
                 )
             }
         }
@@ -101,7 +103,7 @@ class AuthViewModel(
 
             } catch (e: Exception) {
                 _uiState.value = AuthUiState.Error(
-                    message = e.message ?: "Register gagal"
+                    message = e.convertMessage()
                 )
                 Log.d("SUPABASE_REGISTER", e.toString())
             }
@@ -115,10 +117,13 @@ class AuthViewModel(
         }
     }
 
+    // Mereset uiState kembali ke Idle
+    // Dipanggil setelah user berhasil authentikasi
     fun clearUiState() {
         _uiState.value = AuthUiState.Idle
     }
 
+    // Mengosongkan semua field form (nama, email, password, konfirmasi password)
     fun resetFormState() {
         _name.value = ""
         _email.value = ""

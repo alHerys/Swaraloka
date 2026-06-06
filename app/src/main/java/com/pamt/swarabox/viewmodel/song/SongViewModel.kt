@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.repository.SongRepository
+import com.pamt.swarabox.ui.theme.convertMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +28,7 @@ class SongViewModel(
                 _songs.value = fetchedSongs.shuffled()
                 _uiState.value = SongUiState.Success
             } catch (e: Exception) {
-                _uiState.value = SongUiState.Error(e.message ?: "Failed to fetch songs")
+                _uiState.value = SongUiState.Error(e.convertMessage())
             }
         }
     }

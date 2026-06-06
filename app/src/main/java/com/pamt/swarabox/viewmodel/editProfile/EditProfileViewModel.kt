@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamt.swarabox.data.repository.ProfileRepository
+import com.pamt.swarabox.ui.theme.convertMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -55,7 +56,7 @@ class EditProfileViewModel(
                 _uiState.value = EditProfileUiState.Success
             } catch (e: Exception) {
                 _uiState.value = EditProfileUiState.Error(
-                    message = e.message ?: "Error while updating profile"
+                    message = e.convertMessage()
                 )
             }
         }

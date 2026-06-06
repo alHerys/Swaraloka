@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pamt.swarabox.data.repository.SongRepository
+import com.pamt.swarabox.ui.theme.convertMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -93,7 +94,7 @@ class EditSongViewModel(
                 _uiState.value = EditSongUiState.Success
             } catch (e: Exception) {
                 _uiState.value = EditSongUiState.Error(
-                    message = e.message ?: "Error occured while updating song"
+                    message = e.convertMessage()
                 )
             }
         }
@@ -115,7 +116,7 @@ class EditSongViewModel(
                 _uiState.value = EditSongUiState.Success
             } catch (e: Exception) {
                 _uiState.value = EditSongUiState.Error(
-                    message = e.message ?: "Error occured while deleting song"
+                    message = e.convertMessage()
                 )
             }
         }

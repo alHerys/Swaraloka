@@ -70,6 +70,7 @@ fun AppHomeLayout(
             profileUiState is ProfileUiState.Error -> {
                 snackbarHostState.showSnackbar(
                     message = (profileUiState as ProfileUiState.Error).message,
+                    actionLabel = "error",
                     duration = SnackbarDuration.Short
                 )
             }
@@ -77,6 +78,7 @@ fun AppHomeLayout(
             songUiState is SongUiState.Error -> {
                 snackbarHostState.showSnackbar(
                     message = (songUiState as SongUiState.Error).message,
+                    actionLabel = "error",
                     duration = SnackbarDuration.Short
                 )
             }
@@ -86,8 +88,7 @@ fun AppHomeLayout(
     Scaffold(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState) { data ->
-                val isError = data.visuals.message.contains("Error", ignoreCase = true) ||
-                        data.visuals.message.contains("Failed", ignoreCase = true)
+                val isError = data.visuals.actionLabel == "error"
                 Snackbar(
                     snackbarData = data,
                     containerColor = if (isError) Color(0xFFF04444) else Color(0xFF4CAF50),

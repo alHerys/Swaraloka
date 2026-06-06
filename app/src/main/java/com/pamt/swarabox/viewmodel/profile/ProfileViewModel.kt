@@ -6,6 +6,7 @@ import com.pamt.swarabox.data.SupabaseClientProvider
 import com.pamt.swarabox.data.model.SongModel
 import com.pamt.swarabox.data.repository.ProfileRepository
 import com.pamt.swarabox.data.repository.SongRepository
+import com.pamt.swarabox.ui.theme.convertMessage
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,13 +33,13 @@ class ProfileViewModel(
                 val userId = SupabaseClientProvider.client.auth.currentUserOrNull()?.id
                 if (userId != null) {
                     val user = repository.getCurrentProfile(userId)
-                    _uiState.value = ProfileUiState.Success(user) // ✅ tidak ada cache buster
+                    _uiState.value = ProfileUiState.Success(user)
                     fetchMySongs()
                 } else {
-                    _uiState.value = ProfileUiState.Error("Session end, please relogged to app")
+                    _uiState.value = ProfileUiState.Error("Sesi kamu telah berakhir. Silakan masuk kembali.")
                 }
             } catch (e: Exception) {
-                _uiState.value = ProfileUiState.Error(e.message ?: "Error while fetching profile")
+                _uiState.value = ProfileUiState.Error(e.convertMessage())
             }
         }
     }
@@ -55,17 +56,12 @@ class ProfileViewModel(
                     )
                     _mySongs.value = songs
                 } catch (e: Exception) {
-                    _uiState.value = ProfileUiState.Error(e.message ?: "Failed to fetch your songs")
+                    _uiState.value = ProfileUiState.Error(e.convertMessage())
                 } finally {
                     _isRefreshingSongs.value = false
                 }
             }
         }
-    }
-
-    // Dipanggil setelah delete lagu berhasil
-    fun onSongDeleted(songId: String) {
-        _mySongs.value = _mySongs.value.filter { it.id != songId }
     }
 
     fun resetUiState() {

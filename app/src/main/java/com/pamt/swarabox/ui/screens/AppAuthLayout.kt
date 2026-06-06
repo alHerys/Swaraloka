@@ -37,6 +37,7 @@ fun AppAuthLayout(
             Log.d("AUTH ERROR", (authUiState as AuthUiState.Error).message)
             snackbarHostState.showSnackbar(
                 message = (authUiState as AuthUiState.Error).message,
+                actionLabel = "error",
                 duration = SnackbarDuration.Short
             )
         }
@@ -46,11 +47,10 @@ fun AppAuthLayout(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState) { data ->
-                val isError = data.visuals.message.contains("Error", ignoreCase = true) ||
-                        data.visuals.message.contains("Failed", ignoreCase = true)
+                val isError = data.visuals.actionLabel == "error"
                 Snackbar(
                     snackbarData = data,
-                    containerColor = if (isError) Color(0xFF4CAF50) else Color(0xFFF04444),
+                    containerColor = if (isError) Color(0xFFF04444) else Color(0xFF4CAF50),
                     contentColor = Color.White,
                     shape = RoundedCornerShape(8.dp)
                 )

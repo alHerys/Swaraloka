@@ -86,6 +86,7 @@ fun EditProfileScreen(
                 launch {
                     snackbarHostState.showSnackbar(
                         message = "Profile Updated Successfully",
+                        actionLabel = "success",
                         duration = SnackbarDuration.Short
                     )
                 }
@@ -97,6 +98,7 @@ fun EditProfileScreen(
                 launch {
                     snackbarHostState.showSnackbar(
                         message = (editProfileUiState as EditProfileUiState.Error).message,
+                        actionLabel = "error",
                         duration = SnackbarDuration.Short
                     )
                 }

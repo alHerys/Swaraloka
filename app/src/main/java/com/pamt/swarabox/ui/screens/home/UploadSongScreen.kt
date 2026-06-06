@@ -123,6 +123,7 @@ fun UploadSongScreen(
                 launch {
                     snackbarHostState.showSnackbar(
                         message = "Song Uploaded Successfully",
+                        actionLabel = "success",
                         duration = SnackbarDuration.Short
                     )
                 }
@@ -140,6 +141,7 @@ fun UploadSongScreen(
                 launch {
                     snackbarHostState.showSnackbar(
                         message = (songUploadUiState as UploadUiState.Error).message,
+                        actionLabel = "error",
                         duration = SnackbarDuration.Short
                     )
                 }
