@@ -17,7 +17,7 @@
   <!-- Ukuran yang disarankan: 120×120 px                           -->
   <!-- ============================================================ -->
   <a href="https://github.com/alHerys/SwaraBox">
-    <img width="192" height="192" alt="ic_launcher_round" src="https://github.com/user-attachments/assets/adfdf56f-d349-4a21-846e-38f12cd0063c" />
+    <img width="192" height="192" alt="ic_launcher" src="https://github.com/user-attachments/assets/89326cae-0f94-4992-b058-804c3aeb5731" />
   </a>
 
   <h3 align="center">Swaraloka
