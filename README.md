@@ -19,6 +19,9 @@
   <a href="https://github.com/alHerys/SwaraBox">
     <img width="192" height="192" alt="ic_launcher" src="https://github.com/user-attachments/assets/89326cae-0f94-4992-b058-804c3aeb5731" />
   </a>
+  <br>
+  <img width="800" alt="ChatGPT Image Sep 9, 2026, 12_43_15 AM" src="https://github.com/user-attachments/assets/83f7deb1-8fa4-467d-90fa-6b1dec3d210b" />
+
 
   <h3 align="center">Swaraloka
 </h3>
